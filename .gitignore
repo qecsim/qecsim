@@ -1,0 +1,15 @@
+##python
+__pycache__
+##venv
+/venv/
+*.egg-info/
+##pycharm
+/.idea/
+##py.test
+/.cache/
+##coverage
+/.coverage
+##sphinx
+/docs/_build/
+##jupyter
+/.ipynb_checkpoints/
