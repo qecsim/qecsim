@@ -58,6 +58,8 @@ class DepolarizingErrorModel(SimpleErrorModel):
     * p/3: Z
     """
 
+    _cli_help = """generic.depolarizing       Pr I,X,Y,Z is 1-p,p/3,p/3,p/3"""
+
     @functools.lru_cache()
     def probability_distribution(self, probability):
         """See :meth:`qecsim.model.ErrorModel.probability_distribution`"""
@@ -82,6 +84,8 @@ class BitFlipErrorModel(SimpleErrorModel):
     * 0: Y
     * 0: Z
     """
+
+    _cli_help = """generic.bit_flip           Pr I,X,Y,Z is 1-p,p,0,0"""
 
     @functools.lru_cache()
     def probability_distribution(self, probability):
@@ -109,6 +113,8 @@ class PhaseFlipErrorModel(SimpleErrorModel):
     * p: Z
     """
 
+    _cli_help = """generic.phase_flip         Pr I,X,Y,Z is 1-p,0,0,p"""
+
     @functools.lru_cache()
     def probability_distribution(self, probability):
         """See :meth:`qecsim.model.ErrorModel.probability_distribution`"""
@@ -134,6 +140,8 @@ class BitPhaseFlipErrorModel(SimpleErrorModel):
     * p: Y
     * 0: Z
     """
+
+    _cli_help = """generic.bit_phase_flip     Pr I,X,Y,Z is 1-p,0,p,0"""
 
     @functools.lru_cache()
     def probability_distribution(self, probability):

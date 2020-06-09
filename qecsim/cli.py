@@ -10,12 +10,15 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 """
 
 import ast
+import inspect
 import json
 import logging
 import re
+import textwrap
 from collections import namedtuple
 
 import click
+import pkg_resources
 
 import qecsim
 from qecsim import app
@@ -144,6 +147,66 @@ class _ConstructorParamType(click.ParamType):
         return '{}({!r})'.format(type(self).__name__, self._constructors)
 
 
+class _RunCommandMetaData:
+    def __init__(self, command, help):
+        # construct meta-data
+        models = {'code': {}, 'error_model': {}, 'decoder': {}, }
+        for model_type, constructors in models.items():
+            model_help = []
+            entry_point_id = '{}_{}s'.format(command, model_type)
+            for entry_point in pkg_resources.iter_entry_points(entry_point_id):
+                param_name = entry_point.name
+                param_class = entry_point.load()
+                constructors[param_name] = param_class
+                try:
+                    param_help = inspect.cleandoc(param_class._cli_help)
+                except AttributeError:
+                    param_help = param_name
+                model_help.append(textwrap.indent(param_help, '  '))
+            help = help.replace('#{}_PARAMETERS#'.format(model_type.upper()), '\n'.join(model_help))
+        # meta-data properties
+        self.command = command
+        self.code = _ConstructorParamType(models['code'])
+        self.error_model = _ConstructorParamType(models['error_model'])
+        self.decoder = _ConstructorParamType(models['decoder'])
+        self.help = help
+
+
+_RUN_META_DATA = _RunCommandMetaData('run', """
+Simulate quantum error correction.
+
+Arguments:
+
+\b
+ CODE                  Stabilizer code in format name(<args>)
+#CODE_PARAMETERS#
+
+\b
+ ERROR_MODEL           Error model in format name(<args>)
+#ERROR_MODEL_PARAMETERS#
+
+\b
+ DECODER               Decoder in format name(<args>)
+#DECODER_PARAMETERS#
+
+\b
+ ERROR_PROBABILITY...  One or more probabilities as FLOAT in [0.0, 1.0]
+
+
+Examples:
+
+\b
+ qecsim run -r10 "five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
+ qecsim run -f5 -r50 -s13 "steane" "generic.phase_flip" "generic.naive" 0.1
+ qecsim run -r20 "planar(7,7)" "generic.bit_flip" "planar.mps(6)" 0.10 0.11
+ qecsim run -r10 "color666(7)" "generic.bit_flip" "color666.mps(16)" 0.09 0.10
+ qecsim run -o"data.json" -f9 "toric(3,3)" "generic.bit_flip" "toric.mwpm" 0.1
+""")
+
+
+# _CODE_PARAMETER = _load_constructor_param_type('run_codes')
+
+
 @click.group()
 @click.version_option(version=qecsim.__version__, prog_name='qecsim')
 def cli():
@@ -156,30 +219,30 @@ def cli():
 
 
 # custom param types
-_CODE_PARAMETER = _ConstructorParamType({
-    # add new codes here mapping name -> constructor
-    # 'color666': Color666Code,
-    'five_qubit': FiveQubitCode,
-    'steane': SteaneCode,
-    # 'planar': PlanarCode,
-    # 'rotated_planar': RotatedPlanarCode,
-    # 'rotated_planar_xz': RotatedPlanarXZCode,
-    # 'rotated_toric': RotatedToricCode,
-    # 'toric': ToricCode,
-})
-_ERROR_MODEL_PARAMETER = _ConstructorParamType({
-    # add new error_models here mapping name -> constructor
-    'generic.depolarizing': DepolarizingErrorModel,
-    'generic.bit_flip': BitFlipErrorModel,
-    'generic.phase_flip': PhaseFlipErrorModel,
-    'generic.bit_phase_flip': BitPhaseFlipErrorModel,
-    # 'generic.biased_depolarizing': BiasedDepolarizingErrorModel,
-    # 'generic.biased_y_x': BiasedYXErrorModel,
-    # 'generic.file': FileErrorModel,
-    # 'generic.center_slice': CenterSliceErrorModel,
-    # 'planar.afcx': PlanarAFCXErrorModel,
-    # 'planar.avcx': PlanarAVCXErrorModel,
-})
+# _CODE_PARAMETER = _ConstructorParamType({
+#     # add new codes here mapping name -> constructor
+#     # 'color666': Color666Code,
+#     'five_qubit': FiveQubitCode,
+#     'steane': SteaneCode,
+#     # 'planar': PlanarCode,
+#     # 'rotated_planar': RotatedPlanarCode,
+#     # 'rotated_planar_xz': RotatedPlanarXZCode,
+#     # 'rotated_toric': RotatedToricCode,
+#     # 'toric': ToricCode,
+# })
+# _ERROR_MODEL_PARAMETER = _ConstructorParamType({
+#     # add new error_models here mapping name -> constructor
+#     'generic.depolarizing': DepolarizingErrorModel,
+#     'generic.bit_flip': BitFlipErrorModel,
+#     'generic.phase_flip': PhaseFlipErrorModel,
+#     'generic.bit_phase_flip': BitPhaseFlipErrorModel,
+#     # 'generic.biased_depolarizing': BiasedDepolarizingErrorModel,
+#     # 'generic.biased_y_x': BiasedYXErrorModel,
+#     # 'generic.file': FileErrorModel,
+#     # 'generic.center_slice': CenterSliceErrorModel,
+#     # 'planar.afcx': PlanarAFCXErrorModel,
+#     # 'planar.avcx': PlanarAVCXErrorModel,
+# })
 _DECODER_PARAMETER = _ConstructorParamType({
     # add new decoders here mapping name -> constructor
     # 'color666.mps': Color666MPSDecoder,
@@ -200,6 +263,7 @@ _DECODER_PARAMETER = _ConstructorParamType({
 })
 
 
+
 # custom validators
 def _validate_error_probability(ctx, param, value):
     if not (0 <= value <= 1):
@@ -213,9 +277,9 @@ def _validate_error_probabilities(ctx, param, value):
     return value
 
 
-@cli.command()
-@click.argument('t_code', type=_CODE_PARAMETER, metavar='CODE')
-@click.argument('t_error_model', type=_ERROR_MODEL_PARAMETER, metavar='ERROR_MODEL')
+@cli.command(help=_RUN_META_DATA.help)
+@click.argument('t_code', type=_RUN_META_DATA.code, metavar='CODE')
+@click.argument('t_error_model', type=_RUN_META_DATA.error_model, metavar='ERROR_MODEL')
 @click.argument('t_decoder', type=_DECODER_PARAMETER, metavar='DECODER')
 @click.argument('error_probabilities', required=True, nargs=-1, type=float, metavar='ERROR_PROBABILITY...',
                 callback=_validate_error_probabilities)
@@ -234,60 +298,31 @@ def run(t_code, t_error_model, t_decoder, error_probabilities, max_failures, max
     Arguments:
 
     \b
-     CODE                  Stabilizer code in format name(<args>)
-      color666(size)                     Color 6.6.6 (size INT odd >=3)
-      five_qubit                         5-qubit
-      steane                             Steane
-      planar(rows, cols)                 Planar (rows INT >= 2, cols INT >= 2)
-      rotated_planar(rows, cols)         Rotated planar (rows INT >= 3,
-                                                         cols INT >= 3)
-      rotated_planar_xz(size)            Rotated planar XZ (size INT odd >= 3)
-      toric(rows, cols)                  Toric (rows INT >= 2, cols INT >= 2)
+    CODE                  Stabilizer code in format name(<args>)
+    #CODE_PARAMETERS#
 
     \b
-     ERROR_MODEL           Error model in format name(<args>)
-      generic.biased_depolarizing(bias, ...) Biased (bias FLOAT >= 0, [axis] CHAR)
-      generic.biased_y_x(bias)           Biased Y v. X (bias FLOAT >= 0)
-      generic.bit_flip                   Pr I,X,Y,Z is 1-p,p,0,0
-      generic.bit_phase_flip             Pr I,X,Y,Z is 1-p,0,p,0
-      generic.center_slice(lim, pos)     Slice (lim 3-tuple of FLOAT, pos FLOAT)
-      generic.depolarizing               Pr I,X,Y,Z is 1-p,p/3,p/3,p/3
-      generic.file(filename, start)      File (filename STR, [start] INT >= 0)
-      generic.phase_flip                 Pr I,X,Y,Z is 1-p,0,0,p
-      planar.afcx(correlation)           AFCX (correlation FLOAT >= 0)
-      planar.avcx(correlation)           AVCX (correlation FLOAT >= 0)
+    ERROR_MODEL           Error model in format name(<args>)
+    #ERROR_MODEL_PARAMETERS#
 
     \b
-     DECODER               Decoder in format name(<args>)
-      color666.mps(chi, ...)             MPS ([chi] INT, ...)
-      generic.naive(max_qubits)          Naive ([max_qubits] INT)
-      planar.afcx(chi, ...)              AFCX ([chi] INT >=0, [mode] CHAR, ...)
-      planar.avcx(chi, ...)              AVCX ([chi] INT >=0, [mode] CHAR, ...)
-      planar.cmwpm(factor, ...)          Converging MWPM ([factor] FLOAT >=0, ...)
-      planar.mps(chi, ...)               MPS ([chi] INT >=0, [mode] CHAR, ...)
-      planar.mwpm                        MWPM
-      planar.rmps(chi, ...)              RMPS ([chi] INT >=0, [mode] CHAR, ...)
-      planar.y                           Y-noise
-      rotated_planar.mps(chi, ...)       MPS ([chi] INT >=0, [mode] CHAR, ...)
-      rotated_planar.rmps(chi, ...)      RMPS ([chi] INT >=0, [mode] CHAR, ...)
-      rotated_planar.smwpm               Symmetry MWPM
-      rotated_planar_xz.rmps(chi, ...)   RMPS ([chi] INT >=0, [mode] CHAR, ...)
-      toric.mwpm                         MWPM
+    DECODER               Decoder in format name(<args>)
+    #DECODER_PARAMETERS#
 
     \b
-     ERROR_PROBABILITY...  One or more probabilities as FLOAT in [0.0, 1.0]
+    ERROR_PROBABILITY...  One or more probabilities as FLOAT in [0.0, 1.0]
 
     Examples:
 
-     python qecsim.pyz run -r 5 "color666(7)" "generic.bit_flip" "color666.mps(16)" 0.1
+    qecsim run -r10 "five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
 
-     python qecsim.pyz run -r 10 "five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
+    qecsim run -f5 -r50 -s13 "steane" "generic.phase_flip" "generic.naive" 0.1
 
-     python qecsim.pyz run -f 5 "steane" "generic.phase_flip" "generic.naive" 0.05 0.1 0.15
+    qecsim run -r20 "planar(7,7)" "generic.bit_flip" "planar.mps(6)" 0.101 0.102
 
-     python qecsim.pyz run -r 20 "planar(7,7)" "generic.bit_flip" "planar.mps(6, 'a')" 0.101 0.102 0.103
+    qecsim run -r100 "color666(7)" "generic.bit_flip" "color666.mps(16)" 0.1
 
-     python qecsim.pyz run -o "data.json" -f 5 -r 50 -s 5 "toric(3,3)" "generic.bit_flip" "toric.mwpm" 0.1
+    qecsim run -o"data.json" -r5 "toric(3,3)" "generic.bit_flip" "toric.mwpm" 0.1
     """
     # INPUT
     try:
