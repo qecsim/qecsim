@@ -85,8 +85,8 @@ Implementations
 Stablizer code implementations include:
 
 -   Color 6.6.6 code :class:`qecsim.models.color.Color666Code`
--   5-qubit code :class:`qecsim.models.linear.FiveQubitCode`
--   7-qubit Steane code :class:`qecsim.models.linear.SteaneCode`
+-   5-qubit code :class:`qecsim.models.basic.FiveQubitCode`
+-   7-qubit Steane code :class:`qecsim.models.basic.SteaneCode`
 -   Planar code :class:`qecsim.models.planar.PlanarCode`
 -   Rotated planar code :class:`qecsim.models.rotatedplanar.RotatedPlanarCode`
 -   Rotated planar XZ code :class:`qecsim.models.rotatedplanarxz.RotatedPlanarXZCode`

@@ -1,5 +1,5 @@
 """
-This module contains implementations relevant to linear stabilizer codes.
+This module contains implementations relevant to basic stabilizer codes.
 """
 
 import functools
@@ -8,12 +8,12 @@ from qecsim import paulitools as pt
 from qecsim.model import StabilizerCode
 
 
-class LinearCode(StabilizerCode):
-    """Implements a linear code defined by its stabilizers and logical operators."""
+class BasicCode(StabilizerCode):
+    """Implements a basic code defined by its stabilizers and logical operators."""
 
     def __init__(self, pauli_stabilizers, pauli_logical_xs, pauli_logical_zs, n_k_d=None, label=None):
         """
-        Initialise new linear code.
+        Initialise new basic code.
 
         Assumptions:
 
@@ -29,7 +29,7 @@ class LinearCode(StabilizerCode):
         :type pauli_logical_zs: tuple of str
         :param n_k_d: Descriptor in the format (n, k, d). (Optional. Defaults to n and k calculated and d None.)
         :type n_k_d: 3-tuple of int
-        :param label: Label suitable for use in plots. (Optional. Defaults to 'Linear [n, k, d]'.)
+        :param label: Label suitable for use in plots. (Optional. Defaults to 'Basic [n, k, d]'.)
         :type label: str
         """
         self._pauli_stabilizers = pauli_stabilizers
@@ -40,7 +40,7 @@ class LinearCode(StabilizerCode):
             len(self._pauli_logical_xs) if self._pauli_logical_xs else 0,
             None
         ) if n_k_d is None else n_k_d
-        self._label = 'Linear [{},{},{}]'.format(*self.n_k_d) if label is None else label
+        self._label = 'Basic [{},{},{}]'.format(*self.n_k_d) if label is None else label
 
     @property
     @functools.lru_cache()
@@ -71,7 +71,7 @@ class LinearCode(StabilizerCode):
         return self._label
 
     def __eq__(self, other):
-        if isinstance(other, LinearCode):
+        if isinstance(other, BasicCode):
             return ((self._pauli_stabilizers, self._pauli_logical_xs, self._pauli_logical_zs, self._n_k_d,
                      self._label) ==
                     (other._pauli_stabilizers, other._pauli_logical_xs, other._pauli_logical_zs, other._n_k_d,
@@ -92,7 +92,7 @@ class LinearCode(StabilizerCode):
         )
 
 
-class FiveQubitCode(LinearCode):
+class FiveQubitCode(BasicCode):
     """Implements the 5-qubit [5, 1, 3] code."""
 
     def __init__(self):
@@ -109,7 +109,7 @@ class FiveQubitCode(LinearCode):
         return '{}()'.format(type(self).__name__)
 
 
-class SteaneCode(LinearCode):
+class SteaneCode(BasicCode):
     """Implements the Steane [7, 1, 3] code."""
 
     def __init__(self):

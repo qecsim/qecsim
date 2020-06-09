@@ -15,7 +15,7 @@ class StabilizerCode(metaclass=abc.ABCMeta):
     """
     Defines stabilizer code properties and methods.
 
-    This class cannot be instantiated directly, see :class:`qecsim.models.linear.LinearCode` for an example
+    This class cannot be instantiated directly, see :class:`qecsim.models.basic.FiveQubitCode` for an example
     implementation.
     """
 

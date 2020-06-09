@@ -20,6 +20,7 @@ import click
 import qecsim
 from qecsim import app
 from qecsim import util
+from qecsim.models.basic import FiveQubitCode, SteaneCode
 # from qecsim.models.color import Color666Code
 # from qecsim.models.color import Color666MPSDecoder
 # from qecsim.models.generic import BiasedDepolarizingErrorModel
@@ -31,7 +32,6 @@ from qecsim.models.generic import DepolarizingErrorModel
 # from qecsim.models.generic import FileErrorModel
 from qecsim.models.generic import NaiveDecoder
 from qecsim.models.generic import PhaseFlipErrorModel
-from qecsim.models.linear import FiveQubitCode, SteaneCode
 
 # from qecsim.models.planar import PlanarAFCXErrorModel, PlanarAFCXDecoder
 # from qecsim.models.planar import PlanarAVCXErrorModel, PlanarAVCXDecoder
@@ -159,8 +159,8 @@ def cli():
 _CODE_PARAMETER = _ConstructorParamType({
     # add new codes here mapping name -> constructor
     # 'color666': Color666Code,
-    'linear.five_qubit': FiveQubitCode,
-    'linear.steane': SteaneCode,
+    'five_qubit': FiveQubitCode,
+    'steane': SteaneCode,
     # 'planar': PlanarCode,
     # 'rotated_planar': RotatedPlanarCode,
     # 'rotated_planar_xz': RotatedPlanarXZCode,
@@ -236,8 +236,8 @@ def run(t_code, t_error_model, t_decoder, error_probabilities, max_failures, max
     \b
      CODE                  Stabilizer code in format name(<args>)
       color666(size)                     Color 6.6.6 (size INT odd >=3)
-      linear.five_qubit                  Linear 5-qubit
-      linear.steane                      Linear Steane
+      five_qubit                         5-qubit
+      steane                             Steane
       planar(rows, cols)                 Planar (rows INT >= 2, cols INT >= 2)
       rotated_planar(rows, cols)         Rotated planar (rows INT >= 3,
                                                          cols INT >= 3)
@@ -281,9 +281,9 @@ def run(t_code, t_error_model, t_decoder, error_probabilities, max_failures, max
 
      python qecsim.pyz run -r 5 "color666(7)" "generic.bit_flip" "color666.mps(16)" 0.1
 
-     python qecsim.pyz run -r 10 "linear.five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
+     python qecsim.pyz run -r 10 "five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
 
-     python qecsim.pyz run -f 5 "linear.steane" "generic.phase_flip" "generic.naive" 0.05 0.1 0.15
+     python qecsim.pyz run -f 5 "steane" "generic.phase_flip" "generic.naive" 0.05 0.1 0.15
 
      python qecsim.pyz run -r 20 "planar(7,7)" "generic.bit_flip" "planar.mps(6, 'a')" 0.101 0.102 0.103
 
