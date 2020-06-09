@@ -148,6 +148,11 @@ class _ConstructorParamType(click.ParamType):
 
 
 class _RunCommandMetaData:
+    # TODO: consider doing doc as <param_name> <cli_help>
+    # TODO: consider using decorator on model classes (see functools.wraps)
+    # TODO: consider using HelpFormatter.write_dl for <param_name> <cli_help>
+    # TODO: can this whole thing be re-written as a decorator for run commands
+    # TODO: tidy and doc this class
     def __init__(self, command, help):
         # construct meta-data
         models = {'code': {}, 'error_model': {}, 'decoder': {}, }
@@ -243,25 +248,24 @@ def cli():
 #     # 'planar.afcx': PlanarAFCXErrorModel,
 #     # 'planar.avcx': PlanarAVCXErrorModel,
 # })
-_DECODER_PARAMETER = _ConstructorParamType({
-    # add new decoders here mapping name -> constructor
-    # 'color666.mps': Color666MPSDecoder,
-    'generic.naive': NaiveDecoder,
-    # 'planar.afcx': PlanarAFCXDecoder,
-    # 'planar.avcx': PlanarAVCXDecoder,
-    # 'planar.cmwpm': PlanarCMWPMDecoder,
-    # 'planar.mps': PlanarMPSDecoder,
-    # 'planar.mwpm': PlanarMWPMDecoder,
-    # 'planar.rmps': PlanarRMPSDecoder,
-    # 'planar.y': PlanarYDecoder,
-    # 'rotated_planar.mps': RotatedPlanarMPSDecoder,
-    # 'rotated_planar.rmps': RotatedPlanarRMPSDecoder,
-    # 'rotated_planar.smwpm': RotatedPlanarSMWPMDecoder,
-    # 'rotated_planar_xz.rmps': RotatedPlanarXZRMPSDecoder,
-    # 'rotated_toric.smwpm': RotatedToricSMWPMDecoder,
-    # 'toric.mwpm': ToricMWPMDecoder,
-})
-
+# _DECODER_PARAMETER = _ConstructorParamType({
+#     # add new decoders here mapping name -> constructor
+#     # 'color666.mps': Color666MPSDecoder,
+#     'generic.naive': NaiveDecoder,
+#     # 'planar.afcx': PlanarAFCXDecoder,
+#     # 'planar.avcx': PlanarAVCXDecoder,
+#     # 'planar.cmwpm': PlanarCMWPMDecoder,
+#     # 'planar.mps': PlanarMPSDecoder,
+#     # 'planar.mwpm': PlanarMWPMDecoder,
+#     # 'planar.rmps': PlanarRMPSDecoder,
+#     # 'planar.y': PlanarYDecoder,
+#     # 'rotated_planar.mps': RotatedPlanarMPSDecoder,
+#     # 'rotated_planar.rmps': RotatedPlanarRMPSDecoder,
+#     # 'rotated_planar.smwpm': RotatedPlanarSMWPMDecoder,
+#     # 'rotated_planar_xz.rmps': RotatedPlanarXZRMPSDecoder,
+#     # 'rotated_toric.smwpm': RotatedToricSMWPMDecoder,
+#     # 'toric.mwpm': ToricMWPMDecoder,
+# })
 
 
 # custom validators
@@ -280,7 +284,7 @@ def _validate_error_probabilities(ctx, param, value):
 @cli.command(help=_RUN_META_DATA.help)
 @click.argument('t_code', type=_RUN_META_DATA.code, metavar='CODE')
 @click.argument('t_error_model', type=_RUN_META_DATA.error_model, metavar='ERROR_MODEL')
-@click.argument('t_decoder', type=_DECODER_PARAMETER, metavar='DECODER')
+@click.argument('t_decoder', type=_RUN_META_DATA.decoder, metavar='DECODER')
 @click.argument('error_probabilities', required=True, nargs=-1, type=float, metavar='ERROR_PROBABILITY...',
                 callback=_validate_error_probabilities)
 @click.option('--max-failures', '-f', type=click.IntRange(min=1), metavar='INT',
