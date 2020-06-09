@@ -8,7 +8,8 @@ setup(
     include_package_data=True,
     python_requires='>=3',
     install_requires=[
-        'Click',
+        'click',
+        'numpy',
     ],
     entry_points={
         'console_scripts': [
