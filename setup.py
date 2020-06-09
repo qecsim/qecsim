@@ -26,7 +26,7 @@ setup(
             'generic.bit_phase_flip = qecsim.models.generic:BitPhaseFlipErrorModel',
         ],
         'run_decoders': [
-            'naive = qecsim.models.generic:NaiveDecoder',
+            'generic.naive = qecsim.models.generic:NaiveDecoder',
         ],
     }
 )

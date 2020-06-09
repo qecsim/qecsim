@@ -60,7 +60,6 @@ class _ConstructorParamType(click.ParamType):
     Constructor param type that accepts parameters in the format ``name(<args>)``.
     """
     name = 'constructor'
-    ConstructorValue = namedtuple('ConstructorValue', 'param value constructor arguments')
 
     def __init__(self, constructors):
         """
@@ -81,16 +80,13 @@ class _ConstructorParamType(click.ParamType):
 
     def convert(self, value, param, ctx):
         """
-        Convert value to named tuple (param, value, constructor, arguments).
+        Convert value to model instance.
 
         If the value is correctly formatted as ``name`` or ``name(<args>)`` then:
 
-        * param and value are passed through.
         * constructor is resolved using the constructors map.
         * arguments is resolved to a tuple using a literal evaluation of args.
-
-        The returned tuple ``my_cstr`` can be used to construct a new object using:
-        ``my_cstr.constructor(*my_cstr.arguments)``
+        * instance is constructed using constructor(*arguments).
 
         See ``click.ParamType.convert`` for more details.
 
@@ -100,14 +96,10 @@ class _ConstructorParamType(click.ParamType):
         :type param: click.Parameter
         :param ctx: Context.
         :type ctx: click.Context
-        :return: Named tuple (param, value, constructor, arguments)
-        :rtype: ConstructorValue
+        :return: Model instance
+        :rtype: object
         :raises BadParameter: if the value cannot be parsed or does not correspond to valid constructor or arguments.
         """
-        # pass through None or already converted
-        if value is None or isinstance(value, _ConstructorParamType.ConstructorValue):
-            return value
-
         # constructor regex match
         constructor_match = re.fullmatch(r'''
             # match 'toric(3,3)' as {'constructor_name': 'toric', 'constructor_args': '3,3'}
@@ -141,7 +133,11 @@ class _ConstructorParamType(click.ParamType):
             # no args -> empty tuple
             arguments = tuple()
 
-        return _ConstructorParamType.ConstructorValue(param, value, constructor, arguments)
+        # instantiate model
+        try:
+            return constructor(*arguments)
+        except Exception as ex:
+            self.fail('{} (failed to construct "{}")'.format(value, ex), param, ctx)
 
     def __repr__(self):
         return '{}({!r})'.format(type(self).__name__, self._constructors)
@@ -282,9 +278,9 @@ def _validate_error_probabilities(ctx, param, value):
 
 
 @cli.command(help=_RUN_META_DATA.help)
-@click.argument('t_code', type=_RUN_META_DATA.code, metavar='CODE')
-@click.argument('t_error_model', type=_RUN_META_DATA.error_model, metavar='ERROR_MODEL')
-@click.argument('t_decoder', type=_RUN_META_DATA.decoder, metavar='DECODER')
+@click.argument('code', type=_RUN_META_DATA.code, metavar='CODE')
+@click.argument('error_model', type=_RUN_META_DATA.error_model, metavar='ERROR_MODEL')
+@click.argument('decoder', type=_RUN_META_DATA.decoder, metavar='DECODER')
 @click.argument('error_probabilities', required=True, nargs=-1, type=float, metavar='ERROR_PROBABILITY...',
                 callback=_validate_error_probabilities)
 @click.option('--max-failures', '-f', type=click.IntRange(min=1), metavar='INT',
@@ -295,7 +291,7 @@ def _validate_error_probabilities(ctx, param, value):
               help='Output file. (Writes to log if file exists).')
 @click.option('--random-seed', '-s', type=click.IntRange(min=0, max=2 ** 32 - 1), metavar='INT',
               help='Random seed for qubit error generation. (Re-applied for each probability).')
-def run(t_code, t_error_model, t_decoder, error_probabilities, max_failures, max_runs, output, random_seed):
+def run(code, error_model, decoder, error_probabilities, max_failures, max_runs, output, random_seed):
     """
     Simulate quantum error correction.
 
@@ -329,21 +325,7 @@ def run(t_code, t_error_model, t_decoder, error_probabilities, max_failures, max
     qecsim run -o"data.json" -r5 "toric(3,3)" "generic.bit_flip" "toric.mwpm" 0.1
     """
     # INPUT
-    try:
-        code = t_code.constructor(*t_code.arguments)  # FiveQubitCode()
-    except Exception as ex:
-        raise click.BadParameter('{} (failed to construct code "{}")'.format(t_code.value, ex), param=t_code.param)
     code.validate()
-    try:
-        error_model = t_error_model.constructor(*t_error_model.arguments)  # DepolarizingErrorModel()
-    except Exception as ex:
-        raise click.BadParameter('{} (failed to construct error model "{}")'.format(t_error_model.value, ex),
-                                 param=t_error_model.param)
-    try:
-        decoder = t_decoder.constructor(*t_decoder.arguments)  # NaiveDecoder()
-    except Exception as ex:
-        raise click.BadParameter('{} (failed to construct decoder "{}")'.format(t_decoder.value, ex),
-                                 param=t_decoder.param)
 
     logger.info('RUN STARTING: code={}, error_model={}, decoder={}, error_probabilities={}, max_failures={}, '
                 'max_runs={}, random_seed={}.'
@@ -403,10 +385,10 @@ def _validate_measurement_error_probability(ctx, param, value):
 
 
 @cli.command()
-@click.argument('t_code', type=_FTP_CODE_PARAMETER, metavar='CODE')
+@click.argument('code', type=_FTP_CODE_PARAMETER, metavar='CODE')
 @click.argument('time_steps', type=click.IntRange(min=1), metavar='TIME_STEPS')
-@click.argument('t_error_model', type=_FTP_ERROR_MODEL_PARAMETER, metavar='ERROR_MODEL')
-@click.argument('t_decoder', type=_FTP_DECODER_PARAMETER, metavar='DECODER')
+@click.argument('error_model', type=_FTP_ERROR_MODEL_PARAMETER, metavar='ERROR_MODEL')
+@click.argument('decoder', type=_FTP_DECODER_PARAMETER, metavar='DECODER')
 @click.argument('error_probabilities', required=True, nargs=-1, type=float, metavar='ERROR_PROBABILITY...',
                 callback=_validate_error_probabilities)
 @click.option('--max-failures', '-f', type=click.IntRange(min=1), metavar='INT',
@@ -420,7 +402,7 @@ def _validate_measurement_error_probability(ctx, param, value):
               help='Output file. (Writes to log if file exists).')
 @click.option('--random-seed', '-s', type=click.IntRange(min=0, max=2 ** 32 - 1), metavar='INT',
               help='Random seed for qubit error generation. (Re-applied for each probability).')
-def run_ftp(t_code, time_steps, t_error_model, t_decoder, error_probabilities, max_failures, max_runs,
+def run_ftp(code, time_steps, error_model, decoder, error_probabilities, max_failures, max_runs,
             measurement_error_probability, output, random_seed):
     """
     Simulate fault-tolerant (time-periodic) quantum error correction.
@@ -465,21 +447,7 @@ def run_ftp(t_code, time_steps, t_error_model, t_decoder, error_probabilities, m
     0.1
     """
     # INPUT
-    try:
-        code = t_code.constructor(*t_code.arguments)  # RotatedPlanar(7, 7)
-    except Exception as ex:
-        raise click.BadParameter('{} (failed to construct code "{}")'.format(t_code.value, ex), param=t_code.param)
     code.validate()
-    try:
-        error_model = t_error_model.constructor(*t_error_model.arguments)  # DepolarizingErrorModel()
-    except Exception as ex:
-        raise click.BadParameter('{} (failed to construct error model "{}")'.format(t_error_model.value, ex),
-                                 param=t_error_model.param)
-    try:
-        decoder = t_decoder.constructor(*t_decoder.arguments)  # RotatedPlanarSMWPMDecoder()
-    except Exception as ex:
-        raise click.BadParameter('{} (failed to construct decoder "{}")'.format(t_decoder.value, ex),
-                                 param=t_decoder.param)
 
     logger.info('RUN STARTING: code={}, time_steps={}, error_model={}, decoder={}, error_probabilities={}, '
                 'max_failures={}, max_runs={}, measurement_error_probability={}, random_seed={}.'
