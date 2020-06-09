@@ -144,10 +144,9 @@ class _ConstructorParamType(click.ParamType):
 
 
 class _RunCommandMetaData:
-    # TODO: consider doing doc as <param_name> <cli_help>
-    # TODO: consider using decorator on model classes (see functools.wraps)
-    # TODO: consider using HelpFormatter.write_dl for <param_name> <cli_help>
     # TODO: can this whole thing be re-written as a decorator for run commands
+    # TODO: consider using decorator on model classes (see functools.wraps)
+    # TODO: extract save data function from each command
     # TODO: tidy and doc this class
     def __init__(self, command, help):
         # construct meta-data
@@ -160,11 +159,14 @@ class _RunCommandMetaData:
                 param_class = entry_point.load()
                 constructors[param_name] = param_class
                 try:
-                    param_help = inspect.cleandoc(param_class._cli_help)
+                    param_help = param_class._cli_help
                 except AttributeError:
-                    param_help = param_name
-                model_help.append(textwrap.indent(param_help, '  '))
-            help = help.replace('#{}_PARAMETERS#'.format(model_type.upper()), '\n'.join(model_help))
+                    param_help = ''
+                model_help.append((param_name, param_help))
+            formatter = click.HelpFormatter()
+            formatter.indent()
+            formatter.write_dl(model_help)
+            help = help.replace('#{}_PARAMETERS#'.format(model_type.upper()), formatter.getvalue())
         # meta-data properties
         self.command = command
         self.code = _ConstructorParamType(models['code'])

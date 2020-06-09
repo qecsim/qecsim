@@ -20,7 +20,7 @@ class NaiveDecoder(Decoder):
     * Slow for large numbers of qubits and high weights.
     """
 
-    _cli_help = """generic.naive(max_qubits)  Naive ([max_qubits] INT)"""
+    _cli_help = """Naive ([max_qubits] INT)"""
 
     MAX_QUBITS = 10
 

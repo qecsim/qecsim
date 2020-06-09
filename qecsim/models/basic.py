@@ -95,7 +95,7 @@ class BasicCode(StabilizerCode):
 class FiveQubitCode(BasicCode):
     """Implements the 5-qubit [5, 1, 3] code."""
 
-    _cli_help = """five_qubit                 5-qubit"""
+    _cli_help = """5-qubit"""
 
     def __init__(self):
         """Initialise new 5-qubit [5, 1, 3] code."""
@@ -114,7 +114,7 @@ class FiveQubitCode(BasicCode):
 class SteaneCode(BasicCode):
     """Implements the Steane [7, 1, 3] code."""
 
-    _cli_help = """steane                     Steane"""
+    _cli_help = """Steane"""
 
     def __init__(self):
         """Initialise new Steane [7, 1, 3] code."""
