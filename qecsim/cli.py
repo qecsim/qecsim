@@ -10,6 +10,7 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 """
 
 import ast
+import functools
 import inspect
 import json
 import logging
@@ -143,68 +144,10 @@ class _ConstructorParamType(click.ParamType):
         return '{}({!r})'.format(type(self).__name__, self._constructors)
 
 
-class _RunCommandMetaData:
-    # TODO: can this whole thing be re-written as a decorator for run commands
-    # TODO: consider using decorator on model classes (see functools.wraps)
-    # TODO: extract save data function from each command
-    # TODO: tidy and doc this class
-    def __init__(self, command, help):
-        # construct meta-data
-        models = {'code': {}, 'error_model': {}, 'decoder': {}, }
-        for model_type, constructors in models.items():
-            model_help = []
-            entry_point_id = '{}_{}s'.format(command, model_type)
-            for entry_point in pkg_resources.iter_entry_points(entry_point_id):
-                param_name = entry_point.name
-                param_class = entry_point.load()
-                constructors[param_name] = param_class
-                try:
-                    param_help = param_class._cli_help
-                except AttributeError:
-                    param_help = ''
-                model_help.append((param_name, param_help))
-            formatter = click.HelpFormatter()
-            formatter.indent()
-            formatter.write_dl(model_help)
-            help = help.replace('#{}_PARAMETERS#'.format(model_type.upper()), formatter.getvalue())
-        # meta-data properties
-        self.command = command
-        self.code = _ConstructorParamType(models['code'])
-        self.error_model = _ConstructorParamType(models['error_model'])
-        self.decoder = _ConstructorParamType(models['decoder'])
-        self.help = help
 
 
-_RUN_META_DATA = _RunCommandMetaData('run', """
-Simulate quantum error correction.
-
-Arguments:
-
-\b
- CODE                  Stabilizer code in format name(<args>)
-#CODE_PARAMETERS#
-
-\b
- ERROR_MODEL           Error model in format name(<args>)
-#ERROR_MODEL_PARAMETERS#
-
-\b
- DECODER               Decoder in format name(<args>)
-#DECODER_PARAMETERS#
-
-\b
- ERROR_PROBABILITY...  One or more probabilities as FLOAT in [0.0, 1.0]
 
 
-Examples:
-
-\b
- qecsim run -r10 "five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
- qecsim run -f5 -r50 -s13 "steane" "generic.phase_flip" "generic.naive" 0.1
- qecsim run -r20 "planar(7,7)" "generic.bit_flip" "planar.mps(6)" 0.10 0.11
- qecsim run -r10 "color666(7)" "generic.bit_flip" "color666.mps(16)" 0.09 0.10
- qecsim run -o"data.json" -f9 "toric(3,3)" "generic.bit_flip" "toric.mwpm" 0.1
-""")
 
 
 # _CODE_PARAMETER = _load_constructor_param_type('run_codes')
@@ -266,6 +209,43 @@ def cli():
 # })
 
 
+def _qecsim_model_arguments():
+    # TODO: consider using decorator on model classes (see functools.wraps)
+    # TODO: extract save data function from each command
+    # TODO: tidy and doc this class
+    def _decorator(func):
+        # extract __doc__
+        help_doc = inspect.getdoc(func)
+        # iterate in reverse order so arguments are correctly ordered on CLI
+        for model_type in ('decoder', 'error_model', 'code'):
+            entry_point_id = '{}_{}s'.format(func.__name__, model_type)  # e.g. run-ftp_codes
+            constructors = {}  # e.g. {'five_qubit': FiveQubitCode, ...}
+            model_definition_list = []
+            # iterate entry points, extracting name, class and help doc
+            for entry_point in pkg_resources.iter_entry_points(entry_point_id):
+                param_name = entry_point.name  # e.g. five_qubit
+                param_class = entry_point.load()  # e.g. FiveQubitCode
+                constructors[param_name] = param_class
+                try:
+                    param_help = param_class._cli_help
+                except AttributeError:
+                    param_help = ''
+                model_definition_list.append((param_name, param_help))
+            # add argument decorator
+            func = click.argument(model_type, type=_ConstructorParamType(constructors), metavar=model_type.upper())(
+                func)
+            # update help text with models
+            formatter = click.HelpFormatter()
+            formatter.indent()
+            formatter.write_dl(model_definition_list)
+            help_doc = help_doc.replace('#{}_PARAMETERS#'.format(model_type.upper()), formatter.getvalue())
+        # update __doc__
+        func.__doc__ = help_doc
+        return func
+
+    return _decorator
+
+
 # custom validators
 def _validate_error_probability(ctx, param, value):
     if not (0 <= value <= 1):
@@ -279,10 +259,8 @@ def _validate_error_probabilities(ctx, param, value):
     return value
 
 
-@cli.command(help=_RUN_META_DATA.help)
-@click.argument('code', type=_RUN_META_DATA.code, metavar='CODE')
-@click.argument('error_model', type=_RUN_META_DATA.error_model, metavar='ERROR_MODEL')
-@click.argument('decoder', type=_RUN_META_DATA.decoder, metavar='DECODER')
+@cli.command()
+@_qecsim_model_arguments()
 @click.argument('error_probabilities', required=True, nargs=-1, type=float, metavar='ERROR_PROBABILITY...',
                 callback=_validate_error_probabilities)
 @click.option('--max-failures', '-f', type=click.IntRange(min=1), metavar='INT',
@@ -300,31 +278,29 @@ def run(code, error_model, decoder, error_probabilities, max_failures, max_runs,
     Arguments:
 
     \b
-    CODE                  Stabilizer code in format name(<args>)
+     CODE                  Stabilizer code in format name(<args>)
     #CODE_PARAMETERS#
 
     \b
-    ERROR_MODEL           Error model in format name(<args>)
+     ERROR_MODEL           Error model in format name(<args>)
     #ERROR_MODEL_PARAMETERS#
 
     \b
-    DECODER               Decoder in format name(<args>)
+     DECODER               Decoder in format name(<args>)
     #DECODER_PARAMETERS#
 
     \b
-    ERROR_PROBABILITY...  One or more probabilities as FLOAT in [0.0, 1.0]
+     ERROR_PROBABILITY...  One or more probabilities as FLOAT in [0.0, 1.0]
+
 
     Examples:
 
-    qecsim run -r10 "five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
-
-    qecsim run -f5 -r50 -s13 "steane" "generic.phase_flip" "generic.naive" 0.1
-
-    qecsim run -r20 "planar(7,7)" "generic.bit_flip" "planar.mps(6)" 0.101 0.102
-
-    qecsim run -r100 "color666(7)" "generic.bit_flip" "color666.mps(16)" 0.1
-
-    qecsim run -o"data.json" -r5 "toric(3,3)" "generic.bit_flip" "toric.mwpm" 0.1
+    \b
+     qecsim run -r10 "five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
+     qecsim run -f5 -r50 -s13 "steane" "generic.phase_flip" "generic.naive" 0.1
+     qecsim run -r20 "planar(7,7)" "generic.bit_flip" "planar.mps(6)" 0.10 0.11
+     qecsim run -r10 "color666(7)" "generic.bit_flip" "color666.mps(16)" 0.09 0.10
+     qecsim run -o"data.json" -f9 "toric(3,3)" "generic.bit_flip" "toric.mwpm" 0.1
     """
     # INPUT
     code.validate()
