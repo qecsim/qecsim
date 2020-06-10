@@ -15,17 +15,17 @@ setup(
         'console_scripts': [
             'qecsim = qecsim.cli:cli',
         ],
-        'run_codes': [
+        'qecsim.cli.run.codes': [
             'five_qubit = qecsim.models.basic:FiveQubitCode',
             'steane = qecsim.models.basic:SteaneCode',
         ],
-        'run_error_models': [
+        'qecsim.cli.run.error_models': [
             'generic.depolarizing = qecsim.models.generic:DepolarizingErrorModel',
             'generic.bit_flip = qecsim.models.generic:BitFlipErrorModel',
             'generic.phase_flip = qecsim.models.generic:PhaseFlipErrorModel',
             'generic.bit_phase_flip = qecsim.models.generic:BitPhaseFlipErrorModel',
         ],
-        'run_decoders': [
+        'qecsim.cli.run.decoders': [
             'generic.naive = qecsim.models.generic:NaiveDecoder',
         ],
     }

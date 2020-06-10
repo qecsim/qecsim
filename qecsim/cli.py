@@ -144,26 +144,6 @@ class _ConstructorParamType(click.ParamType):
         return '{}({!r})'.format(type(self).__name__, self._constructors)
 
 
-
-
-
-
-
-
-# _CODE_PARAMETER = _load_constructor_param_type('run_codes')
-
-
-@click.group()
-@click.version_option(version=qecsim.__version__, prog_name='qecsim')
-def cli():
-    """
-    qecsim - quantum error correction simulator using stabilizer codes.
-
-    See python qecsim.pyz COMMAND --help for command-specific help.
-    """
-    util.init_logging()
-
-
 # custom param types
 # _CODE_PARAMETER = _ConstructorParamType({
 #     # add new codes here mapping name -> constructor
@@ -208,45 +188,32 @@ def cli():
 #     # 'toric.mwpm': ToricMWPMDecoder,
 # })
 
-
-def _qecsim_model_arguments():
+# custom command decorators
+def _model_argument(model_type):
     # TODO: consider using decorator on model classes (see functools.wraps)
     # TODO: extract save data function from each command
     # TODO: tidy and doc this class
     def _decorator(func):
-        # extract __doc__
-        help_doc = inspect.getdoc(func)
-        # iterate in reverse order so arguments are correctly ordered on CLI
-        for model_type in ('decoder', 'error_model', 'code'):
-            entry_point_id = '{}_{}s'.format(func.__name__, model_type)  # e.g. run-ftp_codes
-            constructors = {}  # e.g. {'five_qubit': FiveQubitCode, ...}
-            model_definition_list = []
-            # iterate entry points, extracting name, class and help doc
-            for entry_point in pkg_resources.iter_entry_points(entry_point_id):
-                param_name = entry_point.name  # e.g. five_qubit
-                param_class = entry_point.load()  # e.g. FiveQubitCode
-                constructors[param_name] = param_class
-                try:
-                    param_help = param_class._cli_help
-                except AttributeError:
-                    param_help = ''
-                model_definition_list.append((param_name, param_help))
-            # add argument decorator
-            func = click.argument(model_type, type=_ConstructorParamType(constructors), metavar=model_type.upper())(
-                func)
-            # update help text with models
-            formatter = click.HelpFormatter()
-            formatter.indent()
-            formatter.write_dl(model_definition_list)
-            help_doc = help_doc.replace('#{}_PARAMETERS#'.format(model_type.upper()), formatter.getvalue())
+        # extract name and class from entry-point, e.g. {'five_qubit': FiveQubitCode, ...}
+        entry_point_id = 'qecsim.cli.{}.{}s'.format(func.__name__, model_type)  # e.g. qecsim.cli.run_ftp.codes
+        constructors = {ep.name: ep.load() for ep in pkg_resources.iter_entry_points(entry_point_id)}
+        # add argument decorator
+        func = click.argument(model_type, type=_ConstructorParamType(constructors), metavar=model_type.upper())(func)
         # update __doc__
-        func.__doc__ = help_doc
+        model_definition_list = [(name, class_._cli_help if hasattr(class_, '_cli_help') else '')
+                                 for name, class_ in constructors.items()]  # e.g. [('five_qubit', '5-qubit'), ...]
+        formatter = click.HelpFormatter()
+        formatter.indent()
+        if model_definition_list:
+            formatter.write_dl(model_definition_list)
+        model_doc_placeholder = '#{}_PARAMETERS#'.format(model_type.upper())  # e.g. #CODE_PARAMETERS#
+        func.__doc__ = inspect.getdoc(func).replace(model_doc_placeholder, formatter.getvalue())
         return func
 
     return _decorator
 
 
-# custom validators
+# custom parameter validators
 def _validate_error_probability(ctx, param, value):
     if not (0 <= value <= 1):
         raise click.BadParameter('{} is not in [0.0, 1.0]'.format(value), ctx, param)
@@ -259,8 +226,27 @@ def _validate_error_probabilities(ctx, param, value):
     return value
 
 
+def _validate_measurement_error_probability(ctx, param, value):
+    if not (value is None or (0 <= value <= 1)):
+        raise click.BadParameter('{} is not in [0.0, 1.0]'.format(value), ctx, param)
+    return value
+
+
+@click.group()
+@click.version_option(version=qecsim.__version__, prog_name='qecsim')
+def cli():
+    """
+    qecsim - quantum error correction simulator using stabilizer codes.
+
+    See python qecsim.pyz COMMAND --help for command-specific help.
+    """
+    util.init_logging()
+
+
 @cli.command()
-@_qecsim_model_arguments()
+@_model_argument('code')
+@_model_argument('error_model')
+@_model_argument('decoder')
 @click.argument('error_probabilities', required=True, nargs=-1, type=float, metavar='ERROR_PROBABILITY...',
                 callback=_validate_error_probabilities)
 @click.option('--max-failures', '-f', type=click.IntRange(min=1), metavar='INT',
@@ -354,12 +340,6 @@ _FTP_DECODER_PARAMETER = _ConstructorParamType({
     # 'rotated_toric.smwpm': RotatedToricSMWPMDecoder,
 })
 
-
-# custom FT validators
-def _validate_measurement_error_probability(ctx, param, value):
-    if not (value is None or (0 <= value <= 1)):
-        raise click.BadParameter('{} is not in [0.0, 1.0]'.format(value), ctx, param)
-    return value
 
 
 @cli.command()
