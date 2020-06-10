@@ -11,7 +11,7 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 """
 # TODO: extract save data function from each command
 # TODO: move qecsim into src directory
-# TODO: switch to setup.cfg
+# TODO: switch to setup.cfg (see click github)
 # TODO: copy across tests into tests directory and set up tox
 # TODO: copy across tools and models (core)
 # TODO: validate with tests
