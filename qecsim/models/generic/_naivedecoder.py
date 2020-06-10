@@ -3,9 +3,10 @@ import operator
 import numpy as np
 
 from qecsim import paulitools as pt
-from qecsim.model import Decoder
+from qecsim.model import Decoder, cli_description
 
 
+@cli_description('Naive ([max_qubits] INT)')
 class NaiveDecoder(Decoder):
     """
     Implements a naive decoder.
@@ -19,8 +20,6 @@ class NaiveDecoder(Decoder):
 
     * Slow for large numbers of qubits and high weights.
     """
-
-    _cli_help = """Naive ([max_qubits] INT)"""
 
     MAX_QUBITS = 10
 

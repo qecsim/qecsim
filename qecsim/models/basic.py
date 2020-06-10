@@ -5,7 +5,7 @@ This module contains implementations relevant to basic stabilizer codes.
 import functools
 
 from qecsim import paulitools as pt
-from qecsim.model import StabilizerCode
+from qecsim.model import StabilizerCode, cli_description
 
 
 class BasicCode(StabilizerCode):
@@ -92,10 +92,9 @@ class BasicCode(StabilizerCode):
         )
 
 
+@cli_description('5-qubit')
 class FiveQubitCode(BasicCode):
     """Implements the 5-qubit [5, 1, 3] code."""
-
-    _cli_help = """5-qubit"""
 
     def __init__(self):
         """Initialise new 5-qubit [5, 1, 3] code."""
@@ -111,10 +110,9 @@ class FiveQubitCode(BasicCode):
         return '{}()'.format(type(self).__name__)
 
 
+@cli_description('Steane')
 class SteaneCode(BasicCode):
     """Implements the Steane [7, 1, 3] code."""
-
-    _cli_help = """Steane"""
 
     def __init__(self):
         """Initialise new Steane [7, 1, 3] code."""

@@ -4,7 +4,7 @@ import functools
 import numpy as np
 
 from qecsim import paulitools as pt
-from qecsim.model import ErrorModel
+from qecsim.model import ErrorModel, cli_description
 
 
 class SimpleErrorModel(ErrorModel):
@@ -46,6 +46,7 @@ class SimpleErrorModel(ErrorModel):
         return '{}()'.format(type(self).__name__)
 
 
+@cli_description('Pr I,X,Y,Z is 1-p,p/3,p/3,p/3')
 class DepolarizingErrorModel(SimpleErrorModel):
     """
     Implements a depolarizing error model.
@@ -57,8 +58,6 @@ class DepolarizingErrorModel(SimpleErrorModel):
     * p/3: Y
     * p/3: Z
     """
-
-    _cli_help = """Pr I,X,Y,Z is 1-p,p/3,p/3,p/3"""
 
     @functools.lru_cache()
     def probability_distribution(self, probability):
@@ -73,6 +72,7 @@ class DepolarizingErrorModel(SimpleErrorModel):
         return 'Depolarizing'
 
 
+@cli_description('Pr I,X,Y,Z is 1-p,p,0,0')
 class BitFlipErrorModel(SimpleErrorModel):
     """
     Implements a bit-flip error model.
@@ -84,8 +84,6 @@ class BitFlipErrorModel(SimpleErrorModel):
     * 0: Y
     * 0: Z
     """
-
-    _cli_help = """Pr I,X,Y,Z is 1-p,p,0,0"""
 
     @functools.lru_cache()
     def probability_distribution(self, probability):
@@ -101,6 +99,7 @@ class BitFlipErrorModel(SimpleErrorModel):
         return 'Bit-flip'
 
 
+@cli_description('Pr I,X,Y,Z is 1-p,0,0,p')
 class PhaseFlipErrorModel(SimpleErrorModel):
     """
     Implements a phase-flip error model.
@@ -112,8 +111,6 @@ class PhaseFlipErrorModel(SimpleErrorModel):
     * 0: Y
     * p: Z
     """
-
-    _cli_help = """Pr I,X,Y,Z is 1-p,0,0,p"""
 
     @functools.lru_cache()
     def probability_distribution(self, probability):
@@ -129,6 +126,7 @@ class PhaseFlipErrorModel(SimpleErrorModel):
         return 'Phase-flip'
 
 
+@cli_description('Pr I,X,Y,Z is 1-p,0,p,0')
 class BitPhaseFlipErrorModel(SimpleErrorModel):
     """
     Implements a bit-phase-flip error model.
@@ -140,8 +138,6 @@ class BitPhaseFlipErrorModel(SimpleErrorModel):
     * p: Y
     * 0: Z
     """
-
-    _cli_help = """Pr I,X,Y,Z is 1-p,0,p,0"""
 
     @functools.lru_cache()
     def probability_distribution(self, probability):

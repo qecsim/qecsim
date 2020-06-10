@@ -28,5 +28,15 @@ setup(
         'qecsim.cli.run.decoders': [
             'generic.naive = qecsim.models.generic:NaiveDecoder',
         ],
+        'qecsim.cli.run_ftp.codes': [
+        ],
+        'qecsim.cli.run_ftp.error_models': [
+            'generic.depolarizing = qecsim.models.generic:DepolarizingErrorModel',
+            'generic.bit_flip = qecsim.models.generic:BitFlipErrorModel',
+            'generic.phase_flip = qecsim.models.generic:PhaseFlipErrorModel',
+            'generic.bit_phase_flip = qecsim.models.generic:BitPhaseFlipErrorModel',
+        ],
+        'qecsim.cli.run_ftp.decoders': [
+        ],
     }
 )

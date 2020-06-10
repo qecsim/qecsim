@@ -10,6 +10,34 @@ import numpy as np
 from qecsim import paulitools as pt
 from qecsim.error import QecsimException
 
+ATTR_CLI_DESCRIPTION = '__qecsim_cli_desc'
+
+
+def cli_description(description):
+    """
+    CLI description class decorator.
+
+    Notes:
+
+    * Adds the attribute `__qecsim_cli_desc` to the class with the value of the given description.
+    * The description is used by :mod:`qecsim.cli` to generate CLI help messages.
+    * Typically it describes the model and parameters in a human-readable form; the model type (i.e. code, error model,
+      decoder) is not included.
+    * For examples, see :class:`qecsim.models.planar.PlanarCode`, :class:`qecsim.models.generic.BitPhaseFlipErrorModel`
+      and :class:`qecsim.models.planar.PlanarMPSDecoder`.
+
+    :param description: CLI description.
+    :type description: str
+    :return: CLI description class decorator.
+    :rtype: function
+    """
+
+    def _decorator(cls):
+        setattr(cls, ATTR_CLI_DESCRIPTION, description)
+        return cls
+
+    return _decorator
+
 
 class StabilizerCode(metaclass=abc.ABCMeta):
     """

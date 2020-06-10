@@ -1,6 +1,7 @@
 """
 This module contains the qecsim command line interface (CLI).
 
+TODO: rewrite for setuptools
 New codes, error models and decoders can be offered in the CLI by adding them to the _CODE_PARAMETER,
 _ERROR_MODEL_PARAMETER and _DECODER_PARAMETER variables respectively, and updating the docstring of :func:`run`.
 
@@ -8,15 +9,13 @@ New FTP codes, error models and decoders can be offered in the CLI by adding the
 _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, and updating the docstring of
 :func:`run_ftp`.
 """
+# TODO: extract save data function from each command
 
 import ast
-import functools
 import inspect
 import json
 import logging
 import re
-import textwrap
-from collections import namedtuple
 
 import click
 import pkg_resources
@@ -24,6 +23,7 @@ import pkg_resources
 import qecsim
 from qecsim import app
 from qecsim import util
+from qecsim.model import ATTR_CLI_DESCRIPTION
 from qecsim.models.basic import FiveQubitCode, SteaneCode
 # from qecsim.models.color import Color666Code
 # from qecsim.models.color import Color666MPSDecoder
@@ -188,20 +188,38 @@ class _ConstructorParamType(click.ParamType):
 #     # 'toric.mwpm': ToricMWPMDecoder,
 # })
 
-# custom command decorators
+# custom argument decorators
 def _model_argument(model_type):
-    # TODO: consider using decorator on model classes (see functools.wraps)
-    # TODO: extract save data function from each command
-    # TODO: tidy and doc this class
+    """
+    Model argument function decorator.
+
+    Notes:
+    * This decorator is applied to a run command to add an argument of the given model type, i.e. code, error_model, or
+      decoder.
+    * The possible argument values and corresponding model constructors are loaded from setuptools entry-points, under
+      the key `qecsim.cli.<run-command>.<model-type>s`, e.g. `qecsim.cli.run_ftp.codes`, with value
+      `["<model-name> = <model-package>:<model-class>", ...]`, e.g.` ["steane = qecsim.models.basic:SteaneCode", ...]`.
+    * The doc-string of the run command is updated as follows:
+
+        * The placeholder `#<MODEL-TYPE>_PARAMETERS#`, e.g. `#CODE_PARAMETERS#`, is replaced by a definition list
+          consisting of `<model-name>` and `<cli-description>`, as specified by the model class descriptor
+          :func:`qecsim.model.cli_description`, e.g. `planar` and `Planar (rows INT >= 2, cols INT >= 2)`.
+
+    :param model_type: The model type, i.e code, error_model, or decoder.
+    :type model_type: str
+    :return: Model argument function decorator.
+    :rtype: function
+    """
+
     def _decorator(func):
         # extract name and class from entry-point, e.g. {'five_qubit': FiveQubitCode, ...}
         entry_point_id = 'qecsim.cli.{}.{}s'.format(func.__name__, model_type)  # e.g. qecsim.cli.run_ftp.codes
         constructors = {ep.name: ep.load() for ep in pkg_resources.iter_entry_points(entry_point_id)}
         # add argument decorator
         func = click.argument(model_type, type=_ConstructorParamType(constructors), metavar=model_type.upper())(func)
+        # extract name and cli_help, e.g. [('five_qubit', '5-qubit'), ...]
+        model_definition_list = [(name, getattr(cls, ATTR_CLI_DESCRIPTION, '')) for name, cls in constructors.items()]
         # update __doc__
-        model_definition_list = [(name, class_._cli_help if hasattr(class_, '_cli_help') else '')
-                                 for name, class_ in constructors.items()]  # e.g. [('five_qubit', '5-qubit'), ...]
         formatter = click.HelpFormatter()
         formatter.indent()
         if model_definition_list:
@@ -278,14 +296,16 @@ def run(code, error_model, decoder, error_probabilities, max_failures, max_runs,
     \b
      ERROR_PROBABILITY...  One or more probabilities as FLOAT in [0.0, 1.0]
 
-
     Examples:
 
-    \b
-     qecsim run -r10 "five_qubit" "generic.depolarizing" "generic.naive" 0.05 0.1
+     qecsim run -r10 "five_qubit" "generic.depolarizing" "generic.naive" 0.1
+
      qecsim run -f5 -r50 -s13 "steane" "generic.phase_flip" "generic.naive" 0.1
-     qecsim run -r20 "planar(7,7)" "generic.bit_flip" "planar.mps(6)" 0.10 0.11
+
+     qecsim run -r20 "planar(7,7)" "generic.bit_flip" "planar.mps(6)" 0.101 0.102 0.103
+
      qecsim run -r10 "color666(7)" "generic.bit_flip" "color666.mps(16)" 0.09 0.10
+
      qecsim run -o"data.json" -f9 "toric(3,3)" "generic.bit_flip" "toric.mwpm" 0.1
     """
     # INPUT
@@ -341,12 +361,11 @@ _FTP_DECODER_PARAMETER = _ConstructorParamType({
 })
 
 
-
 @cli.command()
-@click.argument('code', type=_FTP_CODE_PARAMETER, metavar='CODE')
+@_model_argument('code')
 @click.argument('time_steps', type=click.IntRange(min=1), metavar='TIME_STEPS')
-@click.argument('error_model', type=_FTP_ERROR_MODEL_PARAMETER, metavar='ERROR_MODEL')
-@click.argument('decoder', type=_FTP_DECODER_PARAMETER, metavar='DECODER')
+@_model_argument('error_model')
+@_model_argument('decoder')
 @click.argument('error_probabilities', required=True, nargs=-1, type=float, metavar='ERROR_PROBABILITY...',
                 callback=_validate_error_probabilities)
 @click.option('--max-failures', '-f', type=click.IntRange(min=1), metavar='INT',
@@ -369,40 +388,29 @@ def run_ftp(code, time_steps, error_model, decoder, error_probabilities, max_fai
 
     \b
      CODE                  Stabilizer code in format name(<args>)
-      rotated_planar(rows, cols)         Rotated planar (rows INT >= 3,
-                                                         cols INT >= 3)
-      rotated_toric(rows, cols)          Rotated toric (rows INT even >= 2,
-                                                        cols INT even >= 2)
+    #CODE_PARAMETERS#
 
     \b
      TIME_STEPS            Number of time steps as INT >= 1
 
     \b
      ERROR_MODEL           Error model in format name(<args>)
-      generic.biased_depolarizing(bias, ...) Biased (bias FLOAT >= 0, [axis] CHAR)
-      generic.biased_y_x(bias)           Biased Y v. X (bias FLOAT >= 0)
-      generic.bit_flip                   Pr I,X,Y,Z is 1-p,p,0,0
-      generic.bit_phase_flip             Pr I,X,Y,Z is 1-p,0,p,0
-      generic.center_slice(lim, pos)     Slice (lim 3-tuple of FLOAT, pos FLOAT)
-      generic.depolarizing               Pr I,X,Y,Z is 1-p,p/3,p/3,p/3
-      generic.phase_flip                 Pr I,X,Y,Z is 1-p,0,0,p
+    #ERROR_MODEL_PARAMETERS#
 
     \b
      DECODER               Decoder in format name(<args>)
-      rotated_planar.smwpm               Symmetry MWPM
-      rotated_toric.smwpm                Symmetry MWPM
+    #DECODER_PARAMETERS#
 
     \b
      ERROR_PROBABILITY...  One or more probabilities as FLOAT in [0.0, 1.0]
 
     Examples:
 
-     python qecsim.pyz run-ftp -r 5 "rotated_planar(13,13)" 13 "generic.bit_phase_flip" "rotated_planar.smwpm" 0.1 0.2
+     qecsim run-ftp -r5 "rotated_planar(13,13)" 13 "generic.bit_phase_flip" "rotated_planar.smwpm" 0.1 0.2
 
-     python qecsim.pyz run-ftp -r 5 -m 0.05 "rotated_toric(6,6)" 4 "generic.bit_phase_flip" "rotated_toric.smwpm" 0.1
+     qecsim run-ftp -r5 -m0.05 "rotated_toric(6,6)" 4 "generic.bit_phase_flip" "rotated_toric.smwpm" 0.1
 
-     python qecsim.pyz run-ftp -r 5 -o "data.json" "rotated_planar(7,7)" 7 "generic.depolarizing" "rotated_planar.smwpm"
-    0.1
+     qecsim run-ftp -r5 -o"data.json" "rotated_planar(7,7)" 7 "generic.depolarizing" "rotated_planar.smwpm" 0.1
     """
     # INPUT
     code.validate()
@@ -451,10 +459,9 @@ def merge(data_file, output):
 
     Examples:
 
-     python qecsim.pyz merge "data1.json" "data2.json" "data3.json"
+     qecsim merge "data1.json" "data2.json" "data3.json"
 
-     python qecsim.pyz merge -o "merged.json" data*.json
-
+     qecsim merge -o"merged.json" data*.json
     """
     # INPUT
     input_data = []
