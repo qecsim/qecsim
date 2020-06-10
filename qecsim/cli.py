@@ -208,7 +208,7 @@ def _model_argument(model_type):
     * The doc-string of the run command is updated as follows:
 
         * The placeholder `#<MODEL-TYPE>_PARAMETERS#`, e.g. `#CODE_PARAMETERS#`, is replaced by a definition list
-          consisting of `<model-name>` and `<cli-description>`, as specified by the model class descriptor
+          consisting of `<model-name>` and `<cli-description>`, as specified by the model class decorator
           :func:`qecsim.model.cli_description`, e.g. `planar` and `Planar (rows INT >= 2, cols INT >= 2)`.
 
     :param model_type: The model type, i.e code, error_model, or decoder.
