@@ -10,7 +10,7 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 :func:`run_ftp`.
 """
 # TODO: extract save data function from each command
-# TODO: move qecsim into src directory
+# TODO: move qecsim into src directory (see https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure)
 # TODO: switch to setup.cfg (see click github)
 # TODO: copy across tests into tests directory and set up tox
 # TODO: copy across tools and models (core)
