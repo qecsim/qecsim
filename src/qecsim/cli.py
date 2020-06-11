@@ -13,10 +13,11 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: move qecsim into src directory (see https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure)
 # DONE: switch to setup.cfg (see click github)
 # DONE: copy across tests into tests directory and set up pytest
-# TODO: set up tox (see https://tox.readthedocs.io/en/latest/index.html)
+# DONE: set up tox (see https://tox.readthedocs.io/en/latest/index.html) for pytest
+# TODO: set up tox for sphinx docs
 # TODO: copy across tools and models (core)
 # TODO: validate with tests
-# TODO: write MakeFile (or dev readme)
+# TODO: write MakeFile (or use tox)
 
 import ast
 import inspect
