@@ -15,9 +15,11 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: copy across tests into tests directory and set up pytest
 # DONE: set up tox (see https://tox.readthedocs.io/en/latest/index.html) for pytest
 # DONE: set up tox for sphinx docs (see https://tox.readthedocs.io/en/latest/example/documentation.html and https://github.com/pallets/click/blob/7.x/tox.ini)
-# TODO: set up dist target (make?)
 # TODO: copy across tools and models (core)
 # TODO: validate with tests
+# TODO: set up tox for docs/usage
+# TODO: set up tox for docs/demos
+# TODO: set up dist target (make?)
 # TODO: write MakeFile (or use tox)
 
 import ast
