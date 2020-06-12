@@ -15,12 +15,22 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: copy across tests into tests directory and set up pytest
 # DONE: set up tox (see https://tox.readthedocs.io/en/latest/index.html) for pytest
 # DONE: set up tox for sphinx docs (see https://tox.readthedocs.io/en/latest/example/documentation.html and https://github.com/pallets/click/blob/7.x/tox.ini)
-# TODO: copy across tools and models (core)
+# DONE: copy across tools and models
+# DONE: copy across core tests
+# TODO: copy across model tests
 # TODO: validate with tests
 # TODO: set up tox for docs/usage
 # TODO: set up tox for docs/demos
+# TODO: update docs for restricted models
 # TODO: set up dist target (make?)
-# TODO: write MakeFile (or use tox)
+# TODO: write MakeFile (or use tox and doc)
+# TODO: update docs for installation
+# TODO: create qecsim-dev repo
+# TODO: create qecsim-example repo
+# TODO: update doc to reference qecsim-example
+# TODO: choose licence
+# TODO: finalize setup.cfg with meta-data and versions
+# TODO: test upload to PyPI
 
 import ast
 import inspect
