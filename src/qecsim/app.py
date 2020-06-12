@@ -15,9 +15,6 @@ from qecsim import paulitools as pt
 logger = logging.getLogger(__name__)
 
 
-# TODO: consider removing public run_once and run_once_ftp methods here and in tests / demos.
-
-
 def _run_once(mode, code, time_steps, error_model, decoder, error_probability, measurement_error_probability, rng):
     """Implements run_once and run_once_ftp functions"""
 

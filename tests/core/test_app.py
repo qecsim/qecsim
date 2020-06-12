@@ -68,15 +68,6 @@ def test_run_once(code, error_model, decoder):
         assert key in data, 'data={} does not contain key={}'.format(data, key)
 
 
-@pytest.mark.parametrize('error_probability', [
-    -0.1, 1.1,
-])
-def test_run_once_invalid_parameters(error_probability):
-    with pytest.raises(ValueError) as exc_info:
-        app.run_once(FiveQubitCode(), DepolarizingErrorModel(), NaiveDecoder(), error_probability)
-    print(exc_info)
-
-
 def test_run_once_seeded():
     code = PlanarCode(5, 5)
     error_model = DepolarizingErrorModel()
@@ -85,6 +76,15 @@ def test_run_once_seeded():
     data1 = app.run_once(code, error_model, decoder, error_probability, rng=np.random.default_rng(5))
     data2 = app.run_once(code, error_model, decoder, error_probability, rng=np.random.default_rng(5))
     assert data1 == data2, 'Identically seeded runs are not the same. '
+
+
+@pytest.mark.parametrize('error_probability', [
+    -0.1, 1.1,
+])
+def test_run_once_invalid_parameters(error_probability):
+    with pytest.raises(ValueError) as exc_info:
+        app.run_once(FiveQubitCode(), DepolarizingErrorModel(), NaiveDecoder(), error_probability)
+    print(exc_info)
 
 
 @pytest.mark.parametrize('code, time_steps, error_model, decoder, error_probability, measurement_error_probability', [
@@ -125,12 +125,13 @@ def test_run_once_ftp_invalid_parameters(time_steps, error_probability, measurem
     print(exc_info)
 
 
-@pytest.mark.parametrize('code, error_model, decoder, error_probability, max_runs', [
-    (PlanarCode(5, 5), DepolarizingErrorModel(), PlanarMPSDecoder(chi=6), 0.15, 5),
-    (ToricCode(5, 5), DepolarizingErrorModel(), ToricMWPMDecoder(), 0.15, 5),
-    # TODO:
+@pytest.mark.parametrize('code, error_model, decoder', [
+    (Color666Code(5), DepolarizingErrorModel(), Color666MPSDecoder(chi=8)),
+    (FiveQubitCode(), DepolarizingErrorModel(), NaiveDecoder()),
 ])
-def test_run_all_models(code, error_model, decoder, error_probability, max_runs):
+def test_run(code, error_model, decoder):
+    error_probability = 0.15
+    max_runs = 2
     data = app.run(code, error_model, decoder, error_probability, max_runs)  # no error raised
     expected_keys = {'code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
                      'measurement_error_probability', 'n_run', 'n_success', 'n_fail', 'error_weight_total',
@@ -147,14 +148,19 @@ def test_run_all_models(code, error_model, decoder, error_probability, max_runs)
     assert data['logical_failure_rate'] == data['n_fail'] / data['n_run']
 
 
-@pytest.mark.parametrize('code, error_model, decoder, error_probability, max_runs, max_failures', [
-    (FiveQubitCode(), BitPhaseFlipErrorModel(), NaiveDecoder(), 0.05, None, None),
-    (FiveQubitCode(), BitPhaseFlipErrorModel(), NaiveDecoder(), 0.05, 10, None),
-    (FiveQubitCode(), BitPhaseFlipErrorModel(), NaiveDecoder(), 0.05, None, 2),
-    (FiveQubitCode(), BitPhaseFlipErrorModel(), NaiveDecoder(), 0.05, 10, 2),
+@pytest.mark.parametrize('max_runs, max_failures', [
+    (None, None),
+    (10, None),
+    (None, 2),
+    (10, 2),
 ])
-def test_run_count(code, error_model, decoder, error_probability, max_runs, max_failures):
-    data = app.run(code, error_model, decoder, error_probability, max_runs, max_failures)  # no error raised
+def test_run_count(max_runs, max_failures):
+    code = FiveQubitCode()
+    error_model = BitPhaseFlipErrorModel()
+    decoder = NaiveDecoder()
+    error_probability = 0.05
+    data = app.run(code, error_model, decoder, error_probability,
+                   max_runs=max_runs, max_failures=max_failures)  # no error raised
     for key in ('n_run', 'n_fail'):
         assert key in data, 'data={} does not contain key={}'.format(data, key)
     if max_runs is None and max_failures is None:
@@ -207,12 +213,13 @@ def test_run_physical_error_rate(code, error_model, decoder, error_probability):
         'physical_error_rate={} is not within 1 std={} of error_probability={}'.format(p_rate, p_std, e_prob))
 
 
-@pytest.mark.parametrize('code, time_steps, error_model, decoder, error_probability, max_runs', [
-    (RotatedPlanarCode(7, 7), 7, BitPhaseFlipErrorModel(), RotatedPlanarSMWPMDecoder(), 0.45, 5),
-    (RotatedToricCode(6, 6), 6, BitPhaseFlipErrorModel(), RotatedToricSMWPMDecoder(), 0.45, 5),
-    # TODO:
+@pytest.mark.parametrize('code, time_steps, error_model, decoder', [
+    (RotatedPlanarCode(7, 7), 7, BitPhaseFlipErrorModel(), RotatedPlanarSMWPMDecoder()),
+    (RotatedToricCode(6, 6), 6, BitPhaseFlipErrorModel(), RotatedToricSMWPMDecoder()),
 ])
-def test_run_ftp_all_models(code, time_steps, error_model, decoder, error_probability, max_runs):
+def test_run_ftp(code, time_steps, error_model, decoder):
+    error_probability = 0.15
+    max_runs = 2
     data = app.run_ftp(code, time_steps, error_model, decoder, error_probability, max_runs=max_runs)
     expected_keys = {'code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
                      'measurement_error_probability', 'n_run', 'n_success', 'n_fail', 'error_weight_total',
@@ -229,8 +236,28 @@ def test_run_ftp_all_models(code, time_steps, error_model, decoder, error_probab
     assert data['logical_failure_rate'] == data['n_fail'] / data['n_run']
 
 
-def test_run_ftp_count():
-    assert False  # TODO
+@pytest.mark.parametrize('max_runs, max_failures', [
+    (None, None),
+    (10, None),
+    (None, 2),
+    (10, 2),
+])
+def test_run_ftp_count(max_runs, max_failures):
+    code = RotatedToricCode(6, 6)
+    time_steps = 6
+    error_model = BitPhaseFlipErrorModel()
+    decoder = RotatedToricSMWPMDecoder()
+    error_probability = 0.05
+    data = app.run_ftp(code, time_steps, error_model, decoder, error_probability,
+                       max_runs=max_runs, max_failures=max_failures)  # no error raised
+    for key in ('n_run', 'n_fail'):
+        assert key in data, 'data={} does not contain key={}'.format(data, key)
+    if max_runs is None and max_failures is None:
+        assert data['n_run'] == 1, 'n_run does not equal 1 when max_runs and max_failures unspecified'
+    if max_runs is not None:
+        assert data['n_run'] <= max_runs, ('n_run is not <= requested max_runs (data={}).'.format(data))
+    if max_failures is not None:
+        assert data['n_fail'] <= max_failures, ('n_fail is not <= requested max_failures (data={}).'.format(data))
 
 
 @pytest.mark.parametrize('time_steps, error_probability, measurement_error_probability, expected', [
