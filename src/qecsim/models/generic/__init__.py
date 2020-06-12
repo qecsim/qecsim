@@ -8,8 +8,8 @@ from ._simpleerrormodel import BitFlipErrorModel
 from ._simpleerrormodel import BitPhaseFlipErrorModel
 from ._simpleerrormodel import DepolarizingErrorModel
 from ._simpleerrormodel import PhaseFlipErrorModel
-# from ._biasederrormodel import BiasedDepolarizingErrorModel
-# from ._biasederrormodel import BiasedYXErrorModel
-# from ._fileerrormodel import FileErrorModel
+from ._biasederrormodel import BiasedDepolarizingErrorModel
+from ._biasederrormodel import BiasedYXErrorModel
+from ._fileerrormodel import FileErrorModel
 from ._naivedecoder import NaiveDecoder
-# from ._sliceerrormodel import CenterSliceErrorModel
+from ._sliceerrormodel import CenterSliceErrorModel

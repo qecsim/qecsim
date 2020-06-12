@@ -15,6 +15,9 @@ from qecsim import paulitools as pt
 logger = logging.getLogger(__name__)
 
 
+# TODO: consider removing public run_once and run_once_ftp methods here and in tests / demos.
+
+
 def _run_once(mode, code, time_steps, error_model, decoder, error_probability, measurement_error_probability, rng):
     """Implements run_once and run_once_ftp functions"""
 
@@ -170,6 +173,7 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
     :type rng: numpy.random.Generator
     :return: error_weight and success flag.
     :rtype: dict
+    :raises ValueError: if error_probability is not in [0, 1].
     """
 
     # validate parameters
@@ -251,6 +255,9 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability, meas
     :type rng: numpy.random.Generator
     :return: error_weight and success flag.
     :rtype: dict
+    :raises ValueError: if time_steps is not >= 1.
+    :raises ValueError: if error_probability is not in [0, 1].
+    :raises ValueError: if measurement_error_probability is not None or in [0, 1].
     """
 
     # validate parameters
@@ -464,8 +471,8 @@ def run_ftp(code, time_steps, error_model, decoder, error_probability,
     :type random_seed: int
     :return: Aggregated runs data.
     :rtype: dict
-    :raises ValueError: if error_probability is not in [0, 1].
     :raises ValueError: if time_steps is not >= 1.
+    :raises ValueError: if error_probability is not in [0, 1].
     :raises ValueError: if measurement_error_probability is not None or in [0, 1].
     """
 
