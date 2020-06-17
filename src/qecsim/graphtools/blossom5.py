@@ -41,7 +41,7 @@ def _libpypm():
     lib.infty.argtypes = None
     lib.infty.restype = ctypes.c_int
     lib.mwpm.argtypes = (ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.c_int, ctypes.POINTER(ctypes.c_int),
-                              ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
+                         ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
     lib.mwpm.restype = None
     return lib
 
