@@ -1,0 +1,8 @@
+{"probability": 0.4}
+{"label": "Biased (bias=10)"}
+{"probability_distribution": [0.6, 0.018181818181818184, 0.36363636363636365, 0.018181818181818184]}
+// The following extra header is invalid (starts with double underscore)
+{"_bias": 10}
+
+["f380", 10]
+["2940", 10]

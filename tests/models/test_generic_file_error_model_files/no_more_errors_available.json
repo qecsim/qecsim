@@ -1,0 +1,7 @@
+{"probability": 0.4}
+{"label": "Biased (bias=10)"}
+
+{"probability_distribution":  [0.25,0.25,0.25,0.25]}
+
+["2940", 10]
+["ce00", 10]

@@ -1,0 +1,29 @@
+// Comment lines start with //; comment lines are ignored.
+// Blank lines are also ignored.
+// Non-comment lines are JSON-encoded per line.
+//
+// Header lines are JSON objects containing one or more keys.
+// A dictionary is built from header lines; if keys are repeated across header lines then an exception is raised.
+// The following header key is required; it gives the marginal error probability per qubit.
+{"probability": 0.4}
+// The following header key is required; it identifies the algorithm/parameters used to generate the errors.
+{"label": "Biased (bias=10)"}
+// The following header key is desirable; it gives the (I, X, Y, Z) marginal probability distribution per qubit.
+{"probability_distribution": [0.6, 0.018181818181818184, 0.36363636363636365, 0.018181818181818184]}
+// Additional header keys are optional; they are added as properties to the error model.
+{"bias": 10}
+// All header lines must appear before body lines.
+//
+// Body lines are JSON lists containing a single error per line.
+// Each error unpacked using qecsim.paulitools.unpack into a NumPy array in binary symplectic form.
+// (The following errors are suitable for the qecsim.models.basic.FiveQubitCode)
+["f380", 10]
+["2940", 10]
+["ce00", 10]
+["7bc0", 10]
+["8400", 10]
+["5280", 10]
+["1080", 10]
+["d680", 10]
+["4a40", 10]
+["4a40", 10]
