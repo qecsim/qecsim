@@ -16,6 +16,7 @@ extensions = [
     'sphinx.ext.mathjax',
     # 'sphinx.ext.viewcode', # adds links to Python source code
     # 'sphinx.ext.intersphinx', # adds links to other sphinx docs
+    'sphinx_autorun',
 ]
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

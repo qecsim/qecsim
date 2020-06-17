@@ -20,7 +20,7 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: copy across model tests
 # DONE: reformat all code
 # DONE: validate with tests
-# TODO: set up tox for docs/usage
+# DONE: set up tox for docs/usage
 # TODO: set up tox for docs/demos
 # TODO: update docs for restricted models
 # TODO: set up dist target (make?)
