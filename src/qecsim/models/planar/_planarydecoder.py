@@ -7,7 +7,6 @@ import random
 
 import numpy as np
 from mpmath import mp
-
 from qecsim import paulitools as pt
 from qecsim import util
 from qecsim.error import QecsimException

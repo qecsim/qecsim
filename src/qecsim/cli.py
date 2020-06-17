@@ -41,39 +41,10 @@ import re
 
 import click
 import pkg_resources
-
 import qecsim
 from qecsim import app
 from qecsim import util
 from qecsim.model import ATTR_CLI_DESCRIPTION
-from qecsim.models.basic import FiveQubitCode, SteaneCode
-# from qecsim.models.color import Color666Code
-# from qecsim.models.color import Color666MPSDecoder
-# from qecsim.models.generic import BiasedDepolarizingErrorModel
-# from qecsim.models.generic import BiasedYXErrorModel
-from qecsim.models.generic import BitFlipErrorModel
-from qecsim.models.generic import BitPhaseFlipErrorModel
-# from qecsim.models.generic import CenterSliceErrorModel
-from qecsim.models.generic import DepolarizingErrorModel
-# from qecsim.models.generic import FileErrorModel
-from qecsim.models.generic import NaiveDecoder
-from qecsim.models.generic import PhaseFlipErrorModel
-
-# from qecsim.models.planar import PlanarAFCXErrorModel, PlanarAFCXDecoder
-# from qecsim.models.planar import PlanarAVCXErrorModel, PlanarAVCXDecoder
-# from qecsim.models.planar import PlanarCMWPMDecoder, PlanarMWPMDecoder
-# from qecsim.models.planar import PlanarCode
-# from qecsim.models.planar import PlanarMPSDecoder, PlanarRMPSDecoder
-# from qecsim.models.planar import PlanarYDecoder
-# from qecsim.models.rotatedplanar import RotatedPlanarCode
-# from qecsim.models.rotatedplanar import RotatedPlanarMPSDecoder, RotatedPlanarRMPSDecoder
-# from qecsim.models.rotatedplanar import RotatedPlanarSMWPMDecoder
-# from qecsim.models.rotatedplanarxz import RotatedPlanarXZCode
-# from qecsim.models.rotatedplanarxz import RotatedPlanarXZRMPSDecoder
-# from qecsim.models.rotatedtoric import RotatedToricCode
-# from qecsim.models.rotatedtoric import RotatedToricSMWPMDecoder
-# from qecsim.models.toric import ToricCode
-# from qecsim.models.toric import ToricMWPMDecoder
 
 logger = logging.getLogger(__name__)
 
@@ -165,50 +136,6 @@ class _ConstructorParamType(click.ParamType):
     def __repr__(self):
         return '{}({!r})'.format(type(self).__name__, self._constructors)
 
-
-# custom param types
-# _CODE_PARAMETER = _ConstructorParamType({
-#     # add new codes here mapping name -> constructor
-#     # 'color666': Color666Code,
-#     'five_qubit': FiveQubitCode,
-#     'steane': SteaneCode,
-#     # 'planar': PlanarCode,
-#     # 'rotated_planar': RotatedPlanarCode,
-#     # 'rotated_planar_xz': RotatedPlanarXZCode,
-#     # 'rotated_toric': RotatedToricCode,
-#     # 'toric': ToricCode,
-# })
-# _ERROR_MODEL_PARAMETER = _ConstructorParamType({
-#     # add new error_models here mapping name -> constructor
-#     'generic.depolarizing': DepolarizingErrorModel,
-#     'generic.bit_flip': BitFlipErrorModel,
-#     'generic.phase_flip': PhaseFlipErrorModel,
-#     'generic.bit_phase_flip': BitPhaseFlipErrorModel,
-#     # 'generic.biased_depolarizing': BiasedDepolarizingErrorModel,
-#     # 'generic.biased_y_x': BiasedYXErrorModel,
-#     # 'generic.file': FileErrorModel,
-#     # 'generic.center_slice': CenterSliceErrorModel,
-#     # 'planar.afcx': PlanarAFCXErrorModel,
-#     # 'planar.avcx': PlanarAVCXErrorModel,
-# })
-# _DECODER_PARAMETER = _ConstructorParamType({
-#     # add new decoders here mapping name -> constructor
-#     # 'color666.mps': Color666MPSDecoder,
-#     'generic.naive': NaiveDecoder,
-#     # 'planar.afcx': PlanarAFCXDecoder,
-#     # 'planar.avcx': PlanarAVCXDecoder,
-#     # 'planar.cmwpm': PlanarCMWPMDecoder,
-#     # 'planar.mps': PlanarMPSDecoder,
-#     # 'planar.mwpm': PlanarMWPMDecoder,
-#     # 'planar.rmps': PlanarRMPSDecoder,
-#     # 'planar.y': PlanarYDecoder,
-#     # 'rotated_planar.mps': RotatedPlanarMPSDecoder,
-#     # 'rotated_planar.rmps': RotatedPlanarRMPSDecoder,
-#     # 'rotated_planar.smwpm': RotatedPlanarSMWPMDecoder,
-#     # 'rotated_planar_xz.rmps': RotatedPlanarXZRMPSDecoder,
-#     # 'rotated_toric.smwpm': RotatedToricSMWPMDecoder,
-#     # 'toric.mwpm': ToricMWPMDecoder,
-# })
 
 # custom argument decorators
 def _model_argument(model_type):
@@ -358,29 +285,6 @@ def run(code, error_model, decoder, error_probabilities, max_failures, max_runs,
         except IOError as ex:
             logger.error('recovered data:\n{}'.format(json.dumps(data, sort_keys=True)))
             raise click.ClickException('{} (failed to open output file "{}")'.format(output, ex))
-
-
-# custom FT param types
-_FTP_CODE_PARAMETER = _ConstructorParamType({
-    # add new codes here mapping name -> constructor
-    # 'rotated_planar': RotatedPlanarCode,
-    # 'rotated_toric': RotatedToricCode,
-})
-_FTP_ERROR_MODEL_PARAMETER = _ConstructorParamType({
-    # add new error_models here mapping name -> constructor
-    'generic.depolarizing': DepolarizingErrorModel,
-    'generic.bit_flip': BitFlipErrorModel,
-    'generic.phase_flip': PhaseFlipErrorModel,
-    'generic.bit_phase_flip': BitPhaseFlipErrorModel,
-    # 'generic.biased_depolarizing': BiasedDepolarizingErrorModel,
-    # 'generic.biased_y_x': BiasedYXErrorModel,
-    # 'generic.center_slice': CenterSliceErrorModel,
-})
-_FTP_DECODER_PARAMETER = _ConstructorParamType({
-    # add new decoders here mapping name -> constructor
-    # 'rotated_planar.smwpm': RotatedPlanarSMWPMDecoder,
-    # 'rotated_toric.smwpm': RotatedToricSMWPMDecoder,
-})
 
 
 @cli.command()

@@ -5,7 +5,6 @@ import math
 from collections import OrderedDict
 
 import numpy as np
-
 from qecsim import graphtools as gt
 from qecsim import paulitools as pt
 from qecsim.error import QecsimException

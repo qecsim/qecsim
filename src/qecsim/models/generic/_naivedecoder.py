@@ -1,7 +1,6 @@
 import operator
 
 import numpy as np
-
 from qecsim import paulitools as pt
 from qecsim.model import Decoder, cli_description
 

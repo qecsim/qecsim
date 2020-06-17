@@ -3,7 +3,6 @@ import itertools
 import operator
 
 import numpy as np
-
 from qecsim.model import StabilizerCode, cli_description
 from qecsim.models.color import Color666Pauli
 

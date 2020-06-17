@@ -1,7 +1,6 @@
 import functools
 
 import numpy as np
-
 from qecsim.error import QecsimException
 from qecsim.model import cli_description
 from qecsim.models.generic import SimpleErrorModel

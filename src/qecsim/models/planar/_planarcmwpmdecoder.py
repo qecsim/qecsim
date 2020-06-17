@@ -4,7 +4,6 @@ import logging
 import operator
 
 import numpy as np
-
 from qecsim import graphtools as gt
 from qecsim import paulitools as pt
 from qecsim.model import Decoder, cli_description
