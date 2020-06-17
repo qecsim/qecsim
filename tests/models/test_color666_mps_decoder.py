@@ -4,7 +4,6 @@ import logging
 import numpy as np
 import pytest
 from mpmath import mp
-
 from qecsim import paulitools as pt
 from qecsim.models.color import Color666Code, Color666MPSDecoder
 from qecsim.models.generic import BiasedDepolarizingErrorModel, DepolarizingErrorModel

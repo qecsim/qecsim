@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
-
+from qecsim.models.basic import FiveQubitCode
 from qecsim.models.generic import BiasedDepolarizingErrorModel, BiasedYXErrorModel
 from qecsim.models.generic import BitFlipErrorModel, DepolarizingErrorModel
-from qecsim.models.basic import FiveQubitCode
 
 
 # biased-depolarizing

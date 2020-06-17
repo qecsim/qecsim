@@ -5,7 +5,6 @@ import time
 import numpy as np
 import pytest
 from mpmath import mp
-
 from qecsim import paulitools as pt
 from qecsim.models.generic import DepolarizingErrorModel, BiasedDepolarizingErrorModel
 from qecsim.models.rotatedplanar import RotatedPlanarCode, RotatedPlanarRMPSDecoder

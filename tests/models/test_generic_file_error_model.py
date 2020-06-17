@@ -4,11 +4,10 @@ import os
 import numpy as np
 import pytest
 from click.testing import CliRunner  # use for isolated_filesystem feature
-
 from qecsim import app
 from qecsim import paulitools as pt
-from qecsim.models.generic import FileErrorModel
 from qecsim.models.basic import FiveQubitCode
+from qecsim.models.generic import FileErrorModel
 from qecsim.models.rotatedplanar import RotatedPlanarCode, RotatedPlanarMPSDecoder
 
 FILES_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_generic_file_error_model_files')

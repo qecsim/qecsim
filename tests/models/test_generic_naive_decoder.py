@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
-
 from qecsim import paulitools as pt
-from qecsim.models.generic import NaiveDecoder
 from qecsim.models.basic import FiveQubitCode, SteaneCode
+from qecsim.models.generic import NaiveDecoder
 
 
 def test_naive_decoder_properties():

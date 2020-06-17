@@ -1,12 +1,11 @@
 import numpy as np
-
 from qecsim import paulitools as pt
+from qecsim.models.basic import FiveQubitCode
 from qecsim.models.generic import BitFlipErrorModel
 from qecsim.models.generic import BitPhaseFlipErrorModel
 from qecsim.models.generic import DepolarizingErrorModel
 from qecsim.models.generic import PhaseFlipErrorModel
 from qecsim.models.generic import SimpleErrorModel
-from qecsim.models.basic import FiveQubitCode
 
 
 def test_generic_error_model_properties():
