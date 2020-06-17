@@ -17,7 +17,8 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: set up tox for sphinx docs (see https://tox.readthedocs.io/en/latest/example/documentation.html and https://github.com/pallets/click/blob/7.x/tox.ini)
 # DONE: copy across tools and models
 # DONE: copy across core tests
-# TODO: copy across model tests
+# DONE: copy across model tests
+# TODO: reformat all code
 # TODO: validate with tests
 # TODO: set up tox for docs/usage
 # TODO: set up tox for docs/demos
