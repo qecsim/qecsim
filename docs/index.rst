@@ -14,6 +14,7 @@ Contents
 
    overview
    usage
+   demos
 
 
 Indices

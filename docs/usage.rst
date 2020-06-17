@@ -72,4 +72,4 @@ qecsim can be accessed as a library:
     >>> import qecsim
     >>> qecsim.__version__
 
-See doc:`demos` and doc:`api` for further information.
+See :doc:`demos` and doc:`api` for further information.
