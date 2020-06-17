@@ -95,14 +95,14 @@ def test_file_error_model_generate_skip_to_start():
 
 
 @pytest.mark.parametrize('filename', [
-    os.path.join(FILES_DIR, 'invalid_line1.json'),
-    os.path.join(FILES_DIR, 'invalid_line2.json'),
-    os.path.join(FILES_DIR, 'invalid_line3.json'),
-    os.path.join(FILES_DIR, 'repeated_dic_key.json'),
-    os.path.join(FILES_DIR, 'invalid_structure1.json'),
-    os.path.join(FILES_DIR, 'invalid_structure2.json'),
-    os.path.join(FILES_DIR, 'no_prob_in_header.json'),
-    os.path.join(FILES_DIR, 'no_label_in_header.json'),
+    os.path.join(FILES_DIR, 'invalid_line1.jsonl'),
+    os.path.join(FILES_DIR, 'invalid_line2.jsonl'),
+    os.path.join(FILES_DIR, 'invalid_line3.jsonl'),
+    os.path.join(FILES_DIR, 'repeated_dic_key.jsonl'),
+    os.path.join(FILES_DIR, 'invalid_structure1.jsonl'),
+    os.path.join(FILES_DIR, 'invalid_structure2.jsonl'),
+    os.path.join(FILES_DIR, 'no_prob_in_header.jsonl'),
+    os.path.join(FILES_DIR, 'no_label_in_header.jsonl'),
 ])
 def test_file_error_model_invalid_file_header(filename):
     with pytest.raises(ValueError):
@@ -116,7 +116,7 @@ def test_file_error_model_probability_distribution_invalid_probability_parameter
 
 
 def test_file_error_model__probability_distribution_no_probability_distribution_in_header():
-    fem = FileErrorModel(os.path.join(FILES_DIR, 'no_probability_distribution.json'))
+    fem = FileErrorModel(os.path.join(FILES_DIR, 'no_probability_distribution.jsonl'))
     with pytest.raises(ValueError):
         fem.probability_distribution(0.4)
 
@@ -129,7 +129,7 @@ def test_file_error_model_generate_invalid_probability_parameter():
 
 
 def test_file_error_model_generate_invalid_error_lines():
-    fem = FileErrorModel(os.path.join(FILES_DIR, 'header_lines_after_body_lines.json'))
+    fem = FileErrorModel(os.path.join(FILES_DIR, 'header_lines_after_body_lines.jsonl'))
     fqc = FiveQubitCode()
     with pytest.raises(ValueError):
         fem.generate(fqc, 0.4)
@@ -137,7 +137,7 @@ def test_file_error_model_generate_invalid_error_lines():
 
 
 def test_file_error_model_generate_no_more_errors_available():
-    fem = FileErrorModel(os.path.join(FILES_DIR, 'no_more_errors_available.json'))
+    fem = FileErrorModel(os.path.join(FILES_DIR, 'no_more_errors_available.jsonl'))
     fqc = FiveQubitCode()
     with pytest.raises(EOFError):
         fem.generate(fqc, 0.4)
@@ -146,7 +146,7 @@ def test_file_error_model_generate_no_more_errors_available():
 
 
 def test_file_error_model_generate_no_more_errors_available_skip_to_start():
-    fem = FileErrorModel(os.path.join(FILES_DIR, 'no_more_errors_available.json'), 1)
+    fem = FileErrorModel(os.path.join(FILES_DIR, 'no_more_errors_available.jsonl'), 1)
     fqc = FiveQubitCode()
     with pytest.raises(EOFError):
         fem.generate(fqc, 0.4)
@@ -154,8 +154,8 @@ def test_file_error_model_generate_no_more_errors_available_skip_to_start():
 
 
 @pytest.mark.parametrize('filename', [
-    os.path.join(FILES_DIR, 'incorrect_length_in_packed_error.json'),
-    os.path.join(FILES_DIR, 'incorrect_length_in_packed_error2.json')
+    os.path.join(FILES_DIR, 'incorrect_length_in_packed_error.jsonl'),
+    os.path.join(FILES_DIR, 'incorrect_length_in_packed_error2.jsonl')
 ])
 def test_file_error_model_generate_incorrect_length_in_packed_error(filename):
     fem = FileErrorModel(filename)
@@ -168,13 +168,13 @@ def test_file_error_model_generate_incorrect_length_in_packed_error(filename):
 
 @pytest.mark.parametrize('code, filename, decoder', [
     (RotatedPlanarCode(5, 5),
-     os.path.join(FILES_DIR, 'rotated_planar_code_size_5_J_0.1_p_2.json'),
+     os.path.join(FILES_DIR, 'rotated_planar_code_size_5_J_0.1_p_2.jsonl'),
      RotatedPlanarMPSDecoder(chi=8)),
     (RotatedPlanarCode(5, 5),
-     os.path.join(FILES_DIR, 'rotated_planar_code_size_5_J_0.1_p_4.json'),
+     os.path.join(FILES_DIR, 'rotated_planar_code_size_5_J_0.1_p_4.jsonl'),
      RotatedPlanarMPSDecoder(chi=8)),
     (RotatedPlanarCode(5, 5),
-     os.path.join(FILES_DIR, 'rotated_planar_code_size_5_J_0.1_p_6.json'),
+     os.path.join(FILES_DIR, 'rotated_planar_code_size_5_J_0.1_p_6.jsonl'),
      RotatedPlanarMPSDecoder(chi=8)),
 ])
 def test_file_error_model_generated_sample_error_probability(code, filename, decoder):

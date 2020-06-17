@@ -38,7 +38,7 @@ def test_cli_invalid_arguments(arguments):
     ['-r9', 'five_qubit', 'generic.depolarizing', 'generic.naive', '0.1'],  # max_runs
     ['-f2', '-r9', 'toric(3,3)', 'generic.bit_flip', 'toric.mwpm', '0.1'],  # max_failures, max_runs
     ['-s5', 'toric(3,3)', 'generic.bit_flip', 'toric.mwpm', '0.1'],  # random_seed
-    ['-otmp_data.json', 'toric(3,3)', 'generic.bit_flip', 'toric.mwpm', '0.1'], # output_file
+    ['-otmp_data.json', 'toric(3,3)', 'generic.bit_flip', 'toric.mwpm', '0.1'],  # output_file
 ])
 def test_cli_run(arguments):
     runner = CliRunner()
@@ -65,7 +65,7 @@ def test_cli_run(arguments):
     ['-s4294967296', 'five_qubit', 'generic.depolarizing', 'generic.naive', '0.1'],  # invalid random_seed max
     ['five_qubit', 'generic.depolarizing', 'generic.naive', '1.1'],  # invalid error_probability
     ['five_qubit(-1)', 'generic.depolarizing', 'generic.naive', '0.1'],  # bad code args
-    ['five_qubit', 'generic.depolarizing(-1)', 'generic.naive', '0.1'], # bad error_model args
+    ['five_qubit', 'generic.depolarizing(-1)', 'generic.naive', '0.1'],  # bad error_model args
     ['five_qubit', 'generic.depolarizing', 'generic.naive(-1)', '0.1'],  # bad decoder args
 ])
 def test_cli_run_invalid_arguments(arguments):
@@ -168,7 +168,7 @@ def test_cli_run_ftp(arguments):
     ['-s4294967296', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'blah', '0.05'],  # invalid random_seed max
     ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '1.1'],  # invalid error_probability
     ['rotated_planar(-1)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.1'],  # bad code args
-    ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip(-1)', 'rotated_planar.smwpm', '0.1'], # bad error_model args
+    ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip(-1)', 'rotated_planar.smwpm', '0.1'],  # bad error_model args
     ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm(-1)', '0.1'],  # bad decoder args
 ])
 def test_cli_run_ftp_invalid_arguments(arguments):

@@ -36,7 +36,6 @@ from qecsim.models.toric import ToricMWPMDecoder
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 
-
 @pytest.mark.parametrize('code, error_model, decoder', [
     # each code with each valid decoder
     (Color666Code(5), DepolarizingErrorModel(), Color666MPSDecoder(chi=8)),
