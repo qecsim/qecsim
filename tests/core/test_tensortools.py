@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 from mpmath import mp
 from scipy import linalg as sp_linalg
-
 from qecsim import tensortools as tt
 from qecsim.models.color import Color666Code
 from qecsim.models.color import _color666mpsdecoder

@@ -1,7 +1,6 @@
 # Test basic CLI functionality to full coverage but attempting to not duplicate API tests where possible.
-from click.testing import CliRunner
-
 import pytest
+from click.testing import CliRunner
 from qecsim.cli import cli
 
 

@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 from click.testing import CliRunner  # use for isolated_filesystem feature
-
 from qecsim import util
 
 
