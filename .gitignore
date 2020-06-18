@@ -9,10 +9,11 @@ __pycache__
 ##tox
 /.tox/
 ##py.test
-/.cache/
+.cache/
 ##coverage
 /.coverage
-##sphinx
-/docs/_build/
 ##jupyter
-/.ipynb_checkpoints/
+.ipynb_checkpoints/
+##c++
+*.o
+*.so
