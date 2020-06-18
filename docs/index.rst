@@ -15,6 +15,7 @@ Contents
    overview
    usage
    demos
+   api
 
 
 Indices

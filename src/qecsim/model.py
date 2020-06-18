@@ -18,7 +18,7 @@ def cli_description(description):
 
     Notes:
 
-    * Adds the attribute `__qecsim_cli_desc` to the class with the value of the given description.
+    * Adds the attribute ``__qecsim_cli_desc`` to the class with the value of the given description.
     * The description is used by :mod:`qecsim.cli` to generate CLI help messages.
     * Typically it describes the model and parameters in a human-readable form; the model type (i.e. code, error model,
       decoder) is not included.
