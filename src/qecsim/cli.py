@@ -27,6 +27,8 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # TODO: validate plot demos using notebook
 # DONE: add api docs models (compare model v. others)
 # DONE: update overview docs for restricted models
+# TODO: set up tox for test coverage
+# TODO: set up tox for doc coverage
 # TODO: set up dist target (make?)
 # TODO: write MakeFile (or use tox and doc)
 # TODO: update docs for installation
