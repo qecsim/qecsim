@@ -1,5 +1,5 @@
 """
-This module contains base classes relevant to simulating stabilizer codes.
+This module contains base classes relevant to simulating stabilizer codes and a CLI description class decorator.
 """
 
 import abc

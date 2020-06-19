@@ -1,29 +1,30 @@
 model: abstract base classes
 ============================
 
-.. currentmodule:: qecsim.model
-
-.. autosummary::
-    :nosignatures:
-
-    StabilizerCode
-    ErrorModel
-    Decoder
-    DecoderFTP
-    cli_description
-
+``qecsim.model``
+----------------
 .. automodule:: qecsim.model
 
-.. autoclass:: StabilizerCode
+``qecsim.model.StabilizerCode``
+-------------------------------
+.. autoclass:: qecsim.model.StabilizerCode
     :members:
 
-.. autoclass:: ErrorModel
+``qecsim.model.ErrorModel``
+---------------------------
+.. autoclass:: qecsim.model.ErrorModel
     :members:
 
-.. autoclass:: Decoder
+``qecsim.model.Decoder``
+------------------------
+.. autoclass:: qecsim.model.Decoder
     :members:
 
-.. autoclass:: DecoderFTP
+``qecsim.model.DecoderFTP``
+---------------------------
+.. autoclass:: qecsim.model.DecoderFTP
     :members:
 
+``qecsim.model.cli_description``
+--------------------------------
 .. autodecorator:: cli_description

@@ -12,7 +12,6 @@ release = qecsim.__version__
 
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     # 'sphinx.ext.viewcode', # adds links to Python source code
@@ -30,7 +29,7 @@ html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
     # Toc options
-    'navigation_depth': 2,
+    'navigation_depth': 3,
     # 'titles_only': False,
 }
 

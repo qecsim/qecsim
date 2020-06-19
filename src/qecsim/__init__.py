@@ -84,12 +84,11 @@ Implementations
 
 Stablizer code implementations include:
 
--   Color 6.6.6 code :class:`qecsim.models.color.Color666Code`
 -   5-qubit code :class:`qecsim.models.basic.FiveQubitCode`
 -   7-qubit Steane code :class:`qecsim.models.basic.SteaneCode`
+-   Color 6.6.6 code :class:`qecsim.models.color.Color666Code`
 -   Planar code :class:`qecsim.models.planar.PlanarCode`
 -   Rotated planar code :class:`qecsim.models.rotatedplanar.RotatedPlanarCode`
--   Rotated planar XZ code :class:`qecsim.models.rotatedplanarxz.RotatedPlanarXZCode`
 -   Rotated toric code :class:`qecsim.models.rotatedtoric.RotatedToricCode`
 -   Toric code :class:`qecsim.models.toric.ToricCode`
 
@@ -103,16 +102,12 @@ Error model implementations include:
 -   Depolarizing error model :class:`qecsim.models.generic.DepolarizingErrorModel`
 -   File error model :class:`qecsim.models.generic.FileErrorModel`
 -   Phase-flip error model :class:`qecsim.models.generic.PhaseFlipErrorModel`
--   Planar Across-Face-Correlated bit-flip error model :class:`qecsim.models.planar.PlanarAFCXErrorModel`
--   Planar Across-Vertex-Correlated bit-flip error model :class:`qecsim.models.planar.PlanarAVCXErrorModel`
 
 Decoder implementations include:
 
 -   Color 6.6.6 MPS decoder :class:`qecsim.models.color.Color666MPSDecoder`
 -   Naive decoder :class:`qecsim.models.generic.NaiveDecoder`
 -   Planar Converging MWPM decoder :class:`qecsim.models.planar.PlanarCMWPMDecoder`
--   Planar Across-Face-Correlated bit-flip decoder :class:`qecsim.models.planar.PlanarAFCXDecoder`
--   Planar Across-Vertex-Correlated bit-flip decoder :class:`qecsim.models.planar.PlanarAVCXDecoder`
 -   Planar MPS decoder :class:`qecsim.models.planar.PlanarMPSDecoder`
 -   Planar MWPM decoder :class:`qecsim.models.planar.PlanarMWPMDecoder`
 -   Planar Rotated MPS decoder :class:`qecsim.models.planar.PlanarRMPSDecoder`
@@ -120,7 +115,6 @@ Decoder implementations include:
 -   Rotated planar MPS decoder :class:`qecsim.models.rotatedplanar.RotatedPlanarMPSDecoder`
 -   Rotated planar Rotated MPS decoder :class:`qecsim.models.rotatedplanar.RotatedPlanarRMPSDecoder`
 -   Rotated planar Symmetry MWPM decoder :class:`qecsim.models.rotatedplanar.RotatedPlanarSMWPMDecoder`
--   Rotated planar XZ Rotated MPS decoder :class:`qecsim.models.rotatedplanarxz.RotatedPlanarXZRMPSDecoder`
 -   Rotated toric Symmetry MWPM decoder :class:`qecsim.models.rotatedtoric.RotatedToricSMWPMDecoder`
 -   Toric MWPM decoder :class:`qecsim.models.toric.ToricMWPMDecoder`
 
