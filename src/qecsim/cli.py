@@ -28,6 +28,7 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: add api docs models (compare model v. others)
 # DONE: update overview docs for restricted models
 # DONE: set up tox for test coverage
+# DONE: set up tox for lint flake8
 # TODO: set up dist target (make?)
 # TODO: write MakeFile (or use tox and doc)
 # TODO: update docs for installation
