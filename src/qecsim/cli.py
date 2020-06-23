@@ -30,7 +30,9 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: set up tox for test coverage
 # TODO: set up tox for lint flake8
 # DONE: set up tox for build
-# TODO: write MakeFile (or use tox and doc)
+# DONE: create docs zip in dist
+# DONE: document tox.ini
+# TODO: fix test deprecation warning
 # TODO: update docs for installation
 # TODO: create qecsim-dev repo
 # TODO: create qecsim-example repo
