@@ -66,7 +66,7 @@ def contract(tn, chi=None, tol=None, start=None, stop=None, step=None, mask=None
     :return: Contraction value
         (if partial contraction: Partially contracted tensor network as MPS/MPO, Multiplier)
     :rtype: mpmath.mpf
-        (if partial contraction: list of numpy.array (4d), mpmath.mpf)
+        (if partial contraction: numpy.array (1d) of numpy.array (4d), mpmath.mpf)
     :raises ValueError: if pairwise-contracted MPS/MPOs do not contain a single contiguous list of tensors.
     :raises ValueError: if full contraction and final contraction value is not a scalar.
     """
@@ -84,8 +84,8 @@ def contract(tn, chi=None, tol=None, start=None, stop=None, step=None, mask=None
         # extract truncate mask for mps
         mps_mask = None if mask is None else mask[:, col]
         if col == col_range[0]:  # is_first_column
-            # assign (cast to list so final result is list as per documentation).
-            result = list(mps)
+            # assign
+            result = mps
         else:  # subsequent columns
             # pair correctly for slice direction
             left, right = (result, mps) if (step is None or step > 0) else (mps, result)
@@ -101,5 +101,10 @@ def contract(tn, chi=None, tol=None, start=None, stop=None, step=None, mask=None
         result = tt_tsr.as_scalar(result)
         return mult * result
     # otherwise return partial_contraction with multiplier
-    else:
+    if result is None or isinstance(result, np.ndarray):
         return result, mult
+    else:
+        # cast to np.array so final result is numpy.array as per documentation
+        np_result = np.empty(len(result), dtype=object)
+        np_result[:] = result  # we cannot simply do np.array(result) since that is recursive
+        return np_result, mult

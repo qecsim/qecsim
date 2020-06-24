@@ -550,16 +550,18 @@ def test_rotatedplanar_mps2d_contract(pauli):
     # note: for optimization we contract tn from left to left_stop as bra common to all cosets
     left_stop = ((tn.shape[1] - 1) // 2) - 1
     bra, bra_mult = tt.mps2d.contract(tn, stop=left_stop)
-    bra = [None] * tn.shape[0] if bra is None else bra
+    # empty bra if None
+    bra = np.full(tn.shape[0], None, dtype=object) if bra is None else bra
     print('len(bra)=', len(bra))
-    assert isinstance(bra, list), 'Partially contracted tensor network is not an np.array'
+    assert isinstance(bra, np.ndarray), 'Partially contracted tensor network is not an np.array'
     assert isinstance(bra_mult, mp.mpf), 'Partially contracted tensor network multiplier is not an mp.mpf'
     # note: for optimization we contract tn from right to right_stop as ket common to all cosets
     right_stop = left_stop + 2
     ket, ket_mult = tt.mps2d.contract(tn, start=-1, stop=right_stop, step=-1)
-    ket = [None] * tn.shape[0] if ket is None else ket
+    # empty ket if None
+    ket = np.full(tn.shape[0], None, dtype=object) if ket is None else ket
     print('len(ket)=', len(ket))
-    assert isinstance(ket, list), 'Partially contracted tensor network is not an np.array'
+    assert isinstance(ket, np.ndarray), 'Partially contracted tensor network is not an np.array'
     assert isinstance(ket_mult, mp.mpf), 'Partially contracted tensor network multiplier is not an mp.mpf'
     # stack bra, remaining tn and ket
     middle = tn[:, left_stop:right_stop + 1]
