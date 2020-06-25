@@ -36,9 +36,9 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: update docs for installation
 # TODO: update docs for logging configuration
 # TODO: update docs for C++ matching library
+# TODO: create qecsim-mwe repo
+# TODO: update doc to reference qecsim-mwe
 # TODO: create qecsim-dev repo
-# TODO: create qecsim-example repo
-# TODO: update doc to reference qecsim-example
 # TODO: choose licence
 # TODO: finalize setup.cfg with meta-data and versions
 # TODO: test upload to PyPI
