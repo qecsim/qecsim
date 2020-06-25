@@ -13,6 +13,7 @@ Contents
    :maxdepth: 2
 
    overview
+   installation
    usage
    demos
    api
