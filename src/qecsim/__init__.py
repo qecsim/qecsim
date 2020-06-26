@@ -121,4 +121,4 @@ Decoder implementations include:
 Further implementations can be added by extending the key abstract models.
 """
 
-__version__ = '1.0a1'
+__version__ = '1.0b1'
