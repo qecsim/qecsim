@@ -40,6 +40,7 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # TODO: update doc to reference qecsim-mwe
 # TODO: create qecsim-dev repo
 # TODO: choose licence
+# TODO: add readme
 # TODO: finalize setup.cfg with meta-data and versions
 # TODO: test upload to PyPI
 
