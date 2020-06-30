@@ -1,0 +1,8 @@
+# Include README
+include README.rst
+
+# Include license file
+include LICENSE
+
+# Include sample logging configuration
+include logging_qecsim.ini
