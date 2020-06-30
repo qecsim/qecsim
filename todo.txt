@@ -1,0 +1,40 @@
+# DONE: move qecsim into src directory (see https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure)
+# DONE: switch to setup.cfg (see click github)
+# DONE: copy across tests into tests directory and set up pytest
+# DONE: set up tox (see https://tox.readthedocs.io/en/latest/index.html) for pytest
+# DONE: set up tox for sphinx docs (see https://tox.readthedocs.io/en/latest/example/documentation.html and https://github.com/pallets/click/blob/7.x/tox.ini)
+# DONE: copy across tools and models
+# DONE: copy across core tests
+# DONE: copy across model tests
+# DONE: reformat all code
+# DONE: validate with tests
+# DONE: set up tox for docs/usage
+# DONE: set up tox for docs/demos
+# DONE: set up tox for notebook
+# DONE: validate run demos using notebook
+# DONE: validate plot demos using notebook
+# DONE: add api docs models (compare model v. others)
+# DONE: update overview docs for restricted models
+# DONE: set up tox for test coverage
+# TODO: set up tox for lint flake8
+# DONE: set up tox for build
+# DONE: create docs zip in dist
+# DONE: document tox.ini
+# DONE: fix test deprecation warning
+# DONE: update docs for installation
+# DONE: update docs for logging configuration
+# TODO: update docs for C++ matching library
+# DONE: add readme
+# DONE: create qecsimext repo
+# DONE: update doc to reference qecsimext
+# TODO: doc qecsimext
+# TODO: update qecsimext tox.ini and setup.cfg relative to qecsim versions
+# TODO: test on hpc
+# TODO: add qecsim@davidtuckett.com email alias
+# TODO: upload doc to davidtuckett.com/qit/qecsim/
+# TODO: choose licence (update setup.cfg license and classifiers)
+# TODO: finalize setup.cfg meta-data
+# TODO: test upload to PyPI
+# TODO: create qecsimdev repo
+# TODO: host documentation on readthedocs (update setup.cfg project_urls and README.rst)
+# TODO: set up issue tracker (update setup.cfg project_urls and README.rst)
