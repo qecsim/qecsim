@@ -27,8 +27,10 @@
 # DONE: add readme
 # DONE: create qecsimext repo
 # DONE: update doc to reference qecsimext
+# DONE: update qecsimext tox.ini and setup.cfg relative to qecsim versions
+# TODO: add license to doc
+# TODO: add acknowledgements to doc
 # TODO: doc qecsimext
-# TODO: update qecsimext tox.ini and setup.cfg relative to qecsim versions
 # TODO: test on hpc
 # TODO: add qecsim@davidtuckett.com email alias
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
