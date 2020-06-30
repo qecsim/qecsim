@@ -36,15 +36,18 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: update docs for installation
 # DONE: update docs for logging configuration
 # TODO: update docs for C++ matching library
-# TODO: create qecsim-mwe repo
-# TODO: update doc to reference qecsim-mwe
-# TODO: create qecsim-dev repo
 # DONE: add readme
+# DONE: create qecsimext repo
+# DONE: update doc to reference qecsimext
+# TODO: doc qecsimext
+# TODO: update qecsimext tox.ini and setup.cfg relative to qecsim versions
+# TODO: test on hpc
 # TODO: add qecsim@davidtuckett.com email alias
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
 # TODO: choose licence (add to setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
 # TODO: test upload to PyPI
+# TODO: create qecsimdev repo
 # TODO: host documentation on readthedocs (add to setup.cfg project_urls and README.rst)
 # TODO: set up issue tracker (add to setup.cfg project_urls)
 
