@@ -23,10 +23,10 @@ A nice way to install qecsim is using a virtual environment:
     $ source myvenv/bin/activate  # activate myvenv
     (myvenv) $ pip install qecsim  # install qecsim
     ...
-    Successfully installed click-7.1.2 decorator-4.4.2 mpmath-1.1.0 networkx-2.4 numpy-1.19.0 qecsim-1.0a1 scipy-1.5.0
+    Successfully installed click-7.1.2 decorator-4.4.2 mpmath-1.1.0 networkx-2.4 numpy-1.19.0 qecsim-1.0b1 scipy-1.5.0
     (myvenv) $
     (myvenv) $ qecsim --version  # verify qecsim cli
-    qecsim, version 1.0a1
+    qecsim, version 1.0b1
     (myvenv) $ deactivate  # deactivate virtual environment
     $
 
