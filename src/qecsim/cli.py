@@ -44,12 +44,12 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # TODO: test on hpc
 # TODO: add qecsim@davidtuckett.com email alias
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
-# TODO: choose licence (add to setup.cfg license and classifiers)
+# TODO: choose licence (update setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
 # TODO: test upload to PyPI
 # TODO: create qecsimdev repo
-# TODO: host documentation on readthedocs (add to setup.cfg project_urls and README.rst)
-# TODO: set up issue tracker (add to setup.cfg project_urls)
+# TODO: host documentation on readthedocs (update setup.cfg project_urls and README.rst)
+# TODO: set up issue tracker (update setup.cfg project_urls and README.rst)
 
 import ast
 import inspect
