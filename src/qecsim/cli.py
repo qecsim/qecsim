@@ -34,7 +34,7 @@ _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, an
 # DONE: document tox.ini
 # DONE: fix test deprecation warning
 # DONE: update docs for installation
-# TODO: update docs for logging configuration
+# DONE: update docs for logging configuration
 # TODO: update docs for C++ matching library
 # TODO: create qecsim-mwe repo
 # TODO: update doc to reference qecsim-mwe
