@@ -1,8 +1,9 @@
 Usage
 =====
 
-qecsim includes a simple command line interface that provides access to all features. It can also be used as a library
-via the fully documented API.
+qecsim provides access to all features via a command-line interface. It can also be used as a library via the
+fully-documented API. It includes many common codes, error models and decoders and can be extended with additional
+components.
 
 Command-line
 ------------
@@ -44,4 +45,5 @@ qecsim can be accessed as a library:
 Extension
 ---------
 
-TODO
+qecsim can be extended with additional codes, error models and decoders that integrate into the command-line interface.
+See https://bitbucket.org/qecsim/qecsimext for a basic example.

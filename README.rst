@@ -3,8 +3,9 @@ qecsim
 
 **qecsim** is a Python 3 package for simulating quantum error correction using stabilizer codes.
 
-It includes many common codes, error models and decoders and can be extended with additional components.
-
+It provides access to all features via a command-line interface. It can also be used as a library via the
+fully-documented API. It includes many common codes, error models and decoders, and can be extended with additional
+components.
 
 Installation
 ------------
@@ -20,10 +21,6 @@ Install and update using `pip`_:
 
 Usage
 -----
-
-qecsim includes a simple command line interface that provides access to all features. It can also be used as a library
-via the fully documented API.
-
 
 CLI
 ~~~
@@ -52,8 +49,8 @@ API
 Extension
 ~~~~~~~~~
 
-See https://bitbucket.org/qecsim/qecsimext for a basic example demonstrating how qecsim can be extended with additional
-codes, error models and decoders that integrate into the command-line interface.
+qecsim can be extended with additional codes, error models and decoders that integrate into the command-line interface.
+See https://bitbucket.org/qecsim/qecsimext for a basic example.
 
 
 Links
