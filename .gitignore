@@ -6,6 +6,7 @@ __pycache__
 /venv/
 ##setuptools
 *.egg-info/
+/dist/
 ##tox
 /.tox/
 ##py.test
