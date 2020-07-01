@@ -50,15 +50,15 @@ Extension
 ~~~~~~~~~
 
 qecsim can be extended with additional codes, error models and decoders that integrate into the command-line interface.
-See https://bitbucket.org/qecsim/qecsimext for a basic example.
+See https://bitbucket.org/qecsim/qecsimext/ for a basic example.
 
 
 Links
 -----
 
-* Source code: https://bitbucket.org/qecsim/qecsim
+* Source code: https://bitbucket.org/qecsim/qecsim/
 * Documentation: http://davidtuckett.com/qit/qecsim/
-* Issue tracker: TODO
+* Issue tracker: https://bitbucket.org/qecsim/qecsim/issues
 * Releases: TODO
 * Contact: qecsim@gmail.com
 

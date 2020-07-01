@@ -46,4 +46,4 @@ Extension
 ---------
 
 qecsim can be extended with additional codes, error models and decoders that integrate into the command-line interface.
-See https://bitbucket.org/qecsim/qecsimext for a basic example.
+See https://bitbucket.org/qecsim/qecsimext/ for a basic example.
