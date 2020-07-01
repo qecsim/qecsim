@@ -30,7 +30,7 @@
 # DONE: update qecsimext tox.ini and setup.cfg relative to qecsim versions
 # TODO: add license to doc
 # TODO: add acknowledgements to doc
-# TODO: doc qecsimext
+# DONE: doc qecsimext
 # TODO: test on hpc
 # TODO: add project links to doc
 # TODO: add qecsim@davidtuckett.com email alias
@@ -39,5 +39,5 @@
 # TODO: finalize setup.cfg meta-data
 # TODO: test upload to PyPI
 # TODO: create qecsimdev repo
-# TODO: host documentation on readthedocs (update setup.cfg project_urls and README.rst)
-# TODO: set up issue tracker (update setup.cfg project_urls and README.rst)
+# TODO: host documentation on readthedocs (update setup.cfg project_urls, README.rst and doc)
+# TODO: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
