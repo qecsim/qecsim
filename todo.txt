@@ -32,6 +32,7 @@
 # TODO: add acknowledgements to doc
 # TODO: doc qecsimext
 # TODO: test on hpc
+# TODO: add project links to doc
 # TODO: add qecsim@davidtuckett.com email alias
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
 # TODO: choose licence (update setup.cfg license and classifiers)
