@@ -10,8 +10,9 @@ library dependency. When performance is not a concern, the python package Networ
 sufficient and is typically already installed as a qecsim dependency.
 
 The licence for Blossom V does not permit public redistribution of the code (see the original author's site for full
-details of the licence). Therefore, Blossom V is not packaged with qecsim.
-TODO: link to C++ library build instructions.
+details of the license). Therefore, Blossom V is not packaged with qecsim. See qecsim documentation linked from
+https://bitbucket.org/qecsim/qecsim/ for details on how to install Blossom V for use with qecsim in accordance with the
+license.
 
 The functions in this module assume the presence of a C++ library 'libpypm.so' in one of the locations searched by
 :func:`qecsim.util.load_clib`. All functions, except :func:`available` will fail with an OSError if the library cannot

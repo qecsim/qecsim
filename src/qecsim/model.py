@@ -9,7 +9,7 @@ import numpy as np
 from qecsim import paulitools as pt
 from qecsim.error import QecsimException
 
-ATTR_CLI_DESCRIPTION = '__qecsim_cli_desc'  # TODO: consider removing this
+ATTR_CLI_DESCRIPTION = '__qecsim_cli_desc'
 
 
 def cli_description(description):

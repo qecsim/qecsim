@@ -402,7 +402,7 @@ def test_color666_mps_functions():
         _color666mpsdecoder._create_q_node(prob_dist, ('I', None), 'e'),
         None,
     ]
-    expected = 0.47831585185185249  # TODO verify
+    expected = 0.47831585185185249
 
     # exact contraction for expected
     result = tt.mps.contract_pairwise(bra, mpo1)
