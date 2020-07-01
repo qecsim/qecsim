@@ -5,6 +5,7 @@ qecsim provides access to all features via a command-line interface. It can also
 fully-documented API. It includes many common codes, error models and decoders and can be extended with additional
 components.
 
+
 Command-line
 ------------
 
@@ -32,6 +33,7 @@ The ``run-ftp`` command runs fault-tolerant simulations according to :func:`qecs
 
     $ qecsim run-ftp --help
 
+
 Library
 -------
 
@@ -41,6 +43,7 @@ qecsim can be accessed as a library:
 
     >>> import qecsim
     >>> qecsim.__version__
+
 
 Extension
 ---------
