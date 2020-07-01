@@ -33,7 +33,7 @@
 # DONE: doc qecsimext
 # TODO: test on hpc
 # TODO: add project links to doc
-# TODO: add qecsim@davidtuckett.com email alias
+# DONE: create qecsim@gmail.com account
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
 # TODO: choose licence (update setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
