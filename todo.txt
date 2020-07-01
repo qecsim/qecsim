@@ -36,7 +36,7 @@
 # DONE: create qecsim@gmail.com account
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
-# TODO: choose licence (update setup.cfg license and classifiers)
+# TODO: choose licence (update doc and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
 # TODO: test upload to PyPI
 # TODO: create qecsimdev repo
