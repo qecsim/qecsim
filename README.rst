@@ -60,6 +60,7 @@ Links
 * Documentation: http://davidtuckett.com/qit/qecsim/
 * Issue tracker: TODO
 * Releases: TODO
+* Contact: qecsim@davidtuckett.com
 
 ----
 
