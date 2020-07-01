@@ -28,11 +28,11 @@
 # DONE: create qecsimext repo
 # DONE: update doc to reference qecsimext
 # DONE: update qecsimext tox.ini and setup.cfg relative to qecsim versions
+# DONE: add project links to doc
 # TODO: add license to doc
 # TODO: add acknowledgements to doc
 # DONE: doc qecsimext
 # TODO: test on hpc
-# TODO: add project links to doc
 # DONE: create qecsim@gmail.com account
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
