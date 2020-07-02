@@ -30,7 +30,7 @@
 # DONE: update qecsimext tox.ini and setup.cfg relative to qecsim versions
 # DONE: add project links to doc
 # DONE: add license to doc
-# TODO: add acknowledgements to doc
+# DONE: add acknowledgements to doc
 # DONE: doc qecsimext
 # TODO: test on hpc
 # DONE: create qecsim@gmail.com account
