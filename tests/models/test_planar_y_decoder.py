@@ -326,7 +326,7 @@ def test_planar_y_decoder_coset_probability_performance():
         run_time = time.time() - start_time
         print('run_time = {}'.format(run_time))
         # test to avoid regression
-        assert run_time < 6  # 5.423123121261597
+        assert run_time < 7  # 5.423123121261597
 
 
 @pytest.mark.parametrize('error_pauli', [

@@ -37,6 +37,7 @@
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
 # TODO: share with testers
 # TODO: set up tox for lint flake8
+# TODO: check tests on darwin, linux and windows
 # TODO: update docs for C++ matching library
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
