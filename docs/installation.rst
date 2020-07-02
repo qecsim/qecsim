@@ -46,6 +46,8 @@ where ``QECSIM_CFG`` is an environment variable and ``~`` indicates the current 
 logging configuration file is available here: :download:`logging_qecsim.ini <../logging_qecsim.ini>`
 
 
+.. _install_blossom:
+
 Fast matching library (optional)
 --------------------------------
 

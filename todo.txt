@@ -22,7 +22,6 @@
 # DONE: fix test deprecation warning
 # DONE: update docs for installation
 # DONE: update docs for logging configuration
-# TODO: update docs for C++ matching library
 # DONE: add readme
 # DONE: create qecsimext repo
 # DONE: update doc to reference qecsimext
@@ -38,6 +37,7 @@
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
 # TODO: share with testers
 # TODO: set up tox for lint flake8
+# TODO: update docs for C++ matching library
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
 # TODO: test upload to PyPI

@@ -1,8 +1,11 @@
 """
 This module contains the qecsim command line interface (CLI).
 
-New components are integrated into the CLI via entries in the ``[options.entry-points]`` section of ``setup.cfg``. The
-format of entries is ``<short_name> = <module_path>:<class_name>``.
+Components are integrated into the CLI via entries in the ``[options.entry-points]`` section of ``setup.cfg``. The
+format of entries is ``<short_name> = <module_path>:<class_name>``. Codes, error models and decoders appear under the
+keys ``qecsim.cli.run.codes``, ``qecsim.cli.run.error_models`` and ``qecsim.cli.run.decoders``, respectively.
+Fault-tolerant compatible codes, error models and decoders appear under the keys ``qecsim.cli.run_ftp.codes``,
+``qecsim.cli.run_ftp.error_models`` and ``qecsim.cli.run_ftp.decoders``, respectively.
 
 For example, the 5-qubit code appears in ``setup.cfg`` as follows:
 
@@ -12,12 +15,9 @@ For example, the 5-qubit code appears in ``setup.cfg`` as follows:
         qecsim.cli.run.codes =
             five_qubit = qecsim.models.basic:FiveQubitCode
 
-New codes, error models and decoders appear under the keys ``qecsim.cli.run.codes``, ``qecsim.cli.run.error_models`` and
-``qecsim.cli.run.decoders``, respectively. New FTP codes, error models and decoders appear under the keys
-``qecsim.cli.run_ftp.codes``, ``qecsim.cli.run_ftp.error_models`` and ``qecsim.cli.run_ftp.decoders``, respectively.
 
 Optionally, one-line descriptions for CLI help messages can be provided by decorating implementation classes with
-:decorator:`qecsim.model.cli_description`. For example, see :class:`qecsim.models.basic.FiveQubitCode`.
+:func:`qecsim.model.cli_description`. For example, see :class:`qecsim.models.basic.FiveQubitCode`.
 """
 import ast
 import inspect
@@ -192,7 +192,7 @@ def cli():
     """
     qecsim - quantum error correction simulator using stabilizer codes.
 
-    See python qecsim.pyz COMMAND --help for command-specific help.
+    See qecsim COMMAND --help for command-specific help.
     """
     util.init_logging()
 

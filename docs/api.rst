@@ -5,6 +5,7 @@ API
     :maxdepth: 2
 
     api/app
+    api/cli
     api/error
     api/graphtools
     api/model
