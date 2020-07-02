@@ -1,13 +1,23 @@
 """
 This module contains the qecsim command line interface (CLI).
 
-TODO: rewrite for setuptools
-New codes, error models and decoders can be offered in the CLI by adding them to the _CODE_PARAMETER,
-_ERROR_MODEL_PARAMETER and _DECODER_PARAMETER variables respectively, and updating the docstring of :func:`run`.
+New components are integrated into the CLI via entries in the ``[options.entry-points]`` section of ``setup.cfg``. The
+format of entries is ``<short_name> = <module_path>:<class_name>``.
 
-New FTP codes, error models and decoders can be offered in the CLI by adding them to the _FTP_CODE_PARAMETER,
-_FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, and updating the docstring of
-:func:`run_ftp`.
+For example, the 5-qubit code appears in ``setup.cfg`` as follows:
+
+    .. code-block:: text
+
+        [options.entry_points]
+        qecsim.cli.run.codes =
+            five_qubit = qecsim.models.basic:FiveQubitCode
+
+New codes, error models and decoders appear under the keys ``qecsim.cli.run.codes``, ``qecsim.cli.run.error_models`` and
+``qecsim.cli.run.decoders``, respectively. New FTP codes, error models and decoders appear under the keys
+``qecsim.cli.run_ftp.codes``, ``qecsim.cli.run_ftp.error_models`` and ``qecsim.cli.run_ftp.decoders``, respectively.
+
+Optionally, one-line descriptions for CLI help messages can be provided by decorating implementation classes with
+``qecsim.model.cli_description``. For example, see :class:`qecsim.models.basic.FiveQubitCode`.
 """
 import ast
 import inspect
