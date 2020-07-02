@@ -19,6 +19,8 @@ Contents
     demos
     api
     links
+    license
+    acknowledgment
 
 
 Indices

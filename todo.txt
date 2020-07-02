@@ -29,7 +29,7 @@
 # DONE: update doc to reference qecsimext
 # DONE: update qecsimext tox.ini and setup.cfg relative to qecsim versions
 # DONE: add project links to doc
-# TODO: add license to doc
+# DONE: add license to doc
 # TODO: add acknowledgements to doc
 # DONE: doc qecsimext
 # TODO: test on hpc
@@ -37,7 +37,7 @@
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
 # TODO: share with testers
-# TODO: choose licence (update doc and setup.cfg license and classifiers)
+# TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
 # TODO: test upload to PyPI
 # TODO: create qecsimdev repo

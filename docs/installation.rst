@@ -43,7 +43,7 @@ configured using a file parsed with :func:`logging.config.fileConfig`. The follo
 * ``~/.qecsim/logging_qecsim.ini``
 
 where ``QECSIM_CFG`` is an environment variable and ``~`` indicates the current user's home directory. An example
-logging configuration file is available here: :download:`logging_qecsim.ini <installation/logging_qecsim.ini>`
+logging configuration file is available here: :download:`logging_qecsim.ini <../logging_qecsim.ini>`
 
 
 Fast matching library (optional)
