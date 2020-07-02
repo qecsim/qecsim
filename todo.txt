@@ -42,3 +42,4 @@
 # TODO: test upload to PyPI
 # TODO: create qecsimdev repo
 # TODO: host documentation on readthedocs (update setup.cfg project_urls, README.rst and doc)
+# TODO: set up continuous integration
