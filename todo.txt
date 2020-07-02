@@ -16,7 +16,6 @@
 # DONE: add api docs models (compare model v. others)
 # DONE: update overview docs for restricted models
 # DONE: set up tox for test coverage
-# TODO: set up tox for lint flake8
 # DONE: set up tox for build
 # DONE: create docs zip in dist
 # DONE: document tox.ini
@@ -32,11 +31,13 @@
 # DONE: add license to doc
 # DONE: add acknowledgements to doc
 # DONE: doc qecsimext
+# TODO: update qecsimext with latest qecsim and zip repo for download
 # TODO: test on hpc
 # DONE: create qecsim@gmail.com account
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
 # TODO: share with testers
+# TODO: set up tox for lint flake8
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
 # TODO: test upload to PyPI
