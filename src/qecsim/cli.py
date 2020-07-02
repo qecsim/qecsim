@@ -17,7 +17,7 @@ New codes, error models and decoders appear under the keys ``qecsim.cli.run.code
 ``qecsim.cli.run_ftp.codes``, ``qecsim.cli.run_ftp.error_models`` and ``qecsim.cli.run_ftp.decoders``, respectively.
 
 Optionally, one-line descriptions for CLI help messages can be provided by decorating implementation classes with
-``qecsim.model.cli_description``. For example, see :class:`qecsim.models.basic.FiveQubitCode`.
+:decorator:`qecsim.model.cli_description`. For example, see :class:`qecsim.models.basic.FiveQubitCode`.
 """
 import ast
 import inspect
