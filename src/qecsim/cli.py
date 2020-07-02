@@ -9,8 +9,6 @@ New FTP codes, error models and decoders can be offered in the CLI by adding the
 _FTP_ERROR_MODEL_PARAMETER and _FTP_DECODER_PARAMETER variables respectively, and updating the docstring of
 :func:`run_ftp`.
 """
-# TODO: extract save data function from each command
-
 import ast
 import inspect
 import json
@@ -19,6 +17,7 @@ import re
 
 import click
 import pkg_resources
+
 import qecsim
 from qecsim import app
 from qecsim import util
@@ -251,18 +250,10 @@ def run(code, error_model, decoder, error_probabilities, max_failures, max_runs,
 
     logger.info('RUN COMPLETE: data={}'.format(data))
 
+    print(output, type(output))
+
     # OUTPUT
-    if output == '-':
-        # write to stdout
-        click.echo(json.dumps(data, sort_keys=True))
-    else:
-        try:
-            # attempt to save to output filename (mode='x' -> fail if file exists)
-            with open(output, 'x') as f:
-                json.dump(data, f, sort_keys=True)
-        except IOError as ex:
-            logger.error('recovered data:\n{}'.format(json.dumps(data, sort_keys=True)))
-            raise click.ClickException('{} (failed to open output file "{}")'.format(output, ex))
+    _write_data(output, data)
 
 
 @cli.command()
@@ -335,17 +326,7 @@ def run_ftp(code, time_steps, error_model, decoder, error_probabilities, max_fai
     logger.info('RUN COMPLETE: data={}'.format(data))
 
     # OUTPUT
-    if output == '-':
-        # write to stdout
-        click.echo(json.dumps(data, sort_keys=True))
-    else:
-        try:
-            # attempt to save to output filename (mode='x' -> fail if file exists)
-            with open(output, 'x') as f:
-                json.dump(data, f, sort_keys=True)
-        except IOError as ex:
-            logger.error('recovered data:\n{}'.format(json.dumps(data, sort_keys=True)))
-            raise click.ClickException('{} (failed to open output file "{}")'.format(output, ex))
+    _write_data(output, data)
 
 
 @cli.command()
@@ -382,6 +363,22 @@ def merge(data_file, output):
     data = app.merge(*input_data)
 
     # OUTPUT
+    _write_data(output, data)
+
+
+def _write_data(output, data):
+    """
+    Write data in JSON format (sorted keys) to the given output.
+
+    Note: If the data cannot be written to the given output, for example if the file already exists, then the data is
+    written to stderr and an exception is raised.
+
+    :param output: Output file path or '-' for stdout.
+    :type output: str
+    :param data: Data (convertible to JSON).
+    :type data: list of dict
+    :raises ClickException: if the data cannot be written to the given path.
+    """
     if output == '-':
         # write to stdout
         click.echo(json.dumps(data, sort_keys=True))
