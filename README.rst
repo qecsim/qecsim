@@ -10,7 +10,7 @@ components.
 Installation
 ------------
 
-Install and update using `pip`_:
+Install and upgrade using `pip`_:
 
 .. code-block:: text
 
