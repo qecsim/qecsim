@@ -31,7 +31,8 @@
 # DONE: add acknowledgements to doc
 # DONE: doc qecsimext
 # TODO: update qecsimext with latest qecsim and zip repo for download
-# TODO: test on hpc
+# TODO: test qecsimext on windows
+# TODO: test qecsim and qecsimext on hpc
 # DONE: create qecsim@gmail.com account
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
