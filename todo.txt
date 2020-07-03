@@ -30,6 +30,7 @@
 # DONE: add license to doc
 # DONE: add acknowledgements to doc
 # DONE: doc qecsimext
+# TODO: rename QecsimException to QecsimError (including doc)
 # TODO: remove unused util.file_cache and tests for portability with windows
 # TODO: update qecsimext with latest qecsim and zip repo for download
 # TODO: test qecsimext on windows
