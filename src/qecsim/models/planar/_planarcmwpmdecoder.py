@@ -5,7 +5,6 @@ import operator
 
 import numpy as np
 from qecsim import graphtools as gt
-from qecsim import paulitools as pt
 from qecsim.model import Decoder, cli_description
 
 logger = logging.getLogger(__name__)
@@ -556,14 +555,6 @@ class PlanarCMWPMDecoder(Decoder):
                                                box_shape=self._box_shape, distance_algorithm=self._distance_algorithm)
                     dual_matches = grid.mwpm(previous_primal_matches, dual_indices, factor=self._factor,
                                              box_shape=self._box_shape, distance_algorithm=self._distance_algorithm)
-
-                    # DEBUG: Hacky debug of iterations for notebook. Can safely be removed.
-                    if self._debug_iterations and 'error' in kwargs:
-                        tmp_recovery = self._recovery_pauli(code, primal_matches, dual_matches).to_bsf()
-                        tmp_error = kwargs['error']
-                        tmp_success = np.all(pt.bsp(tmp_recovery ^ tmp_error, code.logicals.T) == 0)
-                        print('s' if tmp_success else 'f', end='')
-
                     if primal_matches == previous_primal_matches and dual_matches == previous_dual_matches:
                         break
                     previous_primal_matches = primal_matches

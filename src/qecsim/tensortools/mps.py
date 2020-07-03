@@ -29,8 +29,8 @@ import sys
 
 import numpy as np
 from mpmath import mp
-from scipy import linalg as sp_linalg
 from qecsim.tensortools import tsr as tt_tsr
+from scipy import linalg as sp_linalg
 
 logger = logging.getLogger(__name__)
 
@@ -279,7 +279,6 @@ def left_canonical_form(mps, chi=None, tol=None, qr=False, normalise=False, mask
                 # u = np.array(u.tolist(), dtype=matrix.dtype)
                 # s = np.array(s.tolist(), dtype=matrix.dtype).flatten()
                 # v = np.array(v.tolist(), dtype=matrix.dtype)
-                # # print('MPMATH', 'U', u, 'S', s, 'V', v)
 
                 # find largest singular value (s is singular values in descending order)
                 max_s = s[0]
@@ -444,30 +443,11 @@ def truncate(mps, chi=None, tol=None, mask=None):
     :rtype: list of numpy.array (4d), float
     :raises ValueError: if MPS/MPO does not contain a single contiguous list of tensors.
     """
-
-    # DEBUG:
-    # def _norm(bra_mps):
-    #     ket_mps = []
-    #     for bra_t in bra_mps:
-    #         ket_mps.append(np.einsum('nesw->nwse', bra_t).conj())
-    #     norm_squared = inner_product(bra_mps, ket_mps)
-    #     return np.sqrt(norm_squared)
-
     trunc_mps, norm = mps, 1.0
     if len(trunc_mps) and (tol or (chi and chi < bond_dimension(mps))) and (mask is None or any(mask)):
         lcf_mps, norm = left_canonical_form(mps, qr=True, normalise=True)
         # N.B.: No need to handle zeros lcf_mps specially; in that case, right_canonical_form returns a zeros_mps fast.
         trunc_mps = right_canonical_form(lcf_mps, chi=chi, tol=tol, mask=mask)
-
-        # DEBUG:
-        # print('## lcf_mps.norm=',_norm(lcf_mps))  # should be ~1.0
-        # print('## trunc_mps.norm=',_norm(trunc_mps))  # should be ~1.0
-        # for i in range(len(trunc_mps)):
-        #     print('###trunc_mps[{}].norm={}'.format(i, sp_linalg.norm(trunc_mps[i])))
-        #     print('###trunc_mps[{}].abs.amax={}'.format(i, np.amax(np.absolute(trunc_mps[i]))))
-        #     print('###trunc_mps[{}].abs.amin={}'.format(i, np.amin(np.absolute(trunc_mps[i]))))
-        # print('###norm={}'.format(norm))
-
     return trunc_mps, norm
 
 

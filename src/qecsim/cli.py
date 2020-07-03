@@ -27,7 +27,6 @@ import re
 
 import click
 import pkg_resources
-
 import qecsim
 from qecsim import app
 from qecsim import util
@@ -259,8 +258,6 @@ def run(code, error_model, decoder, error_probabilities, max_failures, max_runs,
         data.append(runs_data)
 
     logger.info('RUN COMPLETE: data={}'.format(data))
-
-    print(output, type(output))
 
     # OUTPUT
     _write_data(output, data)
