@@ -1,11 +1,11 @@
-error: exception classes
-========================
+error: error classes
+====================
 
 ``qecsim.error``
 ----------------
 .. automodule:: qecsim.error
 
-``qecsim.error.QecsimException``
---------------------------------
-.. autoclass:: qecsim.error.QecsimException
+``qecsim.error.QecsimError``
+----------------------------
+.. autoclass:: qecsim.error.QecsimError
     :members:

@@ -9,7 +9,7 @@ import numpy as np
 from mpmath import mp
 from qecsim import paulitools as pt
 from qecsim import util
-from qecsim.error import QecsimException
+from qecsim.error import QecsimError
 from qecsim.model import Decoder, cli_description
 from qecsim.models.generic import BitPhaseFlipErrorModel
 from qecsim.models.planar import PlanarCode
@@ -480,7 +480,7 @@ class PlanarYDecoder(Decoder):
                 break
         # report infinite loop protection
         if count > max_count:
-            raise QecsimException('Infinite loop applying Y to {} starting at {} in se={} direction.'.format(
+            raise QecsimError('Infinite loop applying Y to {} starting at {} in se={} direction.'.format(
                 code, start_index, se))
         # convert to bsf
         operator = pauli.to_bsf()

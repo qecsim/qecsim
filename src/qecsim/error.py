@@ -1,7 +1,7 @@
 """
-This module contains exception implementations.
+This module contains error implementations.
 """
 
 
-class QecsimException(Exception):
-    """Base qecsim exception"""
+class QecsimError(Exception):
+    """Indicates a qecsim internal (core or extension) error"""

@@ -31,7 +31,7 @@
 # DONE: add acknowledgements to doc
 # DONE: doc qecsimext
 # DONE: remove unused util.file_cache and tests for Windows compatibility
-# TODO: rename QecsimException to QecsimError (including doc)
+# DONE: rename QecsimException to QecsimError (including doc)
 # TODO: update qecsimext with latest qecsim and zip repo for download
 # TODO: test qecsimext on windows
 # TODO: test qecsim and qecsimext on hpc

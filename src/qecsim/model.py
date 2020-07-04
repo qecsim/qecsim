@@ -7,7 +7,7 @@ import functools
 
 import numpy as np
 from qecsim import paulitools as pt
-from qecsim.error import QecsimException
+from qecsim.error import QecsimError
 
 ATTR_CLI_DESCRIPTION = '__qecsim_cli_desc'
 
@@ -143,17 +143,17 @@ class StabilizerCode(metaclass=abc.ABCMeta):
 
         See :func:`qecsim.paulitools.bsp` for definition of :math:`\odot` and :math:`\Lambda`.
 
-        :raises QecsimException: if the stabilizers or logicals fail the sanity checks.
+        :raises QecsimError: if the stabilizers or logicals fail the sanity checks.
         """
         if not np.all(pt.bsp(self.stabilizers, self.stabilizers.T) == 0):
-            raise QecsimException('Stabilizers do not mutually commute.')
+            raise QecsimError('Stabilizers do not mutually commute.')
         if not np.all(pt.bsp(self.stabilizers, self.logicals.T) == 0):
-            raise QecsimException('Stabilizers do not commute with logicals.')
+            raise QecsimError('Stabilizers do not commute with logicals.')
         # twisted identity with shape (len(logicals), len(logicals))
         i1, i2 = np.hsplit(np.identity(len(self.logicals), dtype=int), 2)
         expected = np.hstack((i2, i1))
         if not np.array_equal(pt.bsp(self.logicals, self.logicals.T), expected):
-            raise QecsimException('Logicals do not commute as expected.')
+            raise QecsimError('Logicals do not commute as expected.')
 
 
 class ErrorModel(metaclass=abc.ABCMeta):

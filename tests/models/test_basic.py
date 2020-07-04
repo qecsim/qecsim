@@ -1,7 +1,7 @@
 import pytest
 
 from qecsim import paulitools as pt
-from qecsim.error import QecsimException
+from qecsim.error import QecsimError
 from qecsim.models.basic import FiveQubitCode, BasicCode, SteaneCode
 
 
@@ -54,7 +54,7 @@ def test_basic_steane_code_validate():
 ])
 def test_basic_code_validate_with_non_commuting_stabilizers(stabilizers, logical_xs, logical_zs):
     code = BasicCode(stabilizers, logical_xs, logical_zs)
-    with pytest.raises(QecsimException) as exc_info:
+    with pytest.raises(QecsimError) as exc_info:
         code.validate()
     assert 'Stabilizers do not mutually commute.' == str(exc_info.value)
 
@@ -64,7 +64,7 @@ def test_basic_code_validate_with_non_commuting_stabilizers(stabilizers, logical
 ])
 def test_basic_code_validate_with_non_commuting_stabilizers_with_logicals(stabilizers, logical_xs, logical_zs):
     code = BasicCode(stabilizers, logical_xs, logical_zs)
-    with pytest.raises(QecsimException) as exc_info:
+    with pytest.raises(QecsimError) as exc_info:
         code.validate()
     assert 'Stabilizers do not commute with logicals.' == str(exc_info.value)
 
@@ -74,6 +74,6 @@ def test_basic_code_validate_with_non_commuting_stabilizers_with_logicals(stabil
 ])
 def test_basic_code_validate_with_commuting_logicals(stabilizers, logical_xs, logical_zs):
     code = BasicCode(stabilizers, logical_xs, logical_zs)
-    with pytest.raises(QecsimException) as exc_info:
+    with pytest.raises(QecsimError) as exc_info:
         code.validate()
     assert 'Logicals do not commute as expected.' == str(exc_info.value)

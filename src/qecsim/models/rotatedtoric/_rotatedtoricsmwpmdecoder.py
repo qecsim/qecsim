@@ -7,7 +7,7 @@ from collections import OrderedDict
 import numpy as np
 from qecsim import graphtools as gt
 from qecsim import paulitools as pt
-from qecsim.error import QecsimException
+from qecsim.error import QecsimError
 from qecsim.model import Decoder, DecoderFTP, cli_description
 from qecsim.models.generic import BiasedDepolarizingErrorModel
 from qecsim.models.generic import BitPhaseFlipErrorModel
@@ -144,7 +144,7 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
             if logger.isEnabledFor(logging.DEBUG):
                 logger.debug('decode: testing t-parity. itp={}, time_steps={}'.format(self._itp, time_steps))
             if not step_measurement_errors:
-                raise QecsimException('Failed to test t-parity. step_measurement_errors not provided.')
+                raise QecsimError('Failed to test t-parity. step_measurement_errors not provided.')
             # extract t-parity for measurement errors
             measurement_error_tps = _measurement_error_tparities(code, step_measurement_errors[-1])
             # return False if t-parity fails
@@ -534,17 +534,17 @@ def _clusters(matches):
                 break  # break when cluster processed
         # sanity: cluster should be closed loop
         if cluster[0] != cluster[-1]:
-            raise QecsimException('Cluster is not a closed loop.')
+            raise QecsimError('Cluster is not a closed loop.')
         # remove redundant final index of closed loop
         cluster.pop()
         # sanity: cluster length should be even
         if len(cluster) % 2:
-            raise QecsimException('Cluster length is not even.')
+            raise QecsimError('Cluster length is not even.')
         # add cluster to list of clusters
         clusters.append(cluster)
     # sanity: all row_mates should be processed when all col_mates have been processed
     if row_mates:
-        raise QecsimException('Some row matches unclustered after all column matches clustered.')
+        raise QecsimError('Some row matches unclustered after all column matches clustered.')
     return clusters
 
 
@@ -569,7 +569,7 @@ def _cluster_to_paths_and_defect(code, cluster):
     z_indices = [(t, x, y) for t, x, y in cluster if code.is_z_plaquette((x, y))]
     # sanity: check X and Z path lengths have same parity
     if len(x_indices) % 2 != len(z_indices) % 2:
-        raise QecsimException('Cluster has non-fused non-Y defect.')
+        raise QecsimError('Cluster has non-fused non-Y defect.')
     # if path lengths odd, choose Y-defect to be final indices
     if len(x_indices) % 2:
         return x_indices[:-1], z_indices[:-1], (x_indices[-1], z_indices[-1])

@@ -1,7 +1,7 @@
 import functools
 
 import numpy as np
-from qecsim.error import QecsimException
+from qecsim.error import QecsimError
 from qecsim.model import cli_description
 from qecsim.models.generic import SimpleErrorModel
 
@@ -93,7 +93,7 @@ class CenterSliceErrorModel(SimpleErrorModel):
                 # return slice and plane interest
                 csem = CenterSliceErrorModel
                 return csem._normalize(csem._line_plane_intersect(pN, pO, pC - pL, pL))
-        raise QecsimException('CenterSliceErrorModel: failed to find negative-limit.')
+        raise QecsimError('CenterSliceErrorModel: failed to find negative-limit.')
 
     @staticmethod
     def _line_plane_intersect(plane_normal, plane_point, line_direction, line_point):
