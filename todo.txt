@@ -32,7 +32,8 @@
 # DONE: doc qecsimext
 # DONE: remove unused util.file_cache and tests for Windows compatibility
 # DONE: rename QecsimException to QecsimError (including doc)
-# DONE: update qecsimext with latest qecsim and zip repo for download
+# TODO: sort cli entries for doc strings
+# TODO: update qecsimext with latest qecsim and zip repo for download
 # TODO: test qecsim and qecsimext on windows
 # TODO: test qecsim and qecsimext on linux
 # DONE: create qecsim@gmail.com account
