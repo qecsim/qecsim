@@ -149,7 +149,8 @@ def _model_argument(model_type):
     def _decorator(func):
         # extract name and class from entry-point, e.g. {'five_qubit': FiveQubitCode, ...}
         entry_point_id = 'qecsim.cli.{}.{}s'.format(func.__name__, model_type)  # e.g. qecsim.cli.run_ftp.codes
-        constructors = {ep.name: ep.load() for ep in pkg_resources.iter_entry_points(entry_point_id)}
+        entry_points = sorted(pkg_resources.iter_entry_points(entry_point_id), key=lambda ep: ep.name)
+        constructors = {ep.name: ep.load() for ep in entry_points}
         # add argument decorator
         func = click.argument(model_type, type=_ConstructorParamType(constructors), metavar=model_type.upper())(func)
         # extract name and cli_help, e.g. [('five_qubit', '5-qubit'), ...]
