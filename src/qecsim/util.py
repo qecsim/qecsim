@@ -2,11 +2,7 @@
 This module contains utility functions.
 """
 import ctypes
-import fcntl
-import functools
-import gzip
 import itertools
-import json
 import logging
 import logging.config
 import os
@@ -104,108 +100,6 @@ def load_clib(filename):
     except OSError:
         logger.exception('Failed to load clib: {}.'.format(filename))
         raise
-
-
-def file_cache(filename, compress=False):
-    """
-    File cache decorator.
-
-    Attributes:
-
-    * enabled (bool):   If the cache is enabled (default=True).
-    * _filename (str):  Filename of cache file (read-only).
-    * _compress (bool): If cache file is compressed with gzip (read-only).
-
-    Notes:
-
-    * Cache file is JSON formatted (and gzipped if compress is True).
-    * Cache key is a string built from repr of arguments to cached function.
-    * Return value of the function should be convertible to a JSON type.
-    * Cache file is read for each hit so typically this decorator should be decorated by a memory cache decorator such
-      as ``functools.lru_cache``.
-
-    :param filename: The filename of cache file.
-    :type filename: str
-    :param compress: Compress cache file with gzip. (default=False)
-    :type compress: bool
-    :return: File cache decorator.
-    :rtype: function
-    """
-
-    def file_cache_decorator(func):
-
-        @functools.wraps(func)
-        def func_wrapper(*args, **kwargs):
-            if not func_wrapper.enabled:
-                return func(*args, **kwargs)
-            # define key: "[arg1, arg2][('key1', val1), ('key2', val2)]"
-            key = repr(list(args)) + (repr(sorted(kwargs.items())) if kwargs else '')
-            # load cache from file
-            path = Path(filename)
-            try:
-                with path.open('rb' if compress else 'r') as f:
-                    try:
-                        fcntl.flock(f, fcntl.LOCK_SH)  # get read lock
-                        data = f.read()  # file might be empty
-                        if compress:
-                            cache = json.loads(gzip.decompress(data).decode('utf-8')) if data else {}
-                        else:
-                            cache = json.loads(data) if data else {}
-                    finally:
-                        fcntl.flock(f, fcntl.LOCK_UN)  # release read lock
-            except FileNotFoundError:
-                cache = {}
-            # get value from cache
-            try:
-                val = cache[key]
-                if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('file_cache: HIT. func={}, filename={}, key={}, val={!r}'.format(
-                        func.__qualname__, filename, key, val))
-            except KeyError:
-                if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('file_cache: MISS. func={}, filename={}, key={}'.format(
-                        func.__qualname__, filename, key))
-                # get value from function
-                val = func(*args, **kwargs)
-                if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug('file_cache: ADD_ITEM. func={}, filename={}, item={!r}: {!r},'.format(
-                        func.__qualname__, filename, key, val))
-                # update file cache
-                path.touch(exist_ok=True)  # make sure file exists
-
-                with path.open('rb+' if compress else 'r+') as f:
-                    try:
-                        fcntl.flock(f, fcntl.LOCK_EX)  # get write lock
-                        data = f.read()  # file might be empty
-                        if compress:
-                            cache = json.loads(gzip.decompress(data).decode('utf-8')) if data else {}
-                        else:
-                            cache = json.loads(data) if data else {}
-                        cache[key] = val
-                        f.seek(0)  # write to beginning of file
-                        if compress:
-                            f.write(gzip.compress(json.dumps(cache).encode('utf-8')))
-                        else:
-                            json.dump(cache, f, sort_keys=True, indent=2)
-                        f.truncate()  # strip extra data
-                    finally:
-                        fcntl.flock(f, fcntl.LOCK_UN)  # release write lock
-            return val
-
-        func_wrapper.enabled = True
-        func_wrapper._filename = filename
-        func_wrapper._compress = compress
-
-        return func_wrapper
-
-    return file_cache_decorator
-
-
-# def touch_open(filename, *args, **kwargs):
-#     # Open the file in R/W and create if it doesn't exist. *Don't* pass O_TRUNC
-#     fd = os.open(filename, os.O_RDWR | os.O_CREAT)
-#     # Encapsulate the low-level file descriptor in a python file object
-#     return os.fdopen(fd, *args, **kwargs)
 
 
 def chunker(iterable, chunk_len):
