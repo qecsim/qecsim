@@ -33,8 +33,8 @@
 # DONE: remove unused util.file_cache and tests for Windows compatibility
 # DONE: rename QecsimException to QecsimError (including doc)
 # TODO: update qecsimext with latest qecsim and zip repo for download
-# TODO: test qecsimext on windows
-# TODO: test qecsim and qecsimext on hpc
+# TODO: test qecsim and qecsimext on windows
+# TODO: test qecsim and qecsimext on linux
 # DONE: create qecsim@gmail.com account
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
 # TODO: upload doc to davidtuckett.com/qit/qecsim/
