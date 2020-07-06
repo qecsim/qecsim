@@ -40,7 +40,7 @@
 # DONE: create qecsim@gmail.com account
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
 # DONE: upload doc to davidtuckett.com/qit/qecsim/
-# TODO: share with testers
+# DONE: share with preview developers
 # TODO: set up tox for lint flake8
 # TODO: update docs for C++ matching library
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
