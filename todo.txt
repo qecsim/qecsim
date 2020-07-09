@@ -43,6 +43,7 @@
 # DONE: share with preview developers
 # TODO: set up tox for lint flake8
 # TODO: update docs for C++ matching library
+# TODO: add EQUS acknowledgment
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
 # TODO: test upload to PyPI
