@@ -1,13 +1,12 @@
 """
-This module provides a somewhat low-level Python interface for Blossom V, a fast C++ implementation of perfect matching,
-due to Vladimir Kolmogorov. Typically this interface is not invoked directly, see rather the functions of
-:mod:`qecsim.graphtools`.
+This module provides a somewhat low-level Python interface for Blossom V, a fast C++ implementation of minimum-weight
+perfect matching in a graph, due to Vladimir Kolmogorov. (Typically, this module is not invoked directly, see rather the
+functions of :mod:`qecsim.graphtools`.)
 
     Vladimir Kolmogorov. "Blossom V: A new implementation of a minimum cost perfect matching algorithm."
     In *Mathematical Programming Computation* (MPC), July 2009, 1(1):43-67.
-    http://pub.ist.ac.at/~vnk/software.html
 
-The licence for Blossom V does not permit public redistribution of the code or its derivatives (see
+The licence for Blossom V does not permit public redistribution of the code or its derivatives (see the Blossom V site
 http://pub.ist.ac.at/~vnk/software.html and the Blossom V README.TXT file for full details of the license and citation
 requirements). Therefore, Blossom V is not packaged with qecsim.
 

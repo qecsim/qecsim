@@ -55,7 +55,7 @@ Fast matching library (optional)
 
 Several decoders included with qecsim use minimum-weight perfect matching in graphs via :func:`qecsim.graphtools.mwpm`.
 By default, qecsim will use a Python matching implementation provided by NetworkX_. Optionally, qecsim can be configured
-to use `Blossom V`_, a fast C++ implementation of minimum-weight perfect matching in a graph, due to Vladimir Kolmogorov:
+to use `Blossom V`_, a fast C++ matching implementation, due to Vladimir Kolmogorov:
 
     Vladimir Kolmogorov. "Blossom V: A new implementation of a minimum cost perfect matching algorithm."
     In *Mathematical Programming Computation* (MPC), July 2009, 1(1):43-67.
