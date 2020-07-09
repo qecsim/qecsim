@@ -1,17 +1,19 @@
 """
-This module is a wrapper for Blossom V, a fast C++ implementation of perfect matching, due to Vladimir Kolmogorov.
+This module provides a somewhat low-level Python interface for Blossom V, a fast C++ implementation of perfect matching,
+due to Vladimir Kolmogorov. Typically this interface is not invoked directly, see rather the functions of
+:mod:`qecsim.graphtools`.
 
-BLOSSOM V - implementation of Edmonds' algorithm for computing a minimum cost perfect matching in a graph
-Version 2.05
-http://pub.ist.ac.at/~vnk/software.html
+    Vladimir Kolmogorov. "Blossom V: A new implementation of a minimum cost perfect matching algorithm."
+    In *Mathematical Programming Computation* (MPC), July 2009, 1(1):43-67.
+    http://pub.ist.ac.at/~vnk/software.html
 
-This wrapper is included to enable high performance matching but some effort is required to build and install the C++
-library dependency. When performance is not a concern, the Python package NetworkX, https://networkx.github.io/, may be
-sufficient and is typically already installed as a qecsim dependency.
+The licence for Blossom V does not permit public redistribution of the code or its derivatives (see
+http://pub.ist.ac.at/~vnk/software.html and the Blossom V README.TXT file for full details of the license and citation
+requirements). Therefore, Blossom V is not packaged with qecsim.
 
-The licence for Blossom V does not permit public redistribution of the code (see the original author's site for full
-details of the license). Therefore, Blossom V is not packaged with qecsim. For details on how to install Blossom V for
-use with qecsim, in accordance with the license, see section :ref:`install_blossom`.
+If your use case satisfies the license requirements of Blossom V, see section :ref:`install_blossom` for details on how
+to configure qecsim to use Blossom V. When performance is not a concern, the Python package NetworkX,
+https://networkx.github.io/, may be sufficient and is already installed as a qecsim dependency.
 
 The functions in this module assume the presence of a C++ library ``libpypm.so`` in one of the locations searched by
 :func:`qecsim.util.load_clib`. All functions, except :func:`available` will fail with an :class:`OSError` if the library
