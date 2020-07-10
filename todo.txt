@@ -43,7 +43,7 @@
 # DONE: share with preview developers
 # TODO: set up tox for lint flake8
 # DONE: update docs for C++ matching library
-# TODO: test docs for C++ matching library
+# DONE: test docs for C++ matching library
 # TODO: add EQUS acknowledgment
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
