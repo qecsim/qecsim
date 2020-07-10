@@ -79,7 +79,7 @@ If your use case satisfies the license requirements of Blossom V, you can config
     $ tar -xzf blossom5-v2.05.pyw.tar.gz
     $ cp blossom5-v2.05.pyw/* blossom5-v2.05.src/
     $ cd blossom5-v2.05.src/
-    $ make -f MakeFile-pyw
+    $ make -f Makefile-pyw
     ...
     c++ -shared ... -o libpypm.so
 
