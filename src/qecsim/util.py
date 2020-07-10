@@ -98,7 +98,7 @@ def load_clib(filename):
         # load clib shared library
         return ctypes.CDLL(path)
     except OSError:
-        logger.exception('Failed to load clib: {}.'.format(filename))
+        logger.warning('Failed to load clib: {}.'.format(filename))
         raise
 
 
