@@ -26,10 +26,10 @@ A nice way to install qecsim is using a virtual environment:
     $ source venv/bin/activate      # activate venv (Windows: venv\Scripts\activate)
     (venv) $ pip install qecsim     # install qecsim
     ...
-    Successfully installed ... qecsim-1.0b1 ...
+    Successfully installed ... qecsim-1.0b2 ...
     (venv) $
     (venv) $ qecsim --version       # verify qecsim cli
-    qecsim, version 1.0b1
+    qecsim, version 1.0b2
     (venv) $ deactivate             # deactivate venv
     $
 
@@ -77,8 +77,8 @@ If your use case satisfies the license requirements of Blossom V, you can config
 
     $ tar -xzf blossom5-v2.05.src.tar.gz
     $ tar -xzf blossom5-v2.05.pyw.tar.gz
-    $ cp blossom5-v2.05.pyw/* blossom5-v2.05.src
-    $ cd blossom5-v2.05.src
+    $ cp blossom5-v2.05.pyw/* blossom5-v2.05.src/
+    $ cd blossom5-v2.05.src/
     $ make -f MakeFile-pyw
     ...
     c++ -shared ... -o libpypm.so
@@ -96,7 +96,7 @@ If your use case satisfies the license requirements of Blossom V, you can config
 
 .. code-block:: pycon
 
-    >>> import blossom5 from qecim.graphtools
+    >>> from qecsim.graphtools import blossom5
     >>> blossom5.available()
     True
 
