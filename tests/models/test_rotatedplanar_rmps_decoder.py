@@ -13,7 +13,7 @@ from qecsim.models.rotatedplanar import RotatedPlanarCode, RotatedPlanarRMPSDeco
 def _is_close(a, b, rtol=1e-05, atol=1e-08):
     # np.isclose for mp.mpf, i.e. absolute(a - b) <= (atol + rtol * absolute(b))
     try:
-        return [mp.almosteq(l, r, rel_eps=rtol, abs_eps=atol) for l, r in itertools.zip_longest(a, b)]
+        return [mp.almosteq(le, ri, rel_eps=rtol, abs_eps=atol) for le, ri in itertools.zip_longest(a, b)]
     except TypeError:
         return mp.almosteq(a, b, rel_eps=rtol, abs_eps=atol)
 
@@ -242,7 +242,7 @@ def test_rotated_planar_rmps_mps_performance():
 
     def _timed_runs(decoder):
         start_time = time.time()
-        for run in range(n_run):
+        for _ in range(n_run):
             error = error_model.generate(code, error_probability)
             syndrome = pt.bsp(error, code.stabilizers.T)
             recovery = decoder.decode(code, syndrome)

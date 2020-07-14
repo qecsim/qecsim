@@ -12,7 +12,7 @@ from qecsim.models.generic import BiasedDepolarizingErrorModel, DepolarizingErro
 def _is_close(a, b, rtol=1e-05, atol=1e-08):
     # np.isclose for mp.mpf, i.e. absolute(a - b) <= (atol + rtol * absolute(b))
     try:
-        return [mp.almosteq(l, r, rel_eps=rtol, abs_eps=atol) for l, r in itertools.zip_longest(a, b)]
+        return [mp.almosteq(le, ri, rel_eps=rtol, abs_eps=atol) for le, ri in itertools.zip_longest(a, b)]
     except TypeError:
         return mp.almosteq(a, b, rel_eps=rtol, abs_eps=atol)
 

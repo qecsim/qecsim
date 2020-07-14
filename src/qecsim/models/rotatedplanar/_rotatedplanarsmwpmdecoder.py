@@ -179,7 +179,9 @@ class RotatedPlanarSMWPMDecoder(Decoder, DecoderFTP):
                              .format(error_model))
         return bias
 
-    def decode(self, code, syndrome, error_model=BitPhaseFlipErrorModel(), error_probability=0.1, **kwargs):
+    def decode(self, code, syndrome,
+               error_model=BitPhaseFlipErrorModel(),  # noqa: B008
+               error_probability=0.1, **kwargs):
         """See :meth:`qecsim.model.Decoder.decode`"""
 
         # Prepare decode_ftp parameters
@@ -188,7 +190,9 @@ class RotatedPlanarSMWPMDecoder(Decoder, DecoderFTP):
         kwargs['measurement_error_probability'] = 0.0
         return self.decode_ftp(code, time_steps, syndrome, error_model, error_probability, **kwargs)
 
-    def decode_ftp(self, code, time_steps, syndrome, error_model=BitPhaseFlipErrorModel(), error_probability=0.1,
+    def decode_ftp(self, code, time_steps, syndrome,
+                   error_model=BitPhaseFlipErrorModel(),  # noqa: B008
+                   error_probability=0.1,
                    measurement_error_probability=0.1, **kwargs):
         """See :meth:`qecsim.model.DecoderFTP.decode_ftp`"""
 
@@ -759,10 +763,10 @@ def _recovery(code, clusters):
         # split into x_path, z_path, y_defect
         x_path, z_path, y_defect = _cluster_to_paths_and_defect(code, cluster)
         # loop over x indices in pairs, applying path operator between indices
-        for (a_t, a_x, a_y), (b_t, b_x, b_y) in zip(x_path[::2], x_path[1::2]):
+        for (_, a_x, a_y), (_, b_x, b_y) in zip(x_path[::2], x_path[1::2]):
             recovery_operator ^= _path_operator(code, (a_x, a_y), (b_x, b_y))
         # loop over z indices in pairs, applying path operator between indices
-        for (a_t, a_x, a_y), (b_t, b_x, b_y) in zip(z_path[::2], z_path[1::2]):
+        for (_, a_x, a_y), (_, b_x, b_y) in zip(z_path[::2], z_path[1::2]):
             recovery_operator ^= _path_operator(code, (a_x, a_y), (b_x, b_y))
     return recovery_operator
 
@@ -934,8 +938,8 @@ def _cluster_recovery(code, matches):
         if a_node.is_virtual and b_node.is_virtual:
             continue
         # unpack indices
-        (a_x_t, a_x_x, a_x_y), (a_z_t, a_z_x, a_z_y) = a_node.x_index, a_node.z_index
-        (b_x_t, b_x_x, b_x_y), (b_z_t, b_z_x, b_z_y) = b_node.x_index, b_node.z_index
+        (_, a_x_x, a_x_y), (_, a_z_x, a_z_y) = a_node.x_index, a_node.z_index
+        (_, b_x_x, b_x_y), (_, b_z_x, b_z_y) = b_node.x_index, b_node.z_index
         # apply path between X plaquette indices
         recovery_operator ^= _path_operator(code, (a_x_x, a_x_y), (b_x_x, b_x_y))
         # apply path between Z plaquette indices

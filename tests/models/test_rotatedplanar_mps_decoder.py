@@ -12,7 +12,7 @@ from qecsim.models.rotatedplanar import RotatedPlanarCode, RotatedPlanarMPSDecod
 def _is_close(a, b, rtol=1e-05, atol=1e-08):
     # np.isclose for mp.mpf, i.e. absolute(a - b) <= (atol + rtol * absolute(b))
     try:
-        return [mp.almosteq(l, r, rel_eps=rtol, abs_eps=atol) for l, r in itertools.zip_longest(a, b)]
+        return [mp.almosteq(le, ri, rel_eps=rtol, abs_eps=atol) for le, ri in itertools.zip_longest(a, b)]
     except TypeError:
         return mp.almosteq(a, b, rel_eps=rtol, abs_eps=atol)
 
@@ -184,31 +184,3 @@ def test_rotated_planar_mps_decoder_small_codes_exact_approx():
     print('#approx Pr(G)=', approx_coset_ps)
     assert all(_is_close(exact_coset_ps, approx_coset_ps, rtol=1e-11, atol=0)), (
         'Coset probabilites do not satisfy exact Pr(G) ~= approx Pr(G)')
-
-# <Corner case tests >
-
-# # rp31x31_y_c4mct1e-12_p0.450.o3056314:2019-03-13 21:13:19,297 qecsim.rotatedplanar._rotatedplanarmpsdecoder WARNING
-# # NON-POSITIVE-FINITE MAX COSET PROBABILITY: {"code": "RotatedPlanarCode(31, 31)",
-# # "coset_ps": ["mpf('0.0')", "mpf('0.0')", "mpf('0.0')", "mpf('0.0')"],
-# # "decoder": "RotatedPlanarMPSDecoder(4, 'c', 1e-12)",
-# # "error": ["85edea48133571273d264a8ea15ce769273c047c83e6c9c1c901aec223ab8c4c1fc22c5d103bb310c2cf804f9917942834289ecd4ed30bff046d12f83a9a5d3279497714e61bc279603b4e1f40a69518e12eb4b4f314f978a5c055c0cbf80b906d750eee9e467950c8014868c6076bd25703f38dae03acdac2f6f524099ab8939e93254750ae73b4939e023e41f364e0e480d76111d5c6260fe1162e881dd9886167c027cc8bca141a144f66a76985ff8236897c1d4d2e993ca4bb8a730de13cb01da70fa0534a8c70975a5a798a7cbc52e02ae065fc05c836ba87774f233ca86400a4346303b5e92b81f9c6d701d66d40", 1922],
-# # "error_model": "BitPhaseFlipErrorModel()", "error_probability": 0.45, "prob_dist": [0.55, 0, 0.45, 0],
-# # "syndrome": ["266d15ae7fb368c88bf7864ef5c66ec97fbc85e72086af4034e4a10798741a62f477dbcfec3160084f622d24e0184330cbc6ced7b08cadeb417450c7b2fd34701926becf23a2420299e52ef21a437ad2f52ba8cbfaf27fe43318a1088c35a6618d610df31b6378b1fe18ac535b8d6748a6cfcc80c2ce0543", 960]}
-#
-# def test_rotated_planar_mps_decoder_corner_case_non_positive_finite_max_coset_probability():
-#     code = RotatedPlanarCode(31, 31)
-#     error_model = BitPhaseFlipErrorModel()
-#     error_probability = 0.45
-#     prob_dist = error_model.probability_distribution(error_probability)
-#     # decoder = RotatedPlanarMPSDecoder(4, 'c', 1e-12)
-#     decoder = RotatedPlanarMPSDecoder(4, 'c')
-#     error = pt.unpack(["85edea48133571273d264a8ea15ce769273c047c83e6c9c1c901aec223ab8c4c1fc22c5d103bb310c2cf804f9917942834289ecd4ed30bff046d12f83a9a5d3279497714e61bc279603b4e1f40a69518e12eb4b4f314f978a5c055c0cbf80b906d750eee9e467950c8014868c6076bd25703f38dae03acdac2f6f524099ab8939e93254750ae73b4939e023e41f364e0e480d76111d5c6260fe1162e881dd9886167c027cc8bca141a144f66a76985ff8236897c1d4d2e993ca4bb8a730de13cb01da70fa0534a8c70975a5a798a7cbc52e02ae065fc05c836ba87774f233ca86400a4346303b5e92b81f9c6d701d66d40", 1922])
-#     syndrome = pt.bsp(error, code.stabilizers.T)
-#     sample_recovery = decoder._sample_recovery(code, syndrome)
-#     # coset_ps, recoveries = decoder._coset_probabilities(prob_dist, sample_recovery)
-#     # print(coset_ps)
-#     recovery = decoder.decode(code, syndrome, error_model=error_model, error_probability=error_probability)
-#     print(pt.bsp(recovery ^ error, code.stabilizers.T))
-#     print(pt.bsp(recovery ^ error, code.logicals.T))
-
-# </ Corner case tests >

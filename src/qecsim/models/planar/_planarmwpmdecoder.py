@@ -6,6 +6,8 @@ from qecsim.model import Decoder, cli_description
 
 class _Node:
     # simple class to contain index and implement object reference equality for mwpm
+    __slots__ = ('index',)
+
     def __init__(self, index):
         self.index = index
 

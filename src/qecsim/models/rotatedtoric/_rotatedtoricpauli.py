@@ -65,7 +65,7 @@ class RotatedToricPauli:
     def code(self):
         """
         The rotated toric code.
-        
+
         :rtype: RotatedToricCode
         """
         return self._code

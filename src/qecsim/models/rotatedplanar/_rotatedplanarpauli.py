@@ -60,7 +60,7 @@ class RotatedPlanarPauli:
     def code(self):
         """
         The rotated planar code.
-        
+
         :rtype: RotatedPlanarCode
         """
         return self._code

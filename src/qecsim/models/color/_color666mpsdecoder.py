@@ -237,7 +237,9 @@ class Color666MPSDecoder(Decoder):
         # results
         return tuple(coset_ps), tuple(sample_paulis)
 
-    def decode(self, code, syndrome, error_model=DepolarizingErrorModel(), error_probability=0.1, **kwargs):
+    def decode(self, code, syndrome,
+               error_model=DepolarizingErrorModel(),  # noqa: B008
+               error_probability=0.1, **kwargs):
         """
         See :meth:`qecsim.model.Decoder.decode`
 

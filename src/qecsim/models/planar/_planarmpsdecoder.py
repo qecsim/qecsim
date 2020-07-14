@@ -8,7 +8,6 @@ from mpmath import mp
 from qecsim import paulitools as pt, tensortools as tt
 from qecsim.model import Decoder, cli_description
 from qecsim.models.generic import DepolarizingErrorModel
-from qecsim.models.planar import PlanarCode
 
 logger = logging.getLogger(__name__)
 
@@ -241,7 +240,9 @@ class PlanarMPSDecoder(Decoder):
         # results
         return tuple(coset_ps), tuple(sample_paulis)
 
-    def decode(self, code, syndrome, error_model=DepolarizingErrorModel(), error_probability=0.1, **kwargs):
+    def decode(self, code, syndrome,
+               error_model=DepolarizingErrorModel(),  # noqa: B008
+               error_probability=0.1, **kwargs):
         """
         See :meth:`qecsim.model.Decoder.decode`
 
@@ -371,9 +372,10 @@ def _create_tn(prob_dist, sample_pauli):
     return tn
 
 
-def _create_mask(stp, shape, rng=np.random.default_rng()):
+def _create_mask(stp, shape):
     """Return truncate mask (numpy.array 2d) of elements True with probability 1-stp and False with probability stp.
     Note: None is returned if stp (skip truncate probability) is falsy."""
+    rng = np.random.default_rng()
     return rng.choice((True, False), size=shape, p=(1 - stp, stp)) if stp else None
 
 # </ Tensor network creation functions >

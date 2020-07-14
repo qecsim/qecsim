@@ -48,7 +48,7 @@ class ToricPauli:
     def code(self):
         """
         The toric code.
-        
+
         :rtype: ToricCode
         """
         return self._code
@@ -135,14 +135,14 @@ class ToricPauli:
         :rtype: ToricPauli
         """
         # index modulo shape
-        l, r, c = np.mod(index, self.code.shape)
+        la, r, c = np.mod(index, self.code.shape)
         # apply Zs if primal lattice, or Xs otherwise
-        operator = 'Z' if l == self.code.PRIMAL_INDEX else 'X'
+        operator = 'Z' if la == self.code.PRIMAL_INDEX else 'X'
         # flip plaquette sites
-        self.site(operator, (l, r, c))  # North
-        self.site(operator, (l, r + 1, c))  # South
-        self.site(operator, (l + 1, r + l, c - l))  # West
-        self.site(operator, (l + 1, r + l, c - l + 1))  # East
+        self.site(operator, (la, r, c))  # North
+        self.site(operator, (la, r + 1, c))  # South
+        self.site(operator, (la + 1, r + la, c - la))  # West
+        self.site(operator, (la + 1, r + la, c - la + 1))  # East
         return self
 
     def path(self, a_index, b_index):

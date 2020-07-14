@@ -64,7 +64,7 @@ class Color666Pauli:
     def code(self):
         """
         The color 6.6.6 code.
-        
+
         :rtype: Color666Code
         """
         return self._code

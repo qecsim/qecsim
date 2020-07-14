@@ -75,7 +75,9 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
                              .format(error_model))
         return bias
 
-    def decode(self, code, syndrome, error_model=BitPhaseFlipErrorModel(), error_probability=0.1, **kwargs):
+    def decode(self, code, syndrome,
+               error_model=BitPhaseFlipErrorModel(),  # noqa: B008
+               error_probability=0.1, **kwargs):
         """See :meth:`qecsim.model.Decoder.decode`"""
 
         # Prepare decode_ftp parameters
@@ -85,8 +87,11 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
         kwargs['step_measurement_errors'] = None
         return self.decode_ftp(code, time_steps, syndrome, error_model, error_probability, **kwargs)
 
-    def decode_ftp(self, code, time_steps, syndrome, error_model=BitPhaseFlipErrorModel(), error_probability=0.1,
-                   measurement_error_probability=0.1, step_measurement_errors=None, **kwargs):
+    def decode_ftp(self, code, time_steps, syndrome,
+                   error_model=BitPhaseFlipErrorModel(),  # noqa: B008
+                   error_probability=0.1,
+                   measurement_error_probability=0.1,
+                   step_measurement_errors=None, **kwargs):
         """See :meth:`qecsim.model.DecoderFTP.decode_ftp`"""
 
         # deduce bias (potentially overridden by eta)

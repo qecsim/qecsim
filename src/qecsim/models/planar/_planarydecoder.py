@@ -12,7 +12,6 @@ from qecsim import util
 from qecsim.error import QecsimError
 from qecsim.model import Decoder, cli_description
 from qecsim.models.generic import BitPhaseFlipErrorModel
-from qecsim.models.planar import PlanarCode
 
 logger = logging.getLogger(__name__)
 
@@ -237,7 +236,7 @@ class PlanarYDecoder(Decoder):
         operators = list(pt.unpack(o) for o in residual_map.values())  # copy of operators in map so far
         _add((np.sum(operator_set, axis=0) % 2 for operator_set in itertools.chain.from_iterable(
             itertools.combinations(operators, n_operators) for n_operators in range(1, len(operators) + 1))),
-             skip_trivial=True)
+            skip_trivial=True)
         # add identity
         _add([code.new_pauli().to_bsf()], skip_trivial=False)
         # return map
@@ -615,7 +614,9 @@ class PlanarYDecoder(Decoder):
         # return sum(p_i ** (n - n_ys) * p_y ** n_ys)
 
     @mp.workdps(50)
-    def decode(self, code, syndrome, error_model=BitPhaseFlipErrorModel(), error_probability=0.1, **kwargs):
+    def decode(self, code, syndrome,
+               error_model=BitPhaseFlipErrorModel(),  # noqa: B008
+               error_probability=0.1, **kwargs):
         """See :meth:`qecsim.model.Decoder.decode`"""
         # extract probability distribution
         prob_dist = error_model.probability_distribution(error_probability)

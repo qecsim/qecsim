@@ -29,7 +29,7 @@ class ToricMWPMDecoder(Decoder):
             # prepare lattice graph
             l_graph = gt.SimpleGraph()
             # select lattice plaquettes
-            l_plaquette_indices = [(l, r, c) for l, r, c in plaquette_indices if l == lattice]
+            l_plaquette_indices = [(la, r, c) for la, r, c in plaquette_indices if la == lattice]
             # add weighted edges to lattice graph
             for a_index, b_index in itertools.combinations(l_plaquette_indices, 2):
                 # add edge with taxi-cab distance between a and b

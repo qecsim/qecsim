@@ -19,7 +19,7 @@ def _print_clusters(code, clusters, debug=False):
     if debug:
         # lattice for each cluster with order plaquettes in cluster given alphabetically
         for cluster in clusters:
-            plaquette_labels = {(x, y): l for (t, x, y), l in zip(cluster, string.ascii_letters + '*' * len(cluster))}
+            plaquette_labels = {(x, y): la for (t, x, y), la in zip(cluster, string.ascii_letters + '*' * len(cluster))}
             print(code.ascii_art(plaquette_labels=plaquette_labels))
 
 
@@ -390,19 +390,17 @@ def test_rotated_toric_smwpm_decoder_distance_ftp(code, time_steps, a, b, eta, e
     # nodes (within edges) are sorted for comparison (automatically in test).
     # edges are in an unsorted set.
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2)),  # bulk
-     {
-         (((0, 1, 1), True), ((0, 2, 1), True), 1),  # bottom edge
-         (((0, 1, 2), True), ((0, 2, 2), True), 1),  # top edge
-         (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
-         (((0, 2, 2), False), ((0, 2, 1), False), 1),  # right edge
-     }),
+     {(((0, 1, 1), True), ((0, 2, 1), True), 1),  # bottom edge
+      (((0, 1, 2), True), ((0, 2, 2), True), 1),  # top edge
+      (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
+      (((0, 2, 2), False), ((0, 2, 1), False), 1),  # right edge
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2), (3, 2)),  # bulk
-     {
-         (((0, 1, 1), True), ((0, 3, 1), True), 2),  # bottom edge
-         (((0, 1, 2), True), ((0, 3, 2), True), 2),  # top edge
-         (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
-         (((0, 3, 2), False), ((0, 3, 1), False), 1),  # right edge
-     }),
+     {(((0, 1, 1), True), ((0, 3, 1), True), 2),  # bottom edge
+      (((0, 1, 2), True), ((0, 3, 2), True), 2),  # top edge
+      (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
+      (((0, 3, 2), False), ((0, 3, 1), False), 1),  # right edge
+      }),
 ])
 def test_rotated_toric_smwpm_decoder_graph(error_pauli, expected):
     # parameters
@@ -427,25 +425,20 @@ def test_rotated_toric_smwpm_decoder_graph(error_pauli, expected):
     # edges are sorted by weight, a_node, b_node, where True > False (manually).
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2)).site('X', (3, 3)),  # bulk
      100, 0.1,
-     (  # nodes: (1, 1), (1, 2), (2, 1), (3, 3)
-             # 0 diagonal + 1 parallel
-             (((0, 1, 1), False), ((0, 1, 2), False)),
-             (((0, 1, 1), True), ((0, 2, 1), True)),
-             # 1 diagonal + 0 parallel
-             (((0, 1, 2), False), ((0, 2, 1), False)),
-             (((0, 1, 2), True), ((0, 2, 1), True)),
-             # 1 diagonal + 1 parallel
-             (((0, 1, 1), False), ((0, 2, 1), False)),
-             (((0, 1, 1), True), ((0, 1, 2), True)),
-             (((0, 1, 2), True), ((0, 3, 3), True)),
-             (((0, 2, 1), False), ((0, 3, 3), False)),
-             # 2 diagonal + 0 parallel
-             (((0, 1, 1), False), ((0, 3, 3), False)),
-             (((0, 1, 1), True), ((0, 3, 3), True)),
-             # 2 diagonal + 1 parallel
-             (((0, 1, 2), False), ((0, 3, 3), False)),
-             (((0, 2, 1), True), ((0, 3, 3), True)),
-     )),
+     # nodes: (1, 1), (1, 2), (2, 1), (3, 3)
+     ((((0, 1, 1), False), ((0, 1, 2), False)),  # 0 diagonal + 1 parallel
+      (((0, 1, 1), True), ((0, 2, 1), True)),
+      (((0, 1, 2), False), ((0, 2, 1), False)),  # 1 diagonal + 0 parallel
+      (((0, 1, 2), True), ((0, 2, 1), True)),
+      (((0, 1, 1), False), ((0, 2, 1), False)),  # 1 diagonal + 1 parallel
+      (((0, 1, 1), True), ((0, 1, 2), True)),
+      (((0, 1, 2), True), ((0, 3, 3), True)),
+      (((0, 2, 1), False), ((0, 3, 3), False)),
+      (((0, 1, 1), False), ((0, 3, 3), False)),  # 2 diagonal + 0 parallel
+      (((0, 1, 1), True), ((0, 3, 3), True)),
+      (((0, 1, 2), False), ((0, 3, 3), False)),  # 2 diagonal + 1 parallel
+      (((0, 2, 1), True), ((0, 3, 3), True)),
+      )),
 ])
 def test_rotated_toric_smwpm_decoder_graph_with_bias(error_pauli, eta, error_probability, expected):
     # parameters
@@ -480,12 +473,11 @@ def test_rotated_toric_smwpm_decoder_graph_with_bias(error_pauli, eta, error_pro
             [(2, 2)],
             [],
         ]),
-     {
-         (((0, 1, 1), True), ((0, 2, 1), True), 1),  # bottom edge
-         (((0, 1, 2), True), ((1, 2, 2), True), 2),  # top edge
-         (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
-         (((1, 2, 2), False), ((0, 2, 1), False), 2),  # right edge
-     }),
+     {(((0, 1, 1), True), ((0, 2, 1), True), 1),  # bottom edge
+      (((0, 1, 2), True), ((1, 2, 2), True), 2),  # top edge
+      (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
+      (((1, 2, 2), False), ((0, 2, 1), False), 2),  # right edge
+      }),
 ])
 def test_rotated_toric_smwpm_decoder_graph_ftp(code, error, syndrome, step_errors, step_measurement_errors, expected):
     # call
@@ -503,230 +495,201 @@ def test_rotated_toric_smwpm_decoder_graph_ftp(code, error, syndrome, step_error
 
     # BULK
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2)),  # . bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 2, 2), True)}),  # right
-         frozenset({((0, 2, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 2, 2), True)}),  # right
+      frozenset({((0, 2, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2), (3, 2)),  # .. bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 3, 2), True)}),  # right
-         frozenset({((0, 3, 2), False), ((0, 3, 1), False)}),  # down
-         frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 3, 2), True)}),  # right
+      frozenset({((0, 3, 2), False), ((0, 3, 1), False)}),  # down
+      frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2), (2, 3)),  # : bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
-         frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
+      frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2), (2, 3), (3, 3), (3, 2)),  # :: bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 3, 3), True)}),  # right
-         frozenset({((0, 3, 3), False), ((0, 3, 1), False)}),  # down
-         frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 3, 3), True)}),  # right
+      frozenset({((0, 3, 3), False), ((0, 3, 1), False)}),  # down
+      frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2), (3, 3)),  # / in bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 3, 2), True)}),  # right
-         frozenset({((0, 3, 2), False), ((0, 3, 3), False)}),  # up
-         frozenset({((0, 3, 3), True), ((0, 2, 3), True)}),  # left
-         frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 3, 2), True)}),  # right
+      frozenset({((0, 3, 2), False), ((0, 3, 3), False)}),  # up
+      frozenset({((0, 3, 3), True), ((0, 2, 3), True)}),  # left
+      frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 3), (3, 2)),  # \ in bulk
-     {
-         frozenset({((0, 1, 2), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
-         frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 3, 1), True)}),  # right
-         frozenset({((0, 3, 1), False), ((0, 3, 2), False)}),  # up
-         frozenset({((0, 3, 2), True), ((0, 1, 2), True)}),  # left
-     }),
+     {frozenset({((0, 1, 2), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
+      frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 3, 1), True)}),  # right
+      frozenset({((0, 3, 1), False), ((0, 3, 2), False)}),  # up
+      frozenset({((0, 3, 2), True), ((0, 1, 2), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2), (2, 3), (3, 2)),  # :. in bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
-         frozenset({((0, 2, 3), False), ((0, 2, 2), False)}),  # down
-         frozenset({((0, 2, 2), True), ((0, 3, 2), True)}),  # right
-         frozenset({((0, 3, 2), False), ((0, 3, 1), False)}),  # down
-         frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
+      frozenset({((0, 2, 3), False), ((0, 2, 2), False)}),  # down
+      frozenset({((0, 2, 2), True), ((0, 3, 2), True)}),  # right
+      frozenset({((0, 3, 2), False), ((0, 3, 1), False)}),  # down
+      frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 3), (3, 3), (3, 2)),  # ': in bulk
-     {
-         frozenset({((0, 1, 2), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 3, 3), True)}),  # right
-         frozenset({((0, 3, 3), False), ((0, 3, 1), False)}),  # down
-         frozenset({((0, 3, 1), True), ((0, 2, 1), True)}),  # left
-         frozenset({((0, 2, 1), False), ((0, 2, 2), False)}),  # up
-         frozenset({((0, 2, 2), True), ((0, 1, 2), True)}),  # left
-     }),
+     {frozenset({((0, 1, 2), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 3, 3), True)}),  # right
+      frozenset({((0, 3, 3), False), ((0, 3, 1), False)}),  # down
+      frozenset({((0, 3, 1), True), ((0, 2, 1), True)}),  # left
+      frozenset({((0, 2, 1), False), ((0, 2, 2), False)}),  # up
+      frozenset({((0, 2, 2), True), ((0, 1, 2), True)}),  # left
+      }),
 
     # CORNER SW
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0)),  # . in sw corner
-     {
-         frozenset({((0, 5, 5), False), ((0, 5, 0), False)}),  # up
-         frozenset({((0, 5, 0), True), ((0, 0, 0), True)}),  # right
-         frozenset({((0, 0, 0), False), ((0, 0, 5), False)}),  # down
-         frozenset({((0, 0, 5), True), ((0, 5, 5), True)}),  # left
-     }),
+     {frozenset({((0, 5, 5), False), ((0, 5, 0), False)}),  # up
+      frozenset({((0, 5, 0), True), ((0, 0, 0), True)}),  # right
+      frozenset({((0, 0, 0), False), ((0, 0, 5), False)}),  # down
+      frozenset({((0, 0, 5), True), ((0, 5, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (1, 0)),  # .. in sw corner
-     {
-         frozenset({((0, 5, 5), False), ((0, 5, 0), False)}),  # up
-         frozenset({((0, 5, 0), True), ((0, 1, 0), True)}),  # right
-         frozenset({((0, 1, 0), False), ((0, 1, 5), False)}),  # down
-         frozenset({((0, 1, 5), True), ((0, 5, 5), True)}),  # left
-     }),
+     {frozenset({((0, 5, 5), False), ((0, 5, 0), False)}),  # up
+      frozenset({((0, 5, 0), True), ((0, 1, 0), True)}),  # right
+      frozenset({((0, 1, 0), False), ((0, 1, 5), False)}),  # down
+      frozenset({((0, 1, 5), True), ((0, 5, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (0, 1)),  # : in sw corner
-     {
-         frozenset({((0, 5, 5), False), ((0, 5, 1), False)}),  # up
-         frozenset({((0, 5, 1), True), ((0, 0, 1), True)}),  # right
-         frozenset({((0, 0, 1), False), ((0, 0, 5), False)}),  # down
-         frozenset({((0, 0, 5), True), ((0, 5, 5), True)}),  # left
-     }),
+     {frozenset({((0, 5, 5), False), ((0, 5, 1), False)}),  # up
+      frozenset({((0, 5, 1), True), ((0, 0, 1), True)}),  # right
+      frozenset({((0, 0, 1), False), ((0, 0, 5), False)}),  # down
+      frozenset({((0, 0, 5), True), ((0, 5, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (0, 1), (1, 1), (1, 0)),  # :: in sw corner
-     {
-         frozenset({((0, 5, 5), False), ((0, 5, 1), False)}),  # up
-         frozenset({((0, 5, 1), True), ((0, 1, 1), True)}),  # right
-         frozenset({((0, 1, 1), False), ((0, 1, 5), False)}),  # down
-         frozenset({((0, 1, 5), True), ((0, 5, 5), True)}),  # left
-     }),
+     {frozenset({((0, 5, 5), False), ((0, 5, 1), False)}),  # up
+      frozenset({((0, 5, 1), True), ((0, 1, 1), True)}),  # right
+      frozenset({((0, 1, 1), False), ((0, 1, 5), False)}),  # down
+      frozenset({((0, 1, 5), True), ((0, 5, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (1, 0), (2, 0)),  # ... in sw corner
-     {
-         frozenset({((0, 5, 5), False), ((0, 5, 0), False)}),  # up
-         frozenset({((0, 5, 0), True), ((0, 2, 0), True)}),  # right
-         frozenset({((0, 2, 0), False), ((0, 2, 5), False)}),  # down
-         frozenset({((0, 2, 5), True), ((0, 5, 5), True)}),  # left
-     }),
+     {frozenset({((0, 5, 5), False), ((0, 5, 0), False)}),  # up
+      frozenset({((0, 5, 0), True), ((0, 2, 0), True)}),  # right
+      frozenset({((0, 2, 0), False), ((0, 2, 5), False)}),  # down
+      frozenset({((0, 2, 5), True), ((0, 5, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (0, 1), (0, 2)),  # ! in sw corner
-     {
-         frozenset({((0, 5, 5), False), ((0, 5, 2), False)}),  # up
-         frozenset({((0, 5, 2), True), ((0, 0, 2), True)}),  # right
-         frozenset({((0, 0, 2), False), ((0, 0, 5), False)}),  # down
-         frozenset({((0, 0, 5), True), ((0, 5, 5), True)}),  # left
-     }),
+     {frozenset({((0, 5, 5), False), ((0, 5, 2), False)}),  # up
+      frozenset({((0, 5, 2), True), ((0, 0, 2), True)}),  # right
+      frozenset({((0, 0, 2), False), ((0, 0, 5), False)}),  # down
+      frozenset({((0, 0, 5), True), ((0, 5, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (1, 1)),  # / in sw corner
-     {
-         frozenset({((0, 5, 5), False), ((0, 5, 0), False)}),  # up
-         frozenset({((0, 5, 0), True), ((0, 1, 0), True)}),  # right
-         frozenset({((0, 1, 0), False), ((0, 1, 1), False)}),  # up
-         frozenset({((0, 1, 1), True), ((0, 0, 1), True)}),  # left
-         frozenset({((0, 0, 1), False), ((0, 0, 5), False)}),  # down
-         frozenset({((0, 0, 5), True), ((0, 5, 5), True)}),  # left
-     }),
+     {frozenset({((0, 5, 5), False), ((0, 5, 0), False)}),  # up
+      frozenset({((0, 5, 0), True), ((0, 1, 0), True)}),  # right
+      frozenset({((0, 1, 0), False), ((0, 1, 1), False)}),  # up
+      frozenset({((0, 1, 1), True), ((0, 0, 1), True)}),  # left
+      frozenset({((0, 0, 1), False), ((0, 0, 5), False)}),  # down
+      frozenset({((0, 0, 5), True), ((0, 5, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 1), (1, 0)),  # \ in sw corner
-     {
-         frozenset({((0, 5, 0), False), ((0, 5, 1), False)}),  # up
-         frozenset({((0, 5, 1), True), ((0, 0, 1), True)}),  # right
-         frozenset({((0, 0, 1), False), ((0, 0, 5), False)}),  # down
-         frozenset({((0, 0, 5), True), ((0, 1, 5), True)}),  # right
-         frozenset({((0, 1, 5), False), ((0, 1, 0), False)}),  # up
-         frozenset({((0, 1, 0), True), ((0, 5, 0), True)}),  # left
-     }),
+     {frozenset({((0, 5, 0), False), ((0, 5, 1), False)}),  # up
+      frozenset({((0, 5, 1), True), ((0, 0, 1), True)}),  # right
+      frozenset({((0, 0, 1), False), ((0, 0, 5), False)}),  # down
+      frozenset({((0, 0, 5), True), ((0, 1, 5), True)}),  # right
+      frozenset({((0, 1, 5), False), ((0, 1, 0), False)}),  # up
+      frozenset({((0, 1, 0), True), ((0, 5, 0), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (0, 1), (1, 0)),  # :. in sw corner
-     {
-         frozenset({((0, 5, 5), False), ((0, 5, 1), False)}),  # up
-         frozenset({((0, 5, 1), True), ((0, 0, 1), True)}),  # right
-         frozenset({((0, 0, 1), False), ((0, 0, 0), False)}),  # down
-         frozenset({((0, 0, 0), True), ((0, 1, 0), True)}),  # right
-         frozenset({((0, 1, 0), False), ((0, 1, 5), False)}),  # down
-         frozenset({((0, 1, 5), True), ((0, 5, 5), True)}),  # left
-     }),
+     {frozenset({((0, 5, 5), False), ((0, 5, 1), False)}),  # up
+      frozenset({((0, 5, 1), True), ((0, 0, 1), True)}),  # right
+      frozenset({((0, 0, 1), False), ((0, 0, 0), False)}),  # down
+      frozenset({((0, 0, 0), True), ((0, 1, 0), True)}),  # right
+      frozenset({((0, 1, 0), False), ((0, 1, 5), False)}),  # down
+      frozenset({((0, 1, 5), True), ((0, 5, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 1), (1, 1), (1, 0)),  # ': in sw corner
-     {
-         frozenset({((0, 5, 0), False), ((0, 5, 1), False)}),  # up
-         frozenset({((0, 5, 1), True), ((0, 1, 1), True)}),  # right
-         frozenset({((0, 1, 1), False), ((0, 1, 5), False)}),  # down
-         frozenset({((0, 1, 5), True), ((0, 0, 5), True)}),  # left
-         frozenset({((0, 0, 5), False), ((0, 0, 0), False)}),  # up
-         frozenset({((0, 0, 0), True), ((0, 5, 0), True)}),  # left
-     }),
+     {frozenset({((0, 5, 0), False), ((0, 5, 1), False)}),  # up
+      frozenset({((0, 5, 1), True), ((0, 1, 1), True)}),  # right
+      frozenset({((0, 1, 1), False), ((0, 1, 5), False)}),  # down
+      frozenset({((0, 1, 5), True), ((0, 0, 5), True)}),  # left
+      frozenset({((0, 0, 5), False), ((0, 0, 0), False)}),  # up
+      frozenset({((0, 0, 0), True), ((0, 5, 0), True)}),  # left
+      }),
 
     # CORNERS (NW, NE SE)
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 5)),  # . in nw corner
-     {
-         frozenset({((0, 5, 4), False), ((0, 5, 5), False)}),  # up
-         frozenset({((0, 5, 5), True), ((0, 0, 5), True)}),  # right
-         frozenset({((0, 0, 5), False), ((0, 0, 4), False)}),  # down
-         frozenset({((0, 0, 4), True), ((0, 5, 4), True)}),  # left
-     }),
+     {frozenset({((0, 5, 4), False), ((0, 5, 5), False)}),  # up
+      frozenset({((0, 5, 5), True), ((0, 0, 5), True)}),  # right
+      frozenset({((0, 0, 5), False), ((0, 0, 4), False)}),  # down
+      frozenset({((0, 0, 4), True), ((0, 5, 4), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (5, 5)),  # . in ne corner
-     {
-         frozenset({((0, 4, 4), False), ((0, 4, 5), False)}),  # up
-         frozenset({((0, 4, 5), True), ((0, 5, 5), True)}),  # right
-         frozenset({((0, 5, 5), False), ((0, 5, 4), False)}),  # down
-         frozenset({((0, 5, 4), True), ((0, 4, 4), True)}),  # left
-     }),
+     {frozenset({((0, 4, 4), False), ((0, 4, 5), False)}),  # up
+      frozenset({((0, 4, 5), True), ((0, 5, 5), True)}),  # right
+      frozenset({((0, 5, 5), False), ((0, 5, 4), False)}),  # down
+      frozenset({((0, 5, 4), True), ((0, 4, 4), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (5, 0)),  # . in se corner
-     {
-         frozenset({((0, 4, 5), False), ((0, 4, 0), False)}),  # up
-         frozenset({((0, 4, 0), True), ((0, 5, 0), True)}),  # right
-         frozenset({((0, 5, 0), False), ((0, 5, 5), False)}),  # down
-         frozenset({((0, 5, 5), True), ((0, 4, 5), True)}),  # left
-     }),
+     {frozenset({((0, 4, 5), False), ((0, 4, 0), False)}),  # up
+      frozenset({((0, 4, 0), True), ((0, 5, 0), True)}),  # right
+      frozenset({((0, 5, 0), False), ((0, 5, 5), False)}),  # down
+      frozenset({((0, 5, 5), True), ((0, 4, 5), True)}),  # left
+      }),
 
     # BOUNDARIES (N, E, S, W)
     (RotatedToricCode(6, 6).new_pauli().site('Y', (1, 5)),  # . on n boundary
-     {
-         frozenset({((0, 0, 4), False), ((0, 0, 5), False)}),  # up
-         frozenset({((0, 0, 5), True), ((0, 1, 5), True)}),  # right
-         frozenset({((0, 1, 5), False), ((0, 1, 4), False)}),  # down
-         frozenset({((0, 1, 4), True), ((0, 0, 4), True)}),  # left
-     }),
+     {frozenset({((0, 0, 4), False), ((0, 0, 5), False)}),  # up
+      frozenset({((0, 0, 5), True), ((0, 1, 5), True)}),  # right
+      frozenset({((0, 1, 5), False), ((0, 1, 4), False)}),  # down
+      frozenset({((0, 1, 4), True), ((0, 0, 4), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (1, 5), (2, 5)),  # .. on n boundary
-     {
-         frozenset({((0, 0, 4), False), ((0, 0, 5), False)}),  # up
-         frozenset({((0, 0, 5), True), ((0, 2, 5), True)}),  # right
-         frozenset({((0, 2, 5), False), ((0, 2, 4), False)}),  # down
-         frozenset({((0, 2, 4), True), ((0, 0, 4), True)}),  # left
-     }),
+     {frozenset({((0, 0, 4), False), ((0, 0, 5), False)}),  # up
+      frozenset({((0, 0, 5), True), ((0, 2, 5), True)}),  # right
+      frozenset({((0, 2, 5), False), ((0, 2, 4), False)}),  # down
+      frozenset({((0, 2, 4), True), ((0, 0, 4), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (5, 2)),  # . on e boundary
-     {
-         frozenset({((0, 4, 1), False), ((0, 4, 2), False)}),  # up
-         frozenset({((0, 4, 2), True), ((0, 5, 2), True)}),  # right
-         frozenset({((0, 5, 2), False), ((0, 5, 1), False)}),  # down
-         frozenset({((0, 5, 1), True), ((0, 4, 1), True)}),  # left
-     }),
+     {frozenset({((0, 4, 1), False), ((0, 4, 2), False)}),  # up
+      frozenset({((0, 4, 2), True), ((0, 5, 2), True)}),  # right
+      frozenset({((0, 5, 2), False), ((0, 5, 1), False)}),  # down
+      frozenset({((0, 5, 1), True), ((0, 4, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (5, 2), (5, 3)),  # : on e boundary
-     {
-         frozenset({((0, 4, 1), False), ((0, 4, 3), False)}),  # up
-         frozenset({((0, 4, 3), True), ((0, 5, 3), True)}),  # right
-         frozenset({((0, 5, 3), False), ((0, 5, 1), False)}),  # down
-         frozenset({((0, 5, 1), True), ((0, 4, 1), True)}),  # left
-     }),
+     {frozenset({((0, 4, 1), False), ((0, 4, 3), False)}),  # up
+      frozenset({((0, 4, 3), True), ((0, 5, 3), True)}),  # right
+      frozenset({((0, 5, 3), False), ((0, 5, 1), False)}),  # down
+      frozenset({((0, 5, 1), True), ((0, 4, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (1, 0)),  # . on s boundary
-     {
-         frozenset({((0, 0, 5), False), ((0, 0, 0), False)}),  # up
-         frozenset({((0, 0, 0), True), ((0, 1, 0), True)}),  # right
-         frozenset({((0, 1, 0), False), ((0, 1, 5), False)}),  # down
-         frozenset({((0, 1, 5), True), ((0, 0, 5), True)}),  # left
-     }),
+     {frozenset({((0, 0, 5), False), ((0, 0, 0), False)}),  # up
+      frozenset({((0, 0, 0), True), ((0, 1, 0), True)}),  # right
+      frozenset({((0, 1, 0), False), ((0, 1, 5), False)}),  # down
+      frozenset({((0, 1, 5), True), ((0, 0, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (1, 0), (2, 0)),  # .. on s boundary
-     {
-         frozenset({((0, 0, 5), False), ((0, 0, 0), False)}),  # up
-         frozenset({((0, 0, 0), True), ((0, 2, 0), True)}),  # right
-         frozenset({((0, 2, 0), False), ((0, 2, 5), False)}),  # down
-         frozenset({((0, 2, 5), True), ((0, 0, 5), True)}),  # left
-     }),
+     {frozenset({((0, 0, 5), False), ((0, 0, 0), False)}),  # up
+      frozenset({((0, 0, 0), True), ((0, 2, 0), True)}),  # right
+      frozenset({((0, 2, 0), False), ((0, 2, 5), False)}),  # down
+      frozenset({((0, 2, 5), True), ((0, 0, 5), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 2)),  # . on w boundary
-     {
-         frozenset({((0, 5, 1), False), ((0, 5, 2), False)}),  # up
-         frozenset({((0, 5, 2), True), ((0, 0, 2), True)}),  # right
-         frozenset({((0, 0, 2), False), ((0, 0, 1), False)}),  # down
-         frozenset({((0, 0, 1), True), ((0, 5, 1), True)}),  # left
-     }),
+     {frozenset({((0, 5, 1), False), ((0, 5, 2), False)}),  # up
+      frozenset({((0, 5, 2), True), ((0, 0, 2), True)}),  # right
+      frozenset({((0, 0, 2), False), ((0, 0, 1), False)}),  # down
+      frozenset({((0, 0, 1), True), ((0, 5, 1), True)}),  # left
+      }),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 2), (0, 3)),  # : on w boundary
-     {
-         frozenset({((0, 5, 1), False), ((0, 5, 3), False)}),  # up
-         frozenset({((0, 5, 3), True), ((0, 0, 3), True)}),  # right
-         frozenset({((0, 0, 3), False), ((0, 0, 1), False)}),  # down
-         frozenset({((0, 0, 1), True), ((0, 5, 1), True)}),  # left
-     }),
+     {frozenset({((0, 5, 1), False), ((0, 5, 3), False)}),  # up
+      frozenset({((0, 5, 3), True), ((0, 0, 3), True)}),  # right
+      frozenset({((0, 0, 3), False), ((0, 0, 1), False)}),  # down
+      frozenset({((0, 0, 1), True), ((0, 5, 1), True)}),  # left
+      }),
 ])
 def test_rotated_toric_smwpm_decoder_matching(error_pauli, expected):
     # parameters
@@ -754,21 +717,19 @@ def test_rotated_toric_smwpm_decoder_matching(error_pauli, expected):
     # . bulk, eta=None (infinite)
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2)),
      None, 0.1,
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 2, 2), True)}),  # right
-         frozenset({((0, 2, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 2, 2), True)}),  # right
+      frozenset({((0, 2, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     # / bulk, eta=3
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2)).site('X', (3, 3)),  # / in center of bulk, eta=10
      10, 0.1,
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 3, 3), True)}),  # right (and up)
-         frozenset({((0, 3, 3), False), ((0, 2, 1), False)}),  # down (and left)
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 3, 3), True)}),  # right (and up)
+      frozenset({((0, 3, 3), False), ((0, 2, 1), False)}),  # down (and left)
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
 ])
 def test_rotated_toric_smwpm_decoder_matching_with_bias(error_pauli, eta, error_probability, expected):
     # parameters
@@ -804,12 +765,11 @@ def test_rotated_toric_smwpm_decoder_matching_with_bias(error_pauli, eta, error_
             [],
         ]),
      None, None, None,
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((1, 2, 2), True)}),  # right
-         frozenset({((1, 2, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((1, 2, 2), True)}),  # right
+      frozenset({((1, 2, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
 
     (*_code_error_syndrome(  # 2 time-steps, Y in bulk, 2 measurement errors
         RotatedToricCode(6, 6),  # code
@@ -822,12 +782,11 @@ def test_rotated_toric_smwpm_decoder_matching_with_bias(error_pauli, eta, error_
             [],
         ]),
      0.1, 0.1, 10,
-     {
-         frozenset({((1, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((1, 2, 2), True)}),  # right
-         frozenset({((1, 2, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((1, 1, 1), True)}),  # left
-     }),
+     {frozenset({((1, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((1, 2, 2), True)}),  # right
+      frozenset({((1, 2, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((1, 1, 1), True)}),  # left
+      }),
 
     (*_code_error_syndrome(  # 2 time-steps, Y in bulk, 2 measurement errors (low q so no matches between time steps)
         RotatedToricCode(6, 6),  # code
@@ -840,12 +799,11 @@ def test_rotated_toric_smwpm_decoder_matching_with_bias(error_pauli, eta, error_
             [],
         ]),
      0.1, 0.01, 10,
-     {
-         frozenset({((1, 1, 1), False), ((1, 2, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 2, 1), True)}),  # right
-         frozenset({((0, 1, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((1, 2, 2), True), ((1, 1, 1), True)}),  # left
-     }),
+     {frozenset({((1, 1, 1), False), ((1, 2, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 2, 1), True)}),  # right
+      frozenset({((0, 1, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((1, 2, 2), True), ((1, 1, 1), True)}),  # left
+      }),
 
 ])
 def test_rotated_toric_smwpm_decoder_matching_ftp(code, error, syndrome, step_errors, step_measurement_errors,
@@ -875,10 +833,9 @@ def test_rotated_toric_smwpm_decoder_matching_ftp(code, error, syndrome, step_er
             [(2, 2)], [], [], [], [], [],
         ]),
      0, 0.04, None,
-     {
-         frozenset({((1, 2, 2), False), ((0, 2, 2), False)}),
-         frozenset({((1, 2, 2), True), ((0, 2, 2), True)}),
-     }),
+     {frozenset({((1, 2, 2), False), ((0, 2, 2), False)}),
+      frozenset({((1, 2, 2), True), ((0, 2, 2), True)}),
+      }),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 1 measurement error
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -888,10 +845,9 @@ def test_rotated_toric_smwpm_decoder_matching_ftp(code, error, syndrome, step_er
             [], [(2, 2)], [], [], [], [],
         ]),
      0, 0.04, None,
-     {
-         frozenset({((1, 2, 2), False), ((2, 2, 2), False)}),
-         frozenset({((1, 2, 2), True), ((2, 2, 2), True)}),
-     }),
+     {frozenset({((1, 2, 2), False), ((2, 2, 2), False)}),
+      frozenset({((1, 2, 2), True), ((2, 2, 2), True)}),
+      }),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 3 measurement error
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -901,10 +857,9 @@ def test_rotated_toric_smwpm_decoder_matching_ftp(code, error, syndrome, step_er
             [], [(2, 2)], [(2, 2)], [(2, 2)], [], [],
         ]),
      0, 0.04, None,
-     {
-         frozenset({((1, 2, 2), False), ((4, 2, 2), False)}),
-         frozenset({((1, 2, 2), True), ((4, 2, 2), True)}),
-     }),
+     {frozenset({((1, 2, 2), False), ((4, 2, 2), False)}),
+      frozenset({((1, 2, 2), True), ((4, 2, 2), True)}),
+      }),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 3 measurement error
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -914,10 +869,9 @@ def test_rotated_toric_smwpm_decoder_matching_ftp(code, error, syndrome, step_er
             [(2, 2)], [], [], [], [(2, 2)], [(2, 2)],
         ]),
      0, 0.04, None,
-     {
-         frozenset({((1, 2, 2), False), ((4, 2, 2), False)}),
-         frozenset({((1, 2, 2), True), ((4, 2, 2), True)}),
-     }),
+     {frozenset({((1, 2, 2), False), ((4, 2, 2), False)}),
+      frozenset({((1, 2, 2), True), ((4, 2, 2), True)}),
+      }),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 1 measurement errors
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -927,10 +881,9 @@ def test_rotated_toric_smwpm_decoder_matching_ftp(code, error, syndrome, step_er
             [], [], [], [], [], [(2, 2)],
         ]),
      0, 0.04, None,
-     {
-         frozenset({((0, 2, 2), False), ((5, 2, 2), False)}),
-         frozenset({((0, 2, 2), True), ((5, 2, 2), True)}),
-     }),
+     {frozenset({((0, 2, 2), False), ((5, 2, 2), False)}),
+      frozenset({((0, 2, 2), True), ((5, 2, 2), True)}),
+      }),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 2 measurement errors
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -940,10 +893,9 @@ def test_rotated_toric_smwpm_decoder_matching_ftp(code, error, syndrome, step_er
             [(2, 2)], [], [], [], [], [(2, 2)],
         ]),
      0, 0.04, None,
-     {
-         frozenset({((1, 2, 2), False), ((5, 2, 2), False)}),
-         frozenset({((1, 2, 2), True), ((5, 2, 2), True)}),
-     }),
+     {frozenset({((1, 2, 2), False), ((5, 2, 2), False)}),
+      frozenset({((1, 2, 2), True), ((5, 2, 2), True)}),
+      }),
 ])
 def test_rotated_toric_smwpm_decoder_matching_tparity(code, error, syndrome, step_errors, step_measurement_errors,
                                                       p, q, eta, expected):
@@ -965,65 +917,52 @@ def test_rotated_toric_smwpm_decoder_matching_tparity(code, error, syndrome, ste
 
     # BULK
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2)),  # . bulk
-     [
-         [(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2), (3, 3)),  # / in bulk
-     [
-         [(0, 1, 1), (0, 1, 2), (0, 3, 2), (0, 3, 3), (0, 2, 3), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (0, 3, 2), (0, 3, 3), (0, 2, 3), (0, 2, 1)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 3), (3, 2)),  # \ in bulk
-     [
-         [(0, 1, 2), (0, 1, 3), (0, 2, 3), (0, 2, 1), (0, 3, 1), (0, 3, 2)],
-     ]),
+     [[(0, 1, 2), (0, 1, 3), (0, 2, 3), (0, 2, 1), (0, 3, 1), (0, 3, 2)],
+      ]),
 
     # CORNER SW
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0)),  # . in sw corner
-     [
-         [(0, 0, 0), (0, 0, 5), (0, 5, 5), (0, 5, 0)],
-     ]),
+     [[(0, 0, 0), (0, 0, 5), (0, 5, 5), (0, 5, 0)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (1, 1)),  # / in sw corner
-     [
-         [(0, 0, 1), (0, 0, 5), (0, 5, 5), (0, 5, 0), (0, 1, 0), (0, 1, 1)],
-     ]),
+     [[(0, 0, 1), (0, 0, 5), (0, 5, 5), (0, 5, 0), (0, 1, 0), (0, 1, 1)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 1), (1, 0)),  # \ in sw corner
-     [
-         [(0, 0, 1), (0, 0, 5), (0, 1, 5), (0, 1, 0), (0, 5, 0), (0, 5, 1)],
-     ]),
+     [[(0, 0, 1), (0, 0, 5), (0, 1, 5), (0, 1, 0), (0, 5, 0), (0, 5, 1)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (1, 1), (2, 2)),  # .*' in sw corner
-     [
-         [(0, 0, 1), (0, 0, 5), (0, 5, 5), (0, 5, 0), (0, 1, 0), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, 0, 1), (0, 0, 5), (0, 5, 5), (0, 5, 0), (0, 1, 0), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
+      ]),
 
     # CORNERS (NW, NE SE)
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 5)),  # . in nw corner
-     [
-         [(0, 0, 4), (0, 0, 5), (0, 5, 5), (0, 5, 4)],
-     ]),
+     [[(0, 0, 4), (0, 0, 5), (0, 5, 5), (0, 5, 4)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (5, 5)),  # . in ne corner
-     [
-         [(0, 4, 4), (0, 4, 5), (0, 5, 5), (0, 5, 4)],
-     ]),
+     [[(0, 4, 4), (0, 4, 5), (0, 5, 5), (0, 5, 4)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (5, 0)),  # . in se corner
-     [
-         [(0, 4, 0), (0, 4, 5), (0, 5, 5), (0, 5, 0)],
-     ]),
+     [[(0, 4, 0), (0, 4, 5), (0, 5, 5), (0, 5, 0)],
+      ]),
 
     # TWO CLUSTERS
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (2, 2)),  # . in sw corner and . in bulk
-     [
-         [(0, 0, 0), (0, 0, 5), (0, 5, 5), (0, 5, 0)],
-         [(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, 0, 0), (0, 0, 5), (0, 5, 5), (0, 5, 0)],
+      [(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (1, 1), (4, 4)),  # / in sw corner and . near ne corner
-     [
-         [(0, 0, 1), (0, 0, 5), (0, 5, 5), (0, 5, 0), (0, 1, 0), (0, 1, 1)],
-         [(0, 3, 3), (0, 3, 4), (0, 4, 4), (0, 4, 3)],
-     ]),
+     [[(0, 0, 1), (0, 0, 5), (0, 5, 5), (0, 5, 0), (0, 1, 0), (0, 1, 1)],
+      [(0, 3, 3), (0, 3, 4), (0, 4, 4), (0, 4, 3)],
+      ]),
     (RotatedToricCode(6, 6).new_pauli().site('Y', (0, 0), (1, 1), (5, 5)),  # / in sw corner and . in ne corner
-     [
-         [(0, 0, 1), (0, 0, 5), (0, 4, 5), (0, 4, 4), (0, 5, 4), (0, 5, 0), (0, 1, 0), (0, 1, 1)],
-     ]),
+     [[(0, 0, 1), (0, 0, 5), (0, 4, 5), (0, 4, 4), (0, 5, 4), (0, 5, 0), (0, 1, 0), (0, 1, 1)],
+      ]),
 ])
 def test_rotated_toric_smwpm_decoder_clusters(error_pauli, expected):
     print()
@@ -1057,24 +996,21 @@ def test_rotated_toric_smwpm_decoder_clusters(error_pauli, expected):
     # . in bulk, eta=None (infinite)
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2)),
      None, 0.1,
-     [
-         [(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
+      ]),
     # / in bulk, eta=10
     (RotatedToricCode(6, 6).new_pauli().site('Y', (2, 2)).site('X', (3, 3)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 1, 2), (0, 3, 3), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (0, 3, 3), (0, 2, 1)],
+      ]),
 
     # TWO CLUSTERS
     # . in sw corner and . in bulk, eta=10
     (RotatedToricCode(8, 8).new_pauli().site('Y', (0, 0), (3, 3)).site('X', (4, 4)),
      10, 0.1,
-     [
-         [(0, 0, 0), (0, 0, 7), (0, 7, 7), (0, 7, 0)],
-         [(0, 2, 2), (0, 2, 3), (0, 4, 4), (0, 3, 2)],
-     ]),
+     [[(0, 0, 0), (0, 0, 7), (0, 7, 7), (0, 7, 0)],
+      [(0, 2, 2), (0, 2, 3), (0, 4, 4), (0, 3, 2)],
+      ]),
 
     # ISOLATED Y DEFECTS
     # Y defects in SW and NE corners, eta=10
@@ -1082,53 +1018,48 @@ def test_rotated_toric_smwpm_decoder_clusters(error_pauli, expected):
      .site('X', (0, 1), (1, 1), (7, 1), (6, 0), (6, 7))
      .site('Z', (2, 1), (2, 0), (2, 7), (1, 7), (0, 7), (7, 7), (6, 7)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 5, 6), (0, 6, 6)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 5, 6), (0, 6, 6)],
+      ]),
     # Y defects in SW and NE corners, eta=10
     (RotatedToricCode(10, 10).new_pauli()
      .site('X', (0, 1), (1, 1), (9, 1), (8, 0), (8, 9))
      .site('Z', (2, 1), (2, 0), (2, 9), (1, 9), (0, 9), (9, 9), (8, 9)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 7, 8), (0, 8, 8)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 7, 8), (0, 8, 8)],
+      ]),
     # Y defects in SW and NE corners and neutral cluster in center, eta=10
     (RotatedToricCode(10, 10).new_pauli()
      .site('X', (0, 1), (1, 1), (9, 1), (8, 0), (8, 9))
      .site('Z', (2, 1), (2, 0), (2, 9), (1, 9), (0, 9), (9, 9), (8, 9))
      .site('Y', (4, 5), (5, 5), (6, 5)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 3, 4), (0, 3, 5), (0, 6, 5), (0, 6, 4)],
-         [(0, 7, 8), (0, 8, 8)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 3, 4), (0, 3, 5), (0, 6, 5), (0, 6, 4)],
+      [(0, 7, 8), (0, 8, 8)],
+      ]),
     # Y defects in SW and NE corners and neutral cluster in center, eta=10
     (RotatedToricCode(12, 12).new_pauli()
      .site('X', (0, 1), (1, 1), (11, 1), (10, 0), (10, 11))
      .site('Z', (2, 1), (2, 0), (2, 11), (1, 11), (0, 11), (11, 11), (10, 11))
      .site('Y', (5, 6), (6, 6), (7, 6)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 4, 5), (0, 4, 6), (0, 7, 6), (0, 7, 5)],
-         [(0, 9, 10), (0, 10, 10)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 4, 5), (0, 4, 6), (0, 7, 6), (0, 7, 5)],
+      [(0, 9, 10), (0, 10, 10)],
+      ]),
     # Y defects in SW and NE corners and 2 neutral clusters in center, eta=10
     (RotatedToricCode(12, 12).new_pauli()
      .site('X', (0, 1), (1, 1), (11, 1), (10, 0), (10, 11))
      .site('Z', (2, 1), (2, 0), (2, 11), (1, 11), (0, 11), (11, 11), (10, 11))
      .site('Y', (4, 5), (8, 7)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 3, 4), (0, 3, 5), (0, 4, 5), (0, 4, 4)],
-         [(0, 7, 6), (0, 7, 7), (0, 8, 7), (0, 8, 6)],
-         [(0, 9, 10), (0, 10, 10)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 3, 4), (0, 3, 5), (0, 4, 5), (0, 4, 4)],
+      [(0, 7, 6), (0, 7, 7), (0, 8, 7), (0, 8, 6)],
+      [(0, 9, 10), (0, 10, 10)],
+      ]),
 ])
 def test_rotated_toric_smwpm_decoder_clusters_with_bias(error_pauli, eta, error_probability, expected):
     print()
@@ -1168,9 +1099,8 @@ def test_rotated_toric_smwpm_decoder_clusters_with_bias(error_pauli, eta, error_
             [(2, 2)],
             [],
         ]),
-     [
-         [(0, 1, 1), (0, 1, 2), (1, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (1, 2, 2), (0, 2, 1)],
+      ]),
 ])
 def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_errors, step_measurement_errors,
                                                   expected):
@@ -1194,9 +1124,8 @@ def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_er
             [(2, 2)], [], [], [], [], [],
         ]),
      0, 0.04, None,
-     [
-         [(0, 2, 2), (1, 2, 2)],
-     ]),
+     [[(0, 2, 2), (1, 2, 2)],
+      ]),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 1 measurement error
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -1206,9 +1135,8 @@ def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_er
             [], [(2, 2)], [], [], [], [],
         ]),
      0, 0.04, None,
-     [
-         [(1, 2, 2), (2, 2, 2)],
-     ]),
+     [[(1, 2, 2), (2, 2, 2)],
+      ]),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 3 measurement error
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -1218,9 +1146,8 @@ def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_er
             [], [(2, 2)], [(2, 2)], [(2, 2)], [], [],
         ]),
      0, 0.04, None,
-     [
-         [(1, 2, 2), (4, 2, 2)],
-     ]),
+     [[(1, 2, 2), (4, 2, 2)],
+      ]),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 3 measurement error
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -1230,9 +1157,8 @@ def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_er
             [(2, 2)], [], [], [], [(2, 2)], [(2, 2)],
         ]),
      0, 0.04, None,
-     [
-         [(1, 2, 2), (4, 2, 2)],
-     ]),
+     [[(1, 2, 2), (4, 2, 2)],
+      ]),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 1 measurement errors
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -1242,9 +1168,8 @@ def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_er
             [], [], [], [], [], [(2, 2)],
         ]),
      0, 0.04, None,
-     [
-         [(0, 2, 2), (5, 2, 2)],
-     ]),
+     [[(0, 2, 2), (5, 2, 2)],
+      ]),
     (*_code_error_syndrome(  # 6 time-steps, 0 qubit errors, 2 measurement errors
         RotatedToricCode(6, 6),  # code
         [  # step_errors
@@ -1254,9 +1179,8 @@ def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_er
             [(2, 2)], [], [], [], [], [(2, 2)],
         ]),
      0, 0.04, None,
-     [
-         [(1, 2, 2), (5, 2, 2)],
-     ]),
+     [[(1, 2, 2), (5, 2, 2)],
+      ]),
 ])
 def test_rotated_toric_smwpm_decoder_clusters_tparity(code, error, syndrome, step_errors, step_measurement_errors,
                                                       p, q, eta, expected):
@@ -1269,56 +1193,56 @@ def test_rotated_toric_smwpm_decoder_clusters_tparity(code, error, syndrome, ste
 
 
 @pytest.mark.parametrize('code, cluster, expected', [
-    (  # On-lattice (no Y-defect)
-            RotatedToricCode(6, 6),
-            [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)],  # ZXZX
-            ([(0, 0, 1), (0, 1, 0)], [(0, 0, 0), (0, 1, 1)], None)
-    ),
-    (  # On-lattice (no Y-defect, 1 measurement error)
-            RotatedToricCode(6, 6),
-            [(0, 0, 0), (0, 0, 1), (1, 1, 1), (0, 1, 0)],  # ZXZX
-            ([(0, 0, 1), (0, 1, 0)], [(0, 0, 0), (1, 1, 1)], None)
-    ),
-    (  # On-lattice (Y-defect)
-            RotatedToricCode(6, 6),
-            [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 2, 0)],  # ZXZZ
-            ([], [(0, 0, 0), (0, 1, 1)], ((0, 0, 1), (0, 2, 0)))
-    ),
-    (  # On-lattice (Y-defect, 1 measurement error)
-            RotatedToricCode(6, 6),
-            [(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 2, 0)],  # ZXZZ
-            ([], [(0, 0, 0), (0, 1, 1)], ((0, 0, 1), (1, 2, 0)))
-    ),
-    (  # Off-lattice (no Y-defect)
-            RotatedToricCode(6, 6),
-            [(0, 5, 5), (0, 5, 0), (0, 0, 0), (0, 0, 5)],  # ZXZX
-            ([(0, 5, 0), (0, 0, 5)], [(0, 5, 5), (0, 0, 0)], None)
-    ),
-    (  # Off-lattice (no Y-defect, 1 measurement error)
-            RotatedToricCode(6, 6),
-            [(0, 5, 5), (1, 5, 0), (0, 0, 0), (0, 0, 5)],  # ZXZX
-            ([(1, 5, 0), (0, 0, 5)], [(0, 5, 5), (0, 0, 0)], None)
-    ),
-    (  # Off-lattice (Y-defect)
-            RotatedToricCode(6, 6),
-            [(0, 5, 5), (0, 5, 0), (0, 1, 0), (0, 2, 5)],  # ZXXX
-            ([(0, 5, 0), (0, 1, 0)], [], ((0, 2, 5), (0, 5, 5)))
-    ),
-    (  # Off-lattice (Y-defect, 1 measurment error)
-            RotatedToricCode(6, 6),
-            [(1, 5, 5), (0, 5, 0), (0, 1, 0), (0, 2, 5)],  # ZXXX
-            ([(0, 5, 0), (0, 1, 0)], [], ((0, 2, 5), (1, 5, 5)))
-    ),
-    (  # Partially off-lattice (Y-defect)
-            RotatedToricCode(6, 6),
-            [(0, 0, 5), (0, 5, 0), (0, 1, 0), (0, 1, 5)],  # XXXZ
-            ([(0, 0, 5), (0, 5, 0)], [], ((0, 1, 0), (0, 1, 5)))
-    ),
-    (  # Partially off-lattice (Y-defect, 1 measurement error)
-            RotatedToricCode(6, 6),
-            [(0, 0, 5), (0, 5, 0), (0, 1, 0), (1, 1, 5)],  # XXXZ
-            ([(0, 0, 5), (0, 5, 0)], [], ((0, 1, 0), (1, 1, 5)))
-    ),
+    # On-lattice (no Y-defect)
+    (RotatedToricCode(6, 6),
+     [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)],  # ZXZX
+     ([(0, 0, 1), (0, 1, 0)], [(0, 0, 0), (0, 1, 1)], None)
+     ),
+    # On-lattice (no Y-defect, 1 measurement error)
+    (RotatedToricCode(6, 6),
+     [(0, 0, 0), (0, 0, 1), (1, 1, 1), (0, 1, 0)],  # ZXZX
+     ([(0, 0, 1), (0, 1, 0)], [(0, 0, 0), (1, 1, 1)], None)
+     ),
+    # On-lattice (Y-defect)
+    (RotatedToricCode(6, 6),
+     [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 2, 0)],  # ZXZZ
+     ([], [(0, 0, 0), (0, 1, 1)], ((0, 0, 1), (0, 2, 0)))
+     ),
+    # On-lattice (Y-defect, 1 measurement error)
+    (RotatedToricCode(6, 6),
+     [(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 2, 0)],  # ZXZZ
+     ([], [(0, 0, 0), (0, 1, 1)], ((0, 0, 1), (1, 2, 0)))
+     ),
+    # Off-lattice (no Y-defect)
+    (RotatedToricCode(6, 6),
+     [(0, 5, 5), (0, 5, 0), (0, 0, 0), (0, 0, 5)],  # ZXZX
+     ([(0, 5, 0), (0, 0, 5)], [(0, 5, 5), (0, 0, 0)], None)
+     ),
+    # Off-lattice (no Y-defect, 1 measurement error)
+    (RotatedToricCode(6, 6),
+     [(0, 5, 5), (1, 5, 0), (0, 0, 0), (0, 0, 5)],  # ZXZX
+     ([(1, 5, 0), (0, 0, 5)], [(0, 5, 5), (0, 0, 0)], None)
+     ),
+    # Off-lattice (Y-defect)
+    (RotatedToricCode(6, 6),
+     [(0, 5, 5), (0, 5, 0), (0, 1, 0), (0, 2, 5)],  # ZXXX
+     ([(0, 5, 0), (0, 1, 0)], [], ((0, 2, 5), (0, 5, 5)))
+     ),
+    # Off-lattice (Y-defect, 1 measurment error)
+    (RotatedToricCode(6, 6),
+     [(1, 5, 5), (0, 5, 0), (0, 1, 0), (0, 2, 5)],  # ZXXX
+     ([(0, 5, 0), (0, 1, 0)], [], ((0, 2, 5), (1, 5, 5)))
+     ),
+    # Partially off-lattice (Y-defect)
+    (RotatedToricCode(6, 6),
+     [(0, 0, 5), (0, 5, 0), (0, 1, 0), (0, 1, 5)],  # XXXZ
+     ([(0, 0, 5), (0, 5, 0)], [], ((0, 1, 0), (0, 1, 5)))
+     ),
+    # Partially off-lattice (Y-defect, 1 measurement error)
+    (RotatedToricCode(6, 6),
+     [(0, 0, 5), (0, 5, 0), (0, 1, 0), (1, 1, 5)],  # XXXZ
+     ([(0, 0, 5), (0, 5, 0)], [], ((0, 1, 0), (1, 1, 5)))
+     ),
 ])
 def test_rotated_toric_smwpm_decoder_cluster_to_paths_and_defect_ftp(code, cluster, expected):
     x_path, z_path, y_defect = _rtsd._cluster_to_paths_and_defect(code, cluster)
@@ -1576,36 +1500,31 @@ def test_rotated_toric_smwpm_decoder_decode_ftp_tparity(code, error, syndrome, s
 
 
 @pytest.mark.parametrize('code, time_steps, a_node, b_node, expected', [
-    (
-            RotatedToricCode(6, 6), 1,
-            _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-            _rtsd._ClusterNode([(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)], (0, 2, 3), (0, 2, 4)),
-            3  # manhattan distance between (0, 1, 1) and (0, 2, 3)
-    ),
-    (
-            RotatedToricCode(6, 6), 1,
-            _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-            _rtsd._ClusterNode([(0, 1, 4), (0, 1, 5), (0, 2, 5), (0, 2, 4)], (0, 1, 4), (0, 1, 5)),
-            1  # manhattan distance between (0, 1, 0) and (0, 1, 5) (periodic in y)
-    ),
-    (
-            RotatedToricCode(6, 6), 1,
-            _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-            _rtsd._ClusterNode([(0, 4, 1), (0, 4, 2)], (0, 4, 1), (0, 4, 2)),
-            2  # manhattan distance between (0, 0, 1) and (0, 4, 1) (periodic in x)
-    ),
-    (
-            RotatedToricCode(6, 6), 6,
-            _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-            _rtsd._ClusterNode([(2, 2, 3), (2, 2, 4), (2, 3, 4), (2, 3, 3)], (2, 2, 3), (2, 2, 4)),
-            5  # manhattan distance between (0, 1, 1) and (2, 2, 3)
-    ),
-    (
-            RotatedToricCode(6, 6), 6,
-            _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-            _rtsd._ClusterNode([(5, 2, 3), (5, 2, 4), (5, 3, 4), (5, 3, 3)], (5, 2, 3), (5, 2, 4)),
-            4  # manhattan distance between (0, 1, 1) and (5, 2, 3) (periodic in t)
-    ),
+    (RotatedToricCode(6, 6), 1,
+     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     _rtsd._ClusterNode([(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)], (0, 2, 3), (0, 2, 4)),
+     3  # manhattan distance between (0, 1, 1) and (0, 2, 3)
+     ),
+    (RotatedToricCode(6, 6), 1,
+     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     _rtsd._ClusterNode([(0, 1, 4), (0, 1, 5), (0, 2, 5), (0, 2, 4)], (0, 1, 4), (0, 1, 5)),
+     1  # manhattan distance between (0, 1, 0) and (0, 1, 5) (periodic in y)
+     ),
+    (RotatedToricCode(6, 6), 1,
+     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     _rtsd._ClusterNode([(0, 4, 1), (0, 4, 2)], (0, 4, 1), (0, 4, 2)),
+     2  # manhattan distance between (0, 0, 1) and (0, 4, 1) (periodic in x)
+     ),
+    (RotatedToricCode(6, 6), 6,
+     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     _rtsd._ClusterNode([(2, 2, 3), (2, 2, 4), (2, 3, 4), (2, 3, 3)], (2, 2, 3), (2, 2, 4)),
+     5  # manhattan distance between (0, 1, 1) and (2, 2, 3)
+     ),
+    (RotatedToricCode(6, 6), 6,
+     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     _rtsd._ClusterNode([(5, 2, 3), (5, 2, 4), (5, 3, 4), (5, 3, 3)], (5, 2, 3), (5, 2, 4)),
+     4  # manhattan distance between (0, 1, 1) and (5, 2, 3) (periodic in t)
+     ),
 ])
 def test_rotated_toric_smwpm_decoder_cluster_distance_ftp(code, time_steps, a_node, b_node, expected):
     distance = _rtsd._cluster_distance(code, time_steps, a_node, b_node)

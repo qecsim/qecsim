@@ -385,6 +385,8 @@ class StepGrid:
 
 class _Node:
     # simple class to contain index and implement object reference equality for mwpm
+    __slots__ = ('index',)
+
     def __init__(self, index):
         self.index = index
 
@@ -550,7 +552,7 @@ class PlanarCMWPMDecoder(Decoder):
         # Catch and log floating point errors. This may happen if factor is large/small and there are many matches.
         with np.errstate(all='raise'):
             try:
-                for i in range(self._max_iterations):
+                for _ in range(self._max_iterations):
                     primal_matches = grid.mwpm(previous_dual_matches, primal_indices, factor=self._factor,
                                                box_shape=self._box_shape, distance_algorithm=self._distance_algorithm)
                     dual_matches = grid.mwpm(previous_primal_matches, dual_indices, factor=self._factor,

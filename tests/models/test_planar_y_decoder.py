@@ -12,7 +12,7 @@ from qecsim.models.planar import PlanarCode, PlanarYDecoder
 def _is_close(a, b, rtol=1e-05, atol=1e-08):
     # np.isclose for mp.mpf, i.e. absolute(a - b) <= (atol + rtol * absolute(b))
     try:
-        return [mp.almosteq(l, r, rel_eps=rtol, abs_eps=atol) for l, r in itertools.zip_longest(a, b)]
+        return [mp.almosteq(le, ri, rel_eps=rtol, abs_eps=atol) for le, ri in itertools.zip_longest(a, b)]
     except TypeError:
         return mp.almosteq(a, b, rel_eps=rtol, abs_eps=atol)
 
@@ -196,7 +196,7 @@ def test_planar_y_decoder_residual_recovery(code, syndrome_index):
 ])
 def test_planar_y_decoder_sample_recovery_sans_residual(error_pauli):
     def _mock_residual_recovery(code, syndrome):
-        assert False, 'Residual recovery called unexpectedly'
+        raise AssertionError('Residual recovery called unexpectedly')
 
     real_residual_recovery = PlanarYDecoder._residual_recovery
     try:
@@ -319,7 +319,7 @@ def test_planar_y_decoder_coset_probability_performance():
         PlanarYDecoder._y_stabilizers(code)
         # time runs
         start_time = time.time()
-        for run in range(n_run):
+        for _ in range(n_run):
             coset = PlanarYDecoder._y_stabilizers(code)
             coset_probability = PlanarYDecoder._coset_probability(prob_dist, coset)
         print(repr(coset_probability))
@@ -379,7 +379,7 @@ def test_planar_y_decoder_decode_equal_coset_probabilities():
     # run simulations
     error = error_pauli.to_bsf()
     syndrome = pt.bsp(error, code.stabilizers.T)
-    for i in range(2000):
+    for _ in range(2000):
         recovery = decoder.decode(code, syndrome)
         assert np.array_equal(pt.bsp(recovery, code.stabilizers.T), syndrome), (
             'recovery {} does not give the same syndrome as the error {}'.format(recovery, error))

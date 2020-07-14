@@ -9,7 +9,6 @@ from mpmath import mp
 from qecsim import paulitools as pt, tensortools as tt
 from qecsim.model import Decoder, cli_description
 from qecsim.models.generic import DepolarizingErrorModel
-from qecsim.models.rotatedplanar import RotatedPlanarCode
 
 logger = logging.getLogger(__name__)
 
@@ -238,7 +237,9 @@ class RotatedPlanarMPSDecoder(Decoder):
         # results
         return tuple(coset_ps), sample_paulis
 
-    def decode(self, code, syndrome, error_model=DepolarizingErrorModel(), error_probability=0.1, **kwargs):
+    def decode(self, code, syndrome,
+               error_model=DepolarizingErrorModel(),  # noqa: B008
+               error_probability=0.1, **kwargs):
         """
         See :meth:`qecsim.model.Decoder.decode`
 

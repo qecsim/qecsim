@@ -22,7 +22,7 @@ def _run_once(mode, code, time_steps, error_model, decoder, error_probability, m
 
     # generate step_error, step_syndrome and step_measurement_error for each time step
     step_errors, step_syndromes, step_measurement_errors = [], [], []
-    for t in range(time_steps):
+    for _ in range(time_steps):
         # step_error: random error based on error probability
         step_error = error_model.generate(code, error_probability, rng)
         step_errors.append(step_error)

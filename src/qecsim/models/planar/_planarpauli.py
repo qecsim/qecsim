@@ -61,7 +61,7 @@ class PlanarPauli:
     def code(self):
         """
         The planar code.
-        
+
         :rtype: PlanarCode
         """
         return self._code

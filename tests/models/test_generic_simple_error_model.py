@@ -37,7 +37,7 @@ def test_simple_error_model_generate():
 
     # output
     ixyz_counts = np.array([0, 0, 0, 0])
-    for r in range(n_runs):
+    for _ in range(n_runs):
         error = error_model.generate(code, error_probability, rng)
         pauli_error = pt.bsf_to_pauli(error)
         ixyz_counts += (pauli_error.count('I'), pauli_error.count('X'), pauli_error.count('Y'), pauli_error.count('Z'))

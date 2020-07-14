@@ -19,7 +19,7 @@ def _print_clusters(code, clusters, debug=False):
     if debug:
         # lattice for each cluster with order plaquettes in cluster given alphabetically
         for cluster in clusters:
-            plaquette_labels = {(x, y): l for (t, x, y), l in zip(cluster, string.ascii_letters + '*' * len(cluster))}
+            plaquette_labels = {(x, y): la for (t, x, y), la in zip(cluster, string.ascii_letters + '*' * len(cluster))}
             print(code.ascii_art(plaquette_labels=plaquette_labels))
 
 
@@ -419,19 +419,17 @@ def test_rotated_planar_smwpm_decoder_distance_ftp(code, time_steps, a, b, eta, 
     # nodes (within edges) are sorted for comparison (automatically in test).
     # edges are in an unsorted set.
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)),  # bulk
-     {
-         (((0, 1, 1), True), ((0, 2, 1), True), 1),  # bottom edge
-         (((0, 1, 2), True), ((0, 2, 2), True), 1),  # top edge
-         (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
-         (((0, 2, 2), False), ((0, 2, 1), False), 1),  # right edge
-     }),
+     {(((0, 1, 1), True), ((0, 2, 1), True), 1),  # bottom edge
+      (((0, 1, 2), True), ((0, 2, 2), True), 1),  # top edge
+      (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
+      (((0, 2, 2), False), ((0, 2, 1), False), 1),  # right edge
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2), (3, 2)),  # bulk
-     {
-         (((0, 1, 1), True), ((0, 3, 1), True), 2),  # bottom edge
-         (((0, 1, 2), True), ((0, 3, 2), True), 2),  # top edge
-         (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
-         (((0, 3, 2), False), ((0, 3, 1), False), 1),  # right edge
-     }),
+     {(((0, 1, 1), True), ((0, 3, 1), True), 2),  # bottom edge
+      (((0, 1, 2), True), ((0, 3, 2), True), 2),  # top edge
+      (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
+      (((0, 3, 2), False), ((0, 3, 1), False), 1),  # right edge
+      }),
 ])
 def test_rotated_planar_smwpm_decoder_graph(error_pauli, expected):
     # parameters
@@ -456,27 +454,22 @@ def test_rotated_planar_smwpm_decoder_graph(error_pauli, expected):
 @pytest.mark.parametrize('error_pauli, eta, error_probability, expected', [
     # nodes (within edges) are sorted for comparison (manually).
     # edges are sorted by weight, a_node, b_node, where True > False (manually).
-    (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)).site('X', (3, 3)),  # bulk
+    (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)).site('X', (3, 3)),
      100, 0.1,
-     (  # nodes: (1, 1), (1, 2), (2, 1), (3, 3)
-             # 0 diagonal + 1 parallel
-             (((0, 1, 1), False), ((0, 1, 2), False)),
-             (((0, 1, 1), True), ((0, 2, 1), True)),
-             # 1 diagonal + 0 parallel
-             (((0, 1, 2), False), ((0, 2, 1), False)),
-             (((0, 1, 2), True), ((0, 2, 1), True)),
-             # 1 diagonal + 1 parallel
-             (((0, 1, 1), False), ((0, 2, 1), False)),
-             (((0, 1, 1), True), ((0, 1, 2), True)),
-             (((0, 1, 2), True), ((0, 3, 3), True)),
-             (((0, 2, 1), False), ((0, 3, 3), False)),
-             # 2 diagonal + 0 parallel
-             (((0, 1, 1), False), ((0, 3, 3), False)),
-             (((0, 1, 1), True), ((0, 3, 3), True)),
-             # 2 diagonal + 1 parallel
-             (((0, 1, 2), False), ((0, 3, 3), False)),
-             (((0, 2, 1), True), ((0, 3, 3), True)),
-     )),
+     # nodes: (1, 1), (1, 2), (2, 1), (3, 3)
+     ((((0, 1, 1), False), ((0, 1, 2), False)),  # 0 diagonal + 1 parallel
+      (((0, 1, 1), True), ((0, 2, 1), True)),
+      (((0, 1, 2), False), ((0, 2, 1), False)),  # 1 diagonal + 0 parallel
+      (((0, 1, 2), True), ((0, 2, 1), True)),
+      (((0, 1, 1), False), ((0, 2, 1), False)),  # 1 diagonal + 1 parallel
+      (((0, 1, 1), True), ((0, 1, 2), True)),
+      (((0, 1, 2), True), ((0, 3, 3), True)),
+      (((0, 2, 1), False), ((0, 3, 3), False)),
+      (((0, 1, 1), False), ((0, 3, 3), False)),  # 2 diagonal + 0 parallel
+      (((0, 1, 1), True), ((0, 3, 3), True)),
+      (((0, 1, 2), False), ((0, 3, 3), False)),  # 2 diagonal + 1 parallel
+      (((0, 2, 1), True), ((0, 3, 3), True)),
+      )),
 ])
 def test_rotated_planar_smwpm_decoder_graph_with_bias(error_pauli, eta, error_probability, expected):
     # parameters
@@ -514,12 +507,12 @@ def test_rotated_planar_smwpm_decoder_graph_with_bias(error_pauli, eta, error_pr
             [(2, 2)],
             [],
         ]),
-     {
-         (((0, 1, 1), True), ((0, 2, 1), True), 1),  # bottom edge
-         (((0, 1, 2), True), ((1, 2, 2), True), 2),  # top edge
-         (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
-         (((1, 2, 2), False), ((0, 2, 1), False), 2),  # right edge
-     }),
+     {(((0, 1, 1), True), ((0, 2, 1), True), 1),  # bottom edge
+      (((0, 1, 2), True), ((1, 2, 2), True), 2),  # top edge
+      (((0, 1, 2), False), ((0, 1, 1), False), 1),  # left edge
+      (((1, 2, 2), False), ((0, 2, 1), False), 2),  # right edge
+      }
+     ),
 ])
 def test_rotated_planar_smwpm_decoder_graph_ftp(code, error, syndrome, expected):
     # call
@@ -539,230 +532,201 @@ def test_rotated_planar_smwpm_decoder_graph_ftp(code, error, syndrome, expected)
 
     # BULK
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)),  # . bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 2, 2), True)}),  # right
-         frozenset({((0, 2, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 2, 2), True)}),  # right
+      frozenset({((0, 2, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2), (3, 2)),  # .. bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 3, 2), True)}),  # right
-         frozenset({((0, 3, 2), False), ((0, 3, 1), False)}),  # down
-         frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 3, 2), True)}),  # right
+      frozenset({((0, 3, 2), False), ((0, 3, 1), False)}),  # down
+      frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2), (2, 3)),  # : bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
-         frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
+      frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2), (2, 3), (3, 3), (3, 2)),  # :: bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 3, 3), True)}),  # right
-         frozenset({((0, 3, 3), False), ((0, 3, 1), False)}),  # down
-         frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 3, 3), True)}),  # right
+      frozenset({((0, 3, 3), False), ((0, 3, 1), False)}),  # down
+      frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2), (3, 3)),  # / in bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 3, 2), True)}),  # right
-         frozenset({((0, 3, 2), False), ((0, 3, 3), False)}),  # up
-         frozenset({((0, 3, 3), True), ((0, 2, 3), True)}),  # left
-         frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 3, 2), True)}),  # right
+      frozenset({((0, 3, 2), False), ((0, 3, 3), False)}),  # up
+      frozenset({((0, 3, 3), True), ((0, 2, 3), True)}),  # left
+      frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 3), (3, 2)),  # \ in bulk
-     {
-         frozenset({((0, 1, 2), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
-         frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 3, 1), True)}),  # right
-         frozenset({((0, 3, 1), False), ((0, 3, 2), False)}),  # up
-         frozenset({((0, 3, 2), True), ((0, 1, 2), True)}),  # left
-     }),
+     {frozenset({((0, 1, 2), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
+      frozenset({((0, 2, 3), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 3, 1), True)}),  # right
+      frozenset({((0, 3, 1), False), ((0, 3, 2), False)}),  # up
+      frozenset({((0, 3, 2), True), ((0, 1, 2), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2), (2, 3), (3, 2)),  # :. in bulk
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
-         frozenset({((0, 2, 3), False), ((0, 2, 2), False)}),  # down
-         frozenset({((0, 2, 2), True), ((0, 3, 2), True)}),  # right
-         frozenset({((0, 3, 2), False), ((0, 3, 1), False)}),  # down
-         frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 2, 3), True)}),  # right
+      frozenset({((0, 2, 3), False), ((0, 2, 2), False)}),  # down
+      frozenset({((0, 2, 2), True), ((0, 3, 2), True)}),  # right
+      frozenset({((0, 3, 2), False), ((0, 3, 1), False)}),  # down
+      frozenset({((0, 3, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 3), (3, 3), (3, 2)),  # ': in bulk
-     {
-         frozenset({((0, 1, 2), False), ((0, 1, 3), False)}),  # up
-         frozenset({((0, 1, 3), True), ((0, 3, 3), True)}),  # right
-         frozenset({((0, 3, 3), False), ((0, 3, 1), False)}),  # down
-         frozenset({((0, 3, 1), True), ((0, 2, 1), True)}),  # left
-         frozenset({((0, 2, 1), False), ((0, 2, 2), False)}),  # up
-         frozenset({((0, 2, 2), True), ((0, 1, 2), True)}),  # left
-     }),
+     {frozenset({((0, 1, 2), False), ((0, 1, 3), False)}),  # up
+      frozenset({((0, 1, 3), True), ((0, 3, 3), True)}),  # right
+      frozenset({((0, 3, 3), False), ((0, 3, 1), False)}),  # down
+      frozenset({((0, 3, 1), True), ((0, 2, 1), True)}),  # left
+      frozenset({((0, 2, 1), False), ((0, 2, 2), False)}),  # up
+      frozenset({((0, 2, 2), True), ((0, 1, 2), True)}),  # left
+      }),
 
     # CORNER SW
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0)),  # . in sw corner
-     {
-         frozenset({((0, -1, -1), False), ((0, -1, 0), False)}),  # up
-         frozenset({((0, -1, 0), True), ((0, 0, 0), True)}),  # right
-         frozenset({((0, 0, 0), False), ((0, 0, -1), False)}),  # down
-         frozenset({((0, 0, -1), True), ((0, -1, -1), True)}),  # left
-     }),
+     {frozenset({((0, -1, -1), False), ((0, -1, 0), False)}),  # up
+      frozenset({((0, -1, 0), True), ((0, 0, 0), True)}),  # right
+      frozenset({((0, 0, 0), False), ((0, 0, -1), False)}),  # down
+      frozenset({((0, 0, -1), True), ((0, -1, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (1, 0)),  # .. in sw corner
-     {
-         frozenset({((0, -1, -1), False), ((0, -1, 0), False)}),  # up
-         frozenset({((0, -1, 0), True), ((0, 1, 0), True)}),  # right
-         frozenset({((0, 1, 0), False), ((0, 1, -1), False)}),  # down
-         frozenset({((0, 1, -1), True), ((0, -1, -1), True)}),  # left
-     }),
+     {frozenset({((0, -1, -1), False), ((0, -1, 0), False)}),  # up
+      frozenset({((0, -1, 0), True), ((0, 1, 0), True)}),  # right
+      frozenset({((0, 1, 0), False), ((0, 1, -1), False)}),  # down
+      frozenset({((0, 1, -1), True), ((0, -1, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (0, 1)),  # : in sw corner
-     {
-         frozenset({((0, -1, -1), False), ((0, -1, 1), False)}),  # up
-         frozenset({((0, -1, 1), True), ((0, 0, 1), True)}),  # right
-         frozenset({((0, 0, 1), False), ((0, 0, -1), False)}),  # down
-         frozenset({((0, 0, -1), True), ((0, -1, -1), True)}),  # left
-     }),
+     {frozenset({((0, -1, -1), False), ((0, -1, 1), False)}),  # up
+      frozenset({((0, -1, 1), True), ((0, 0, 1), True)}),  # right
+      frozenset({((0, 0, 1), False), ((0, 0, -1), False)}),  # down
+      frozenset({((0, 0, -1), True), ((0, -1, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (0, 1), (1, 1), (1, 0)),  # :: in sw corner
-     {
-         frozenset({((0, -1, -1), False), ((0, -1, 1), False)}),  # up
-         frozenset({((0, -1, 1), True), ((0, 1, 1), True)}),  # right
-         frozenset({((0, 1, 1), False), ((0, 1, -1), False)}),  # down
-         frozenset({((0, 1, -1), True), ((0, -1, -1), True)}),  # left
-     }),
+     {frozenset({((0, -1, -1), False), ((0, -1, 1), False)}),  # up
+      frozenset({((0, -1, 1), True), ((0, 1, 1), True)}),  # right
+      frozenset({((0, 1, 1), False), ((0, 1, -1), False)}),  # down
+      frozenset({((0, 1, -1), True), ((0, -1, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (1, 0), (2, 0)),  # ... in sw corner
-     {
-         frozenset({((0, -1, -1), False), ((0, -1, 0), False)}),  # up
-         frozenset({((0, -1, 0), True), ((0, 2, 0), True)}),  # right
-         frozenset({((0, 2, 0), False), ((0, 2, -1), False)}),  # down
-         frozenset({((0, 2, -1), True), ((0, -1, -1), True)}),  # left
-     }),
+     {frozenset({((0, -1, -1), False), ((0, -1, 0), False)}),  # up
+      frozenset({((0, -1, 0), True), ((0, 2, 0), True)}),  # right
+      frozenset({((0, 2, 0), False), ((0, 2, -1), False)}),  # down
+      frozenset({((0, 2, -1), True), ((0, -1, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (0, 1), (0, 2)),  # ! in sw corner
-     {
-         frozenset({((0, -1, -1), False), ((0, -1, 2), False)}),  # up
-         frozenset({((0, -1, 2), True), ((0, 0, 2), True)}),  # right
-         frozenset({((0, 0, 2), False), ((0, 0, -1), False)}),  # down
-         frozenset({((0, 0, -1), True), ((0, -1, -1), True)}),  # left
-     }),
+     {frozenset({((0, -1, -1), False), ((0, -1, 2), False)}),  # up
+      frozenset({((0, -1, 2), True), ((0, 0, 2), True)}),  # right
+      frozenset({((0, 0, 2), False), ((0, 0, -1), False)}),  # down
+      frozenset({((0, 0, -1), True), ((0, -1, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (1, 1)),  # / in sw corner
-     {
-         frozenset({((0, -1, -1), False), ((0, -1, 0), False)}),  # up
-         frozenset({((0, -1, 0), True), ((0, 1, 0), True)}),  # right
-         frozenset({((0, 1, 0), False), ((0, 1, 1), False)}),  # up
-         frozenset({((0, 1, 1), True), ((0, 0, 1), True)}),  # left
-         frozenset({((0, 0, 1), False), ((0, 0, -1), False)}),  # down
-         frozenset({((0, 0, -1), True), ((0, -1, -1), True)}),  # left
-     }),
+     {frozenset({((0, -1, -1), False), ((0, -1, 0), False)}),  # up
+      frozenset({((0, -1, 0), True), ((0, 1, 0), True)}),  # right
+      frozenset({((0, 1, 0), False), ((0, 1, 1), False)}),  # up
+      frozenset({((0, 1, 1), True), ((0, 0, 1), True)}),  # left
+      frozenset({((0, 0, 1), False), ((0, 0, -1), False)}),  # down
+      frozenset({((0, 0, -1), True), ((0, -1, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 1), (1, 0)),  # \ in sw corner
-     {
-         frozenset({((0, -1, 0), False), ((0, -1, 1), False)}),  # up
-         frozenset({((0, -1, 1), True), ((0, 0, 1), True)}),  # right
-         frozenset({((0, 0, 1), False), ((0, 0, -1), False)}),  # down
-         frozenset({((0, 0, -1), True), ((0, 1, -1), True)}),  # right
-         frozenset({((0, 1, -1), False), ((0, 1, 0), False)}),  # up
-         frozenset({((0, 1, 0), True), ((0, -1, 0), True)}),  # left
-     }),
+     {frozenset({((0, -1, 0), False), ((0, -1, 1), False)}),  # up
+      frozenset({((0, -1, 1), True), ((0, 0, 1), True)}),  # right
+      frozenset({((0, 0, 1), False), ((0, 0, -1), False)}),  # down
+      frozenset({((0, 0, -1), True), ((0, 1, -1), True)}),  # right
+      frozenset({((0, 1, -1), False), ((0, 1, 0), False)}),  # up
+      frozenset({((0, 1, 0), True), ((0, -1, 0), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (0, 1), (1, 0)),  # :. in sw corner
-     {
-         frozenset({((0, -1, -1), False), ((0, -1, 1), False)}),  # up
-         frozenset({((0, -1, 1), True), ((0, 0, 1), True)}),  # right
-         frozenset({((0, 0, 1), False), ((0, 0, 0), False)}),  # down
-         frozenset({((0, 0, 0), True), ((0, 1, 0), True)}),  # right
-         frozenset({((0, 1, 0), False), ((0, 1, -1), False)}),  # down
-         frozenset({((0, 1, -1), True), ((0, -1, -1), True)}),  # left
-     }),
+     {frozenset({((0, -1, -1), False), ((0, -1, 1), False)}),  # up
+      frozenset({((0, -1, 1), True), ((0, 0, 1), True)}),  # right
+      frozenset({((0, 0, 1), False), ((0, 0, 0), False)}),  # down
+      frozenset({((0, 0, 0), True), ((0, 1, 0), True)}),  # right
+      frozenset({((0, 1, 0), False), ((0, 1, -1), False)}),  # down
+      frozenset({((0, 1, -1), True), ((0, -1, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 1), (1, 1), (1, 0)),  # ': in sw corner
-     {
-         frozenset({((0, -1, 0), False), ((0, -1, 1), False)}),  # up
-         frozenset({((0, -1, 1), True), ((0, 1, 1), True)}),  # right
-         frozenset({((0, 1, 1), False), ((0, 1, -1), False)}),  # down
-         frozenset({((0, 1, -1), True), ((0, 0, -1), True)}),  # left
-         frozenset({((0, 0, -1), False), ((0, 0, 0), False)}),  # up
-         frozenset({((0, 0, 0), True), ((0, -1, 0), True)}),  # left
-     }),
+     {frozenset({((0, -1, 0), False), ((0, -1, 1), False)}),  # up
+      frozenset({((0, -1, 1), True), ((0, 1, 1), True)}),  # right
+      frozenset({((0, 1, 1), False), ((0, 1, -1), False)}),  # down
+      frozenset({((0, 1, -1), True), ((0, 0, -1), True)}),  # left
+      frozenset({((0, 0, -1), False), ((0, 0, 0), False)}),  # up
+      frozenset({((0, 0, 0), True), ((0, -1, 0), True)}),  # left
+      }),
 
     # CORNERS (NW, NE SE)
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 4)),  # . in nw corner
-     {
-         frozenset({((0, -1, 3), False), ((0, -1, 4), False)}),  # up
-         frozenset({((0, -1, 4), True), ((0, 0, 4), True)}),  # right
-         frozenset({((0, 0, 4), False), ((0, 0, 3), False)}),  # down
-         frozenset({((0, 0, 3), True), ((0, -1, 3), True)}),  # left
-     }),
+     {frozenset({((0, -1, 3), False), ((0, -1, 4), False)}),  # up
+      frozenset({((0, -1, 4), True), ((0, 0, 4), True)}),  # right
+      frozenset({((0, 0, 4), False), ((0, 0, 3), False)}),  # down
+      frozenset({((0, 0, 3), True), ((0, -1, 3), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (4, 4)),  # . in ne corner
-     {
-         frozenset({((0, 3, 3), False), ((0, 3, 4), False)}),  # up
-         frozenset({((0, 3, 4), True), ((0, 4, 4), True)}),  # right
-         frozenset({((0, 4, 4), False), ((0, 4, 3), False)}),  # down
-         frozenset({((0, 4, 3), True), ((0, 3, 3), True)}),  # left
-     }),
+     {frozenset({((0, 3, 3), False), ((0, 3, 4), False)}),  # up
+      frozenset({((0, 3, 4), True), ((0, 4, 4), True)}),  # right
+      frozenset({((0, 4, 4), False), ((0, 4, 3), False)}),  # down
+      frozenset({((0, 4, 3), True), ((0, 3, 3), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (4, 0)),  # . in se corner
-     {
-         frozenset({((0, 3, -1), False), ((0, 3, 0), False)}),  # up
-         frozenset({((0, 3, 0), True), ((0, 4, 0), True)}),  # right
-         frozenset({((0, 4, 0), False), ((0, 4, -1), False)}),  # down
-         frozenset({((0, 4, -1), True), ((0, 3, -1), True)}),  # left
-     }),
+     {frozenset({((0, 3, -1), False), ((0, 3, 0), False)}),  # up
+      frozenset({((0, 3, 0), True), ((0, 4, 0), True)}),  # right
+      frozenset({((0, 4, 0), False), ((0, 4, -1), False)}),  # down
+      frozenset({((0, 4, -1), True), ((0, 3, -1), True)}),  # left
+      }),
 
     # BOUNDARIES (N, E, S, W)
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (1, 4)),  # . on n boundary
-     {
-         frozenset({((0, 0, 3), False), ((0, 0, 4), False)}),  # up
-         frozenset({((0, 0, 4), True), ((0, 1, 4), True)}),  # right
-         frozenset({((0, 1, 4), False), ((0, 1, 3), False)}),  # down
-         frozenset({((0, 1, 3), True), ((0, 0, 3), True)}),  # left
-     }),
+     {frozenset({((0, 0, 3), False), ((0, 0, 4), False)}),  # up
+      frozenset({((0, 0, 4), True), ((0, 1, 4), True)}),  # right
+      frozenset({((0, 1, 4), False), ((0, 1, 3), False)}),  # down
+      frozenset({((0, 1, 3), True), ((0, 0, 3), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (1, 4), (2, 4)),  # .. on n boundary
-     {
-         frozenset({((0, 0, 3), False), ((0, 0, 4), False)}),  # up
-         frozenset({((0, 0, 4), True), ((0, 2, 4), True)}),  # right
-         frozenset({((0, 2, 4), False), ((0, 2, 3), False)}),  # down
-         frozenset({((0, 2, 3), True), ((0, 0, 3), True)}),  # left
-     }),
+     {frozenset({((0, 0, 3), False), ((0, 0, 4), False)}),  # up
+      frozenset({((0, 0, 4), True), ((0, 2, 4), True)}),  # right
+      frozenset({((0, 2, 4), False), ((0, 2, 3), False)}),  # down
+      frozenset({((0, 2, 3), True), ((0, 0, 3), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (4, 2)),  # . on e boundary
-     {
-         frozenset({((0, 3, 1), False), ((0, 3, 2), False)}),  # up
-         frozenset({((0, 3, 2), True), ((0, 4, 2), True)}),  # right
-         frozenset({((0, 4, 2), False), ((0, 4, 1), False)}),  # down
-         frozenset({((0, 4, 1), True), ((0, 3, 1), True)}),  # left
-     }),
+     {frozenset({((0, 3, 1), False), ((0, 3, 2), False)}),  # up
+      frozenset({((0, 3, 2), True), ((0, 4, 2), True)}),  # right
+      frozenset({((0, 4, 2), False), ((0, 4, 1), False)}),  # down
+      frozenset({((0, 4, 1), True), ((0, 3, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (4, 2), (4, 3)),  # : on e boundary
-     {
-         frozenset({((0, 3, 1), False), ((0, 3, 3), False)}),  # up
-         frozenset({((0, 3, 3), True), ((0, 4, 3), True)}),  # right
-         frozenset({((0, 4, 3), False), ((0, 4, 1), False)}),  # down
-         frozenset({((0, 4, 1), True), ((0, 3, 1), True)}),  # left
-     }),
+     {frozenset({((0, 3, 1), False), ((0, 3, 3), False)}),  # up
+      frozenset({((0, 3, 3), True), ((0, 4, 3), True)}),  # right
+      frozenset({((0, 4, 3), False), ((0, 4, 1), False)}),  # down
+      frozenset({((0, 4, 1), True), ((0, 3, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (1, 0)),  # . on s boundary
-     {
-         frozenset({((0, 0, -1), False), ((0, 0, 0), False)}),  # up
-         frozenset({((0, 0, 0), True), ((0, 1, 0), True)}),  # right
-         frozenset({((0, 1, 0), False), ((0, 1, -1), False)}),  # down
-         frozenset({((0, 1, -1), True), ((0, 0, -1), True)}),  # left
-     }),
+     {frozenset({((0, 0, -1), False), ((0, 0, 0), False)}),  # up
+      frozenset({((0, 0, 0), True), ((0, 1, 0), True)}),  # right
+      frozenset({((0, 1, 0), False), ((0, 1, -1), False)}),  # down
+      frozenset({((0, 1, -1), True), ((0, 0, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (1, 0), (2, 0)),  # .. on s boundary
-     {
-         frozenset({((0, 0, -1), False), ((0, 0, 0), False)}),  # up
-         frozenset({((0, 0, 0), True), ((0, 2, 0), True)}),  # right
-         frozenset({((0, 2, 0), False), ((0, 2, -1), False)}),  # down
-         frozenset({((0, 2, -1), True), ((0, 0, -1), True)}),  # left
-     }),
+     {frozenset({((0, 0, -1), False), ((0, 0, 0), False)}),  # up
+      frozenset({((0, 0, 0), True), ((0, 2, 0), True)}),  # right
+      frozenset({((0, 2, 0), False), ((0, 2, -1), False)}),  # down
+      frozenset({((0, 2, -1), True), ((0, 0, -1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 2)),  # . on w boundary
-     {
-         frozenset({((0, -1, 1), False), ((0, -1, 2), False)}),  # up
-         frozenset({((0, -1, 2), True), ((0, 0, 2), True)}),  # right
-         frozenset({((0, 0, 2), False), ((0, 0, 1), False)}),  # down
-         frozenset({((0, 0, 1), True), ((0, -1, 1), True)}),  # left
-     }),
+     {frozenset({((0, -1, 1), False), ((0, -1, 2), False)}),  # up
+      frozenset({((0, -1, 2), True), ((0, 0, 2), True)}),  # right
+      frozenset({((0, 0, 2), False), ((0, 0, 1), False)}),  # down
+      frozenset({((0, 0, 1), True), ((0, -1, 1), True)}),  # left
+      }),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 2), (0, 3)),  # : on w boundary
-     {
-         frozenset({((0, -1, 1), False), ((0, -1, 3), False)}),  # up
-         frozenset({((0, -1, 3), True), ((0, 0, 3), True)}),  # right
-         frozenset({((0, 0, 3), False), ((0, 0, 1), False)}),  # down
-         frozenset({((0, 0, 1), True), ((0, -1, 1), True)}),  # left
-     }),
+     {frozenset({((0, -1, 1), False), ((0, -1, 3), False)}),  # up
+      frozenset({((0, -1, 3), True), ((0, 0, 3), True)}),  # right
+      frozenset({((0, 0, 3), False), ((0, 0, 1), False)}),  # down
+      frozenset({((0, 0, 1), True), ((0, -1, 1), True)}),  # left
+      }),
 ])
 def test_rotated_planar_smwpm_decoder_matching(error_pauli, expected):
     # parameters
@@ -790,21 +754,19 @@ def test_rotated_planar_smwpm_decoder_matching(error_pauli, expected):
     # . bulk, eta=None (infinite)
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)),
      None, 0.1,
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 2, 2), True)}),  # right
-         frozenset({((0, 2, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 2, 2), True)}),  # right
+      frozenset({((0, 2, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
     # / bulk, eta=3
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)).site('X', (3, 3)),  # / in center of bulk, eta=10
      10, 0.1,
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 3, 3), True)}),  # right (and up)
-         frozenset({((0, 3, 3), False), ((0, 2, 1), False)}),  # down (and left)
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 3, 3), True)}),  # right (and up)
+      frozenset({((0, 3, 3), False), ((0, 2, 1), False)}),  # down (and left)
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
 ])
 def test_rotated_planar_smwpm_decoder_matching_with_bias(error_pauli, eta, error_probability, expected):
     # parameters
@@ -840,12 +802,11 @@ def test_rotated_planar_smwpm_decoder_matching_with_bias(error_pauli, eta, error
             [],
         ]),
      None, None, None,
-     {
-         frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((1, 2, 2), True)}),  # right
-         frozenset({((1, 2, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
-     }),
+     {frozenset({((0, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((1, 2, 2), True)}),  # right
+      frozenset({((1, 2, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((0, 1, 1), True)}),  # left
+      }),
 
     (*_code_error_syndrome(  # 2 time-steps, Y in bulk, 2 measurement errors
         RotatedPlanarCode(5, 5),  # code
@@ -858,12 +819,11 @@ def test_rotated_planar_smwpm_decoder_matching_with_bias(error_pauli, eta, error
             [],
         ]),
      0.1, 0.1, 10,
-     {
-         frozenset({((1, 1, 1), False), ((0, 1, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((1, 2, 2), True)}),  # right
-         frozenset({((1, 2, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((0, 2, 1), True), ((1, 1, 1), True)}),  # left
-     }),
+     {frozenset({((1, 1, 1), False), ((0, 1, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((1, 2, 2), True)}),  # right
+      frozenset({((1, 2, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((0, 2, 1), True), ((1, 1, 1), True)}),  # left
+      }),
 
     (*_code_error_syndrome(  # 2 time-steps, Y in bulk, 2 measurement errors (low q so no matches between time steps)
         RotatedPlanarCode(5, 5),  # code
@@ -876,12 +836,11 @@ def test_rotated_planar_smwpm_decoder_matching_with_bias(error_pauli, eta, error
             [],
         ]),
      0.1, 0.01, 10,
-     {
-         frozenset({((1, 1, 1), False), ((1, 2, 2), False)}),  # up
-         frozenset({((0, 1, 2), True), ((0, 2, 1), True)}),  # right
-         frozenset({((0, 1, 2), False), ((0, 2, 1), False)}),  # down
-         frozenset({((1, 2, 2), True), ((1, 1, 1), True)}),  # left
-     }),
+     {frozenset({((1, 1, 1), False), ((1, 2, 2), False)}),  # up
+      frozenset({((0, 1, 2), True), ((0, 2, 1), True)}),  # right
+      frozenset({((0, 1, 2), False), ((0, 2, 1), False)}),  # down
+      frozenset({((1, 2, 2), True), ((1, 1, 1), True)}),  # left
+      }),
 
 ])
 def test_rotated_planar_smwpm_decoder_matching_ftp(code, error, syndrome, p, q, eta, expected):
@@ -903,61 +862,49 @@ def test_rotated_planar_smwpm_decoder_matching_ftp(code, error, syndrome, p, q, 
 
     # BULK
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)),  # . bulk
-     [
-         [(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
+      ]),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2), (3, 3)),  # / in bulk
-     [
-         [(0, 1, 1), (0, 1, 2), (0, 3, 2), (0, 3, 3), (0, 2, 3), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (0, 3, 2), (0, 3, 3), (0, 2, 3), (0, 2, 1)],
+      ]),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 3), (3, 2)),  # \ in bulk
-     [
-         [(0, 1, 2), (0, 1, 3), (0, 2, 3), (0, 2, 1), (0, 3, 1), (0, 3, 2)],
-     ]),
+     [[(0, 1, 2), (0, 1, 3), (0, 2, 3), (0, 2, 1), (0, 3, 1), (0, 3, 2)],
+      ]),
 
     # CORNER SW
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0)),  # . in sw corner
-     [
-         [(0, -1, -1), (0, -1, 0), (0, 0, 0), (0, 0, -1)],
-     ]),
+     [[(0, -1, -1), (0, -1, 0), (0, 0, 0), (0, 0, -1)],
+      ]),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (1, 1)),  # / in sw corner
-     [
-         [(0, -1, -1), (0, -1, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1), (0, 0, -1)],
-     ]),
+     [[(0, -1, -1), (0, -1, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1), (0, 0, -1)],
+      ]),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 1), (1, 0)),  # \ in sw corner
-     [
-         [(0, -1, 0), (0, -1, 1), (0, 0, 1), (0, 0, -1), (0, 1, -1), (0, 1, 0)],
-     ]),
+     [[(0, -1, 0), (0, -1, 1), (0, 0, 1), (0, 0, -1), (0, 1, -1), (0, 1, 0)],
+      ]),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (1, 1), (2, 2)),  # .*' in sw corner
-     [
-         [(0, -1, -1), (0, -1, 0), (0, 1, 0), (0, 1, 2), (0, 2, 2), (0, 2, 1), (0, 0, 1), (0, 0, -1)],
-     ]),
+     [[(0, -1, -1), (0, -1, 0), (0, 1, 0), (0, 1, 2), (0, 2, 2), (0, 2, 1), (0, 0, 1), (0, 0, -1)],
+      ]),
 
     # CORNERS (NW, NE SE)
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 4)),  # . in nw corner
-     [
-         [(0, -1, 3), (0, -1, 4), (0, 0, 4), (0, 0, 3)],
-     ]),
+     [[(0, -1, 3), (0, -1, 4), (0, 0, 4), (0, 0, 3)],
+      ]),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (4, 4)),  # . in ne corner
-     [
-         [(0, 3, 3), (0, 3, 4), (0, 4, 4), (0, 4, 3)],
-     ]),
+     [[(0, 3, 3), (0, 3, 4), (0, 4, 4), (0, 4, 3)],
+      ]),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (4, 0)),  # . in se corner
-     [
-         [(0, 3, -1), (0, 3, 0), (0, 4, 0), (0, 4, -1)],
-     ]),
+     [[(0, 3, -1), (0, 3, 0), (0, 4, 0), (0, 4, -1)],
+      ]),
 
     # TWO CLUSTERS
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (2, 2)),  # . in sw corner and . in bulk
-     [
-         [(0, -1, -1), (0, -1, 0), (0, 0, 0), (0, 0, -1)],
-         [(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, -1, -1), (0, -1, 0), (0, 0, 0), (0, 0, -1)],
+      [(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
+      ]),
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (0, 0), (1, 1), (4, 4)),  # / in sw corner and . in ne corner
-     [
-         [(0, -1, -1), (0, -1, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1), (0, 0, -1)],
-         [(0, 3, 3), (0, 3, 4), (0, 4, 4), (0, 4, 3)],
-     ]),
+     [[(0, -1, -1), (0, -1, 0), (0, 1, 0), (0, 1, 1), (0, 0, 1), (0, 0, -1)],
+      [(0, 3, 3), (0, 3, 4), (0, 4, 4), (0, 4, 3)],
+      ]),
 ])
 def test_rotated_planar_smwpm_decoder_clusters(error_pauli, expected):
     # parameters
@@ -982,84 +929,75 @@ def test_rotated_planar_smwpm_decoder_clusters(error_pauli, expected):
     # . in bulk, eta=None (infinite)
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)),
      None, 0.1,
-     [
-         [(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (0, 2, 2), (0, 2, 1)],
+      ]),
     # / in bulk, eta=10
     (RotatedPlanarCode(5, 5).new_pauli().site('Y', (2, 2)).site('X', (3, 3)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 1, 2), (0, 3, 3), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (0, 3, 3), (0, 2, 1)],
+      ]),
 
     # TWO CLUSTERS
     # . in sw corner and . in bulk, eta=10
     (RotatedPlanarCode(7, 7).new_pauli().site('Y', (0, 0), (3, 3)).site('X', (4, 4)),
      10, 0.1,
-     [
-         [(0, -1, -1), (0, -1, 0), (0, 0, 0), (0, 0, -1)],
-         [(0, 2, 2), (0, 2, 3), (0, 4, 4), (0, 3, 2)],
-     ]),
+     [[(0, -1, -1), (0, -1, 0), (0, 0, 0), (0, 0, -1)],
+      [(0, 2, 2), (0, 2, 3), (0, 4, 4), (0, 3, 2)],
+      ]),
 
     # ISOLATED Y DEFECTS
     # Y defect in SW corner, eta=10
     (RotatedPlanarCode(7, 7).new_pauli().site('X', (0, 1), (1, 1)).site('Z', (2, 0), (2, 1)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      ]),
     # Y defects in SW and NE corners, eta=10
     (RotatedPlanarCode(7, 7).new_pauli()
      .site('X', (0, 1), (1, 1), (6, 5), (5, 5))
      .site('Z', (2, 0), (2, 1), (4, 5), (4, 6)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 3, 4), (0, 4, 4)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 3, 4), (0, 4, 4)],
+      ]),
     # Y defects in SW and NE corners, eta=10
     (RotatedPlanarCode(9, 9).new_pauli()
      .site('X', (0, 1), (1, 1), (8, 7), (7, 7))
      .site('Z', (2, 0), (2, 1), (6, 7), (6, 8)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 5, 6), (0, 6, 6)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 5, 6), (0, 6, 6)],
+      ]),
     # Y defects in SW and NE corners and neutral cluster in center, eta=10
     (RotatedPlanarCode(9, 9).new_pauli()
      .site('X', (0, 1), (1, 1), (8, 7), (7, 7))
      .site('Z', (2, 0), (2, 1), (6, 7), (6, 8))
      .site('Y', (3, 4), (4, 4), (5, 4)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 2, 3), (0, 2, 4), (0, 5, 4), (0, 5, 3)],
-         [(0, 5, 6), (0, 6, 6)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 2, 3), (0, 2, 4), (0, 5, 4), (0, 5, 3)],
+      [(0, 5, 6), (0, 6, 6)],
+      ]),
     # Y defects in SW and NE corners and neutral cluster in center, eta=10
     (RotatedPlanarCode(11, 11).new_pauli()
      .site('X', (0, 1), (1, 1), (10, 9), (9, 9))
      .site('Z', (2, 0), (2, 1), (8, 9), (8, 10))
      .site('Y', (4, 5), (5, 5), (6, 5)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 3, 4), (0, 3, 5), (0, 6, 5), (0, 6, 4)],
-         [(0, 7, 8), (0, 8, 8)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 3, 4), (0, 3, 5), (0, 6, 5), (0, 6, 4)],
+      [(0, 7, 8), (0, 8, 8)],
+      ]),
     # Y defects in SW and NE corners and 2 neutral clusters in center, eta=10
     (RotatedPlanarCode(11, 11).new_pauli()
      .site('X', (0, 1), (1, 1), (10, 8), (9, 8), (8, 8))
      .site('Z', (2, 0), (2, 1), (7, 8), (7, 9), (7, 10))
      .site('Y', (3, 4), (6, 5)),
      10, 0.1,
-     [
-         [(0, 1, 1), (0, 2, 1)],
-         [(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)],
-         [(0, 5, 4), (0, 5, 5), (0, 6, 5), (0, 6, 4)],
-         [(0, 6, 7), (0, 7, 7)],
-     ]),
+     [[(0, 1, 1), (0, 2, 1)],
+      [(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)],
+      [(0, 5, 4), (0, 5, 5), (0, 6, 5), (0, 6, 4)],
+      [(0, 6, 7), (0, 7, 7)],
+      ]),
 ])
 def test_rotated_planar_smwpm_decoder_clusters_with_bias(error_pauli, eta, error_probability, expected):
     print()
@@ -1099,9 +1037,8 @@ def test_rotated_planar_smwpm_decoder_clusters_with_bias(error_pauli, eta, error
             [(2, 2)],
             [],
         ]),
-     [
-         [(0, 1, 1), (0, 1, 2), (1, 2, 2), (0, 2, 1)],
-     ]),
+     [[(0, 1, 1), (0, 1, 2), (1, 2, 2), (0, 2, 1)],
+      ]),
 ])
 def test_rotated_planar_smwpm_decoder_clusters_ftp(code, error, syndrome, expected):
     # calls
@@ -1113,56 +1050,56 @@ def test_rotated_planar_smwpm_decoder_clusters_ftp(code, error, syndrome, expect
 
 
 @pytest.mark.parametrize('code, cluster, expected', [
-    (  # On-lattice (no Y-defect)
-            RotatedPlanarCode(5, 5),
-            [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)],  # ZXZX
-            ([(0, 0, 1), (0, 1, 0)], [(0, 0, 0), (0, 1, 1)], None)
-    ),
-    (  # On-lattice (no Y-defect, 1 measurement error)
-            RotatedPlanarCode(5, 5),
-            [(0, 0, 0), (0, 0, 1), (1, 1, 1), (0, 1, 0)],  # ZXZX
-            ([(0, 0, 1), (0, 1, 0)], [(0, 0, 0), (1, 1, 1)], None)
-    ),
-    (  # On-lattice (Y-defect)
-            RotatedPlanarCode(5, 5),
-            [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 2, 0)],  # ZXZZ
-            ([], [(0, 0, 0), (0, 1, 1)], ((0, 0, 1), (0, 2, 0)))
-    ),
-    (  # On-lattice (Y-defect, 1 measurement error)
-            RotatedPlanarCode(5, 5),
-            [(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 2, 0)],  # ZXZZ
-            ([], [(0, 0, 0), (0, 1, 1)], ((0, 0, 1), (1, 2, 0)))
-    ),
-    (  # Off-lattice (no Y-defect)
-            RotatedPlanarCode(5, 5),
-            [(0, -1, -1), (0, -1, 0), (0, 0, 0), (0, 0, -1)],  # ZXZX
-            ([(0, -1, 0), (0, 0, -1)], [(0, -1, -1), (0, 0, 0)], None)
-    ),
-    (  # Off-lattice (no Y-defect, 1 measurement error)
-            RotatedPlanarCode(5, 5),
-            [(0, -1, -1), (1, -1, 0), (0, 0, 0), (0, 0, -1)],  # ZXZX
-            ([(1, -1, 0), (0, 0, -1)], [(0, -1, -1), (0, 0, 0)], None)
-    ),
-    (  # Off-lattice (Y-defect)
-            RotatedPlanarCode(5, 5),
-            [(0, -1, -1), (0, -1, 0), (0, 1, 0), (0, 2, -1)],  # ZXXX
-            ([(0, -1, 0), (0, 1, 0)], [], ((0, 2, -1), (0, -1, -1)))
-    ),
-    (  # Off-lattice (Y-defect, 1 measurment error)
-            RotatedPlanarCode(5, 5),
-            [(1, -1, -1), (0, -1, 0), (0, 1, 0), (0, 2, -1)],  # ZXXX
-            ([(0, -1, 0), (0, 1, 0)], [], ((0, 2, -1), (1, -1, -1)))
-    ),
-    (  # Partially off-lattice (Y-defect)
-            RotatedPlanarCode(5, 5),
-            [(0, 0, -1), (0, -1, 0), (0, 1, 0), (0, 1, -1)],  # XXXZ
-            ([(0, 0, -1), (0, -1, 0)], [], ((0, 1, 0), (0, 1, -1)))
-    ),
-    (  # Partially off-lattice (Y-defect, 1 measurement error)
-            RotatedPlanarCode(5, 5),
-            [(0, 0, -1), (0, -1, 0), (0, 1, 0), (1, 1, -1)],  # XXXZ
-            ([(0, 0, -1), (0, -1, 0)], [], ((0, 1, 0), (1, 1, -1)))
-    ),
+    # On-lattice (no Y-defect)
+    (RotatedPlanarCode(5, 5),
+     [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)],  # ZXZX
+     ([(0, 0, 1), (0, 1, 0)], [(0, 0, 0), (0, 1, 1)], None)
+     ),
+    # On-lattice (no Y-defect, 1 measurement error)
+    (RotatedPlanarCode(5, 5),
+     [(0, 0, 0), (0, 0, 1), (1, 1, 1), (0, 1, 0)],  # ZXZX
+     ([(0, 0, 1), (0, 1, 0)], [(0, 0, 0), (1, 1, 1)], None)
+     ),
+    # On-lattice (Y-defect)
+    (RotatedPlanarCode(5, 5),
+     [(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 2, 0)],  # ZXZZ
+     ([], [(0, 0, 0), (0, 1, 1)], ((0, 0, 1), (0, 2, 0)))
+     ),
+    # On-lattice (Y-defect, 1 measurement error)
+    (RotatedPlanarCode(5, 5),
+     [(0, 0, 0), (0, 0, 1), (0, 1, 1), (1, 2, 0)],  # ZXZZ
+     ([], [(0, 0, 0), (0, 1, 1)], ((0, 0, 1), (1, 2, 0)))
+     ),
+    # Off-lattice (no Y-defect)
+    (RotatedPlanarCode(5, 5),
+     [(0, -1, -1), (0, -1, 0), (0, 0, 0), (0, 0, -1)],  # ZXZX
+     ([(0, -1, 0), (0, 0, -1)], [(0, -1, -1), (0, 0, 0)], None)
+     ),
+    # Off-lattice (no Y-defect, 1 measurement error)
+    (RotatedPlanarCode(5, 5),
+     [(0, -1, -1), (1, -1, 0), (0, 0, 0), (0, 0, -1)],  # ZXZX
+     ([(1, -1, 0), (0, 0, -1)], [(0, -1, -1), (0, 0, 0)], None)
+     ),
+    # Off-lattice (Y-defect)
+    (RotatedPlanarCode(5, 5),
+     [(0, -1, -1), (0, -1, 0), (0, 1, 0), (0, 2, -1)],  # ZXXX
+     ([(0, -1, 0), (0, 1, 0)], [], ((0, 2, -1), (0, -1, -1)))
+     ),
+    # Off-lattice (Y-defect, 1 measurment error)
+    (RotatedPlanarCode(5, 5),
+     [(1, -1, -1), (0, -1, 0), (0, 1, 0), (0, 2, -1)],  # ZXXX
+     ([(0, -1, 0), (0, 1, 0)], [], ((0, 2, -1), (1, -1, -1)))
+     ),
+    # Partially off-lattice (Y-defect)
+    (RotatedPlanarCode(5, 5),
+     [(0, 0, -1), (0, -1, 0), (0, 1, 0), (0, 1, -1)],  # XXXZ
+     ([(0, 0, -1), (0, -1, 0)], [], ((0, 1, 0), (0, 1, -1)))
+     ),
+    # Partially off-lattice (Y-defect, 1 measurement error)
+    (RotatedPlanarCode(5, 5),
+     [(0, 0, -1), (0, -1, 0), (0, 1, 0), (1, 1, -1)],  # XXXZ
+     ([(0, 0, -1), (0, -1, 0)], [], ((0, 1, 0), (1, 1, -1)))
+     ),
 ])
 def test_rotated_planar_smwpm_decoder_cluster_to_paths_and_defect_ftp(code, cluster, expected):
     x_path, z_path, y_defect = _rpsd._cluster_to_paths_and_defect(code, cluster)
@@ -1319,24 +1256,21 @@ def test_rotated_planar_smwpm_decoder_decode_ftp(code, error, syndrome):
 
 
 @pytest.mark.parametrize('time_steps, a_node, b_node, expected', [
-    (
-            1,
-            _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-            _rpsd._ClusterNode([(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)], (0, 2, 3), (0, 2, 4)),
-            3  # manhattan distance between (0, 1, 1) and (0, 2, 3)
-    ),
-    (
-            5,
-            _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-            _rpsd._ClusterNode([(2, 2, 3), (2, 2, 4), (2, 3, 4), (2, 3, 3)], (2, 2, 3), (2, 2, 4)),
-            5  # manhattan distance between (0, 1, 1) and (2, 2, 3)
-    ),
-    (
-            5,
-            _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-            _rpsd._ClusterNode([(4, 2, 3), (4, 2, 4), (4, 3, 4), (4, 3, 3)], (4, 2, 3), (4, 2, 4)),
-            4  # periodic manhattan distance between (0, 1, 1) and (4, 2, 3)
-    ),
+    (1,
+     _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     _rpsd._ClusterNode([(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)], (0, 2, 3), (0, 2, 4)),
+     3  # manhattan distance between (0, 1, 1) and (0, 2, 3)
+     ),
+    (5,
+     _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     _rpsd._ClusterNode([(2, 2, 3), (2, 2, 4), (2, 3, 4), (2, 3, 3)], (2, 2, 3), (2, 2, 4)),
+     5  # manhattan distance between (0, 1, 1) and (2, 2, 3)
+     ),
+    (5,
+     _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     _rpsd._ClusterNode([(4, 2, 3), (4, 2, 4), (4, 3, 4), (4, 3, 3)], (4, 2, 3), (4, 2, 4)),
+     4  # periodic manhattan distance between (0, 1, 1) and (4, 2, 3)
+     ),
 ])
 def test_rotated_planar_smwpm_decoder_cluster_distance_ftp(time_steps, a_node, b_node, expected):
     distance = _rpsd._cluster_distance(time_steps, a_node, b_node)

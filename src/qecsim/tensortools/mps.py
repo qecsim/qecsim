@@ -88,18 +88,18 @@ def contract_pairwise(left_mps, right_mps):
     """
     assert len(left_mps) == len(right_mps), 'MPS/MPO are different lengths so pairwise contraction cannot be evaluated.'
 
-    def _contract(l, r):
-        if l is None:
-            return r
-        elif r is None:
-            return l
+    def _contract(le, ri):
+        if le is None:
+            return ri
+        elif ri is None:
+            return le
         else:
-            return np.einsum('nesw,NESe->nNEsSw', l, r).reshape(
-                (l.shape[0] * r.shape[0], r.shape[1], l.shape[2] * r.shape[2], l.shape[3])  # (nN)E(sS)w
+            return np.einsum('nesw,NESe->nNEsSw', le, ri).reshape(
+                (le.shape[0] * ri.shape[0], ri.shape[1], le.shape[2] * ri.shape[2], le.shape[3])  # (nN)E(sS)w
             )
 
     # contract left.east with right.west, merge indices and return new mps
-    return [_contract(l, r) for l, r in zip(left_mps, right_mps)]
+    return [_contract(le, ri) for le, ri in zip(left_mps, right_mps)]
 
 
 def contract_ladder(mps):

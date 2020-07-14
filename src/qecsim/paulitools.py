@@ -80,7 +80,7 @@ def bsf_to_pauli(bsf):
     """
     assert np.array_equal(bsf % 2, bsf), 'BSF {} is not in binary form'.format(bsf)
 
-    def _to_pauli(b, t=str.maketrans('0123', 'IXZY')):  # assign t here so it is only created once
+    def _to_pauli(b, t=str.maketrans('0123', 'IXZY')):  # noqa: B008 (deliberately reuse t)
         xs, zs = np.hsplit(b, 2)
         ps = (xs + zs * 2).astype(str)  # 0=I, 1=X, 2=Z, 3=Y
         return ''.join(ps).translate(t)
