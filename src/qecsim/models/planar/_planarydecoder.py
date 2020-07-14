@@ -234,8 +234,11 @@ class PlanarYDecoder(Decoder):
                   for start_c in range(0, code.bounds[1] + 1, 2)), skip_trivial=True)
         # add product of all combinations of operators (any length, without repetition)
         operators = list(pt.unpack(o) for o in residual_map.values())  # copy of operators in map so far
-        _add((np.sum(operator_set, axis=0) % 2 for operator_set in itertools.chain.from_iterable(
-            itertools.combinations(operators, n_operators) for n_operators in range(1, len(operators) + 1))),
+        _add(
+            (np.sum(operator_set, axis=0) % 2
+             for operator_set in itertools.chain.from_iterable(
+                itertools.combinations(operators, n_operators)
+                for n_operators in range(1, len(operators) + 1))),
             skip_trivial=True)
         # add identity
         _add([code.new_pauli().to_bsf()], skip_trivial=False)
