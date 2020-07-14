@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from mpmath import mp
-from scipy import linalg as sp_linalg
 from qecsim import tensortools as tt
 from qecsim.models.color import Color666Code
 from qecsim.models.color import _color666mpsdecoder
@@ -10,6 +9,7 @@ from qecsim.models.planar import PlanarCode
 from qecsim.models.planar import _planarmpsdecoder
 from qecsim.models.rotatedplanar import RotatedPlanarCode
 from qecsim.models.rotatedplanar import _rotatedplanarrmpsdecoder
+from scipy import linalg as sp_linalg
 
 
 def _is_close(a, b, rtol=1e-05, atol=1e-08):
