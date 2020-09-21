@@ -45,6 +45,7 @@
 # DONE: update docs for C++ matching library
 # DONE: test docs for C++ matching library
 # DONE: port legacy refactorings: type equality
+# TODO: port legacy refactorings: classmethod extensibility
 # TODO: port legacy refactorings: MPS decoder tensor network extensibility
 # TODO: port legacy refactorings: dynamic type name in model exceptions
 # TODO: add EQUS acknowledgment
