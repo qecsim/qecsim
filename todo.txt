@@ -41,13 +41,15 @@
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
 # DONE: upload doc to davidtuckett.com/qit/qecsim/
 # DONE: share with preview developers
-# TODO: set up tox for lint flake8
 # DONE: update docs for C++ matching library
 # DONE: test docs for C++ matching library
 # DONE: port legacy refactorings: type equality
 # DONE: port legacy refactorings: classmethod extensibility
 # TODO: port legacy refactorings: MPS decoder tensor network extensibility
 # TODO: port legacy refactorings: dynamic type name in model exceptions
+# TODO: reformat all code
+# TODO: set up tox for lint flake8
+# TODO: reformat all code
 # TODO: add EQUS acknowledgment
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
