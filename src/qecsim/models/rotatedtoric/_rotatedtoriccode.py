@@ -144,8 +144,8 @@ class RotatedToricCode(StabilizerCode):
         """
         return self._size
 
-    @staticmethod
-    def is_x_plaquette(index):
+    @classmethod
+    def is_x_plaquette(cls, index):
         """
         Return True if the plaquette index specifies an X-type plaquette, irrespective of lattice bounds.
 
@@ -157,8 +157,8 @@ class RotatedToricCode(StabilizerCode):
         x, y = index
         return (x - y) % 2 == 1
 
-    @staticmethod
-    def is_z_plaquette(index):
+    @classmethod
+    def is_z_plaquette(cls, index):
         """
         Return True if the plaquette index specifies an Z-type plaquette, irrespective of lattice bounds.
 
@@ -167,8 +167,7 @@ class RotatedToricCode(StabilizerCode):
         :return: If the index specifies an Z-type plaquette.
         :rtype: bool
         """
-        x, y = index
-        return (x - y) % 2 == 0
+        return not cls.is_x_plaquette(index)
 
     @property
     def bounds(self):
