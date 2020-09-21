@@ -7,6 +7,7 @@ import random
 
 import numpy as np
 from mpmath import mp
+
 from qecsim import paulitools as pt
 from qecsim import util
 from qecsim.error import QecsimError
@@ -113,9 +114,9 @@ class PlanarYDecoder(Decoder):
 
     CHUNK_LEN = 500  # default chunk length for processing numpy arrays on start-up. smaller = less memory but more time
 
-    @staticmethod
+    @classmethod
     @functools.lru_cache(maxsize=2 ** 23)  # big enough for 128 codes of size 100x100
-    def _snake_fill(code, start_index, down=True):
+    def _snake_fill(cls, code, start_index, down=True):
         """
         Return an operator with Y on the given start index and below such that the only syndrome bits are directly above
         the start index and on the lower boundary of the code.
@@ -182,9 +183,9 @@ class PlanarYDecoder(Decoder):
         # return as bsf
         return pauli.to_bsf()
 
-    @staticmethod
+    @classmethod
     @functools.lru_cache()  # big enough for 128 codes
-    def _residual_syndrome_to_recovery_map(code):
+    def _residual_syndrome_to_recovery_map(cls, code):
         """
         Return map of residual syndromes to residual recovery operators.
 
@@ -226,11 +227,11 @@ class PlanarYDecoder(Decoder):
         # snake fill to trigger syndrome bits on one boundary
         if code.size[0] < code.size[1]:  # push syndrome bits to right boundary
             # add snake-fill-right operators for each edge on left boundary
-            _add((PlanarYDecoder._snake_fill(code, (start_r, 0), down=False)
+            _add((cls._snake_fill(code, (start_r, 0), down=False)
                   for start_r in range(0, code.bounds[0] + 1, 2)), skip_trivial=True)
         else:  # push syndrome bits to lower boundary
             # add snake-fill-down operators for each edge on upper boundary
-            _add((PlanarYDecoder._snake_fill(code, (0, start_c), down=True)
+            _add((cls._snake_fill(code, (0, start_c), down=True)
                   for start_c in range(0, code.bounds[1] + 1, 2)), skip_trivial=True)
         # add product of all combinations of operators (any length, without repetition)
         operators = list(pt.unpack(o) for o in residual_map.values())  # copy of operators in map so far
@@ -245,8 +246,8 @@ class PlanarYDecoder(Decoder):
         # return map
         return residual_map
 
-    @staticmethod
-    def _residual_recovery(code, syndrome):
+    @classmethod
+    def _residual_recovery(cls, code, syndrome):
         """
         Return residual recovery consistent with (lower boundary) syndrome (if possible).
 
@@ -259,7 +260,7 @@ class PlanarYDecoder(Decoder):
         """
         try:
             # get residual recovery from map
-            return pt.unpack(PlanarYDecoder._residual_syndrome_to_recovery_map(code)[pt.pack(syndrome)])
+            return pt.unpack(cls._residual_syndrome_to_recovery_map(code)[pt.pack(syndrome)])
         except KeyError:
             # N.B. this should not happen if a pure Y-noise model is used
             log_data = {
@@ -271,9 +272,9 @@ class PlanarYDecoder(Decoder):
             # return identity
             return code.new_pauli().to_bsf()
 
-    @staticmethod
+    @classmethod
     @functools.lru_cache(maxsize=2 ** 22)  # big enough for 128 codes of size 100x100
-    def _partial_recovery(code, syndrome_index):
+    def _partial_recovery(cls, code, syndrome_index):
         """
         Return partial recovery triggering given syndrome bit plus syndrome bits on one boundary.
 
@@ -293,14 +294,14 @@ class PlanarYDecoder(Decoder):
         # snake fill to trigger target syndrome bit and syndrome bits on one boundary
         if code.size[0] < code.size[1]:  # push syndrome bits to right boundary
             # start on qubit to right of syndrome_index
-            return PlanarYDecoder._snake_fill(code, (syndrome_index[0], syndrome_index[1] + 1), down=False)
+            return cls._snake_fill(code, (syndrome_index[0], syndrome_index[1] + 1), down=False)
         else:  # push syndrome bits to lower boundary
             # start on qubit below syndrome_index
-            return PlanarYDecoder._snake_fill(code, (syndrome_index[0] + 1, syndrome_index[1]), down=True)
+            return cls._snake_fill(code, (syndrome_index[0] + 1, syndrome_index[1]), down=True)
 
-    @staticmethod
+    @classmethod
     @functools.lru_cache(maxsize=2 ** 22)  # big enough for 128 codes of size 100x100
-    def _destabilizer(code, syndrome_index):
+    def _destabilizer(cls, code, syndrome_index):
         """
         Return destabilizer for given co-prime code and syndrome index.
 
@@ -322,7 +323,7 @@ class PlanarYDecoder(Decoder):
         # build destabilizer that triggers syndrome bit plus syndrome bits on lower boundary
         # start snake fill downwards, from qubit below, stopping at lower boundary
         start_index = syndrome_index[0] + 1, syndrome_index[1]
-        destabilizer ^= PlanarYDecoder._snake_fill(code, start_index, down=True)
+        destabilizer ^= cls._snake_fill(code, start_index, down=True)
         # resolve syndrome bits of destabilizer so far
         destabilizer_syndrome = pt.bsp(destabilizer, code.stabilizers.T)
         destabilizer_syndrome_indices = code.syndrome_to_plaquette_indices(destabilizer_syndrome)
@@ -330,11 +331,11 @@ class PlanarYDecoder(Decoder):
         for index in destabilizer_syndrome_indices ^ {syndrome_index}:  # symmetric_difference
             # start snaking in NW direction, from qubit to left, stopping in a corner
             start_index = index[0], index[1] - 1
-            destabilizer ^= PlanarYDecoder._snake(code, start_index, se=False, full=False)
+            destabilizer ^= cls._snake(code, start_index, se=False, full=False)
         return destabilizer
 
-    @staticmethod
-    def _sample_recovery(code, syndrome):
+    @classmethod
+    def _sample_recovery(cls, code, syndrome):
         """
         Return an all-Y sample Pauli consistent with the syndrome (if possible).
 
@@ -358,9 +359,9 @@ class PlanarYDecoder(Decoder):
         # add destabilizers / partial recoveries
         for index in syndrome_indices:
             if coprime:  # destabilizers exist for co-prime codes
-                recovery ^= PlanarYDecoder._destabilizer(code, index)
+                recovery ^= cls._destabilizer(code, index)
             else:
-                recovery ^= PlanarYDecoder._partial_recovery(code, index)
+                recovery ^= cls._partial_recovery(code, index)
         # find recovery_syndrome
         recovery_syndrome = pt.bsp(recovery, code.stabilizers.T)
         # find residual syndrome
@@ -370,14 +371,14 @@ class PlanarYDecoder(Decoder):
             if coprime or max(code.size) % min(code.size) == 0:
                 logger.warning('UNEXPECTED RESIDUAL SYNDROME FOR {}'.format(code))
             # find residual_recovery
-            residual_recovery = PlanarYDecoder._residual_recovery(code, residual_syndrome)
+            residual_recovery = cls._residual_recovery(code, residual_syndrome)
             # add residual_recovery
             recovery ^= residual_recovery
         return recovery
 
-    @staticmethod
+    @classmethod
     @functools.lru_cache(maxsize=2 ** 25)  # big enough for 128 codes of size 100x100
-    def _snake(code, start_index, se=True, full=True, skip_first=False):
+    def _snake(cls, code, start_index, se=True, full=True, skip_first=False):
         """
         Return operator after applying snake of Y from start index and bouncing in SE (NW) direction(s).
 
@@ -488,13 +489,13 @@ class PlanarYDecoder(Decoder):
         operator = pauli.to_bsf()
         # if full requested and we have not looped, then apply snake in opposite direction
         if full and not looped:
-            operator ^ PlanarYDecoder._snake(code, start_index, full=False, se=not se, skip_first=True)
+            operator ^ cls._snake(code, start_index, full=False, se=not se, skip_first=True)
         # return as bsf
         return operator
 
-    @staticmethod
+    @classmethod
     @functools.lru_cache()  # big enough for 128 codes
-    def _y_stabilizers(code):
+    def _y_stabilizers(cls, code):
         """
         Return complete group of all-Y stabilizers.
 
@@ -526,7 +527,7 @@ class PlanarYDecoder(Decoder):
         for c in range(2, 2 * math.gcd(*code.size), 2):
             start_index = 0, c
             # add generator created by snaking
-            y_stabilizer_generators.append(PlanarYDecoder._snake(code, start_index))
+            y_stabilizer_generators.append(cls._snake(code, start_index))
         # all-Y stabilizers: add product of all combinations of generators (any length, without repetition)
         y_stabilizers = []
         for generator_set in itertools.chain.from_iterable(
@@ -538,9 +539,9 @@ class PlanarYDecoder(Decoder):
         # return as np.array
         return np.array(y_stabilizers)
 
-    @staticmethod
+    @classmethod
     @functools.lru_cache()  # big enough for 128 codes
-    def _y_logical(code):
+    def _y_logical(cls, code):
         """
         Return a single all-Y logical (non-trivial) operator.
 
@@ -568,11 +569,11 @@ class PlanarYDecoder(Decoder):
         :rtype: numpy.array (1d)
         """
         # all-Y logical: snake from (0, 0)
-        return PlanarYDecoder._snake(code, (0, 0))
+        return cls._snake(code, (0, 0))
 
-    @staticmethod
+    @classmethod
     @functools.lru_cache(maxsize=2 ** 22)  # enough for 128 pairs of p_i, p_y with a code of size 100x100
-    def _operator_probability(p_i, n_i, p_y, n_y):
+    def _operator_probability(cls, p_i, n_i, p_y, n_y):
         """
         Return the probability of the given operator conditioned by the given probabilities.
 
@@ -591,8 +592,8 @@ class PlanarYDecoder(Decoder):
         """
         return mp.mpf(p_y) ** n_y * mp.mpf(p_i) ** n_i
 
-    @staticmethod
-    def _coset_probability(prob_dist, coset):
+    @classmethod
+    def _coset_probability(cls, prob_dist, coset):
         """
         Return the probability of the given coset conditioned by the given probability distribution.
 
@@ -612,7 +613,7 @@ class PlanarYDecoder(Decoder):
         # number of y errors per coset element (use numpy for integer arithmetic for speed)
         n_ys = np.sum(coset[:, :n], axis=1)
         # sum over coset element probabilities (use mpmath for float arithmetic for precision and to avoid underflow)
-        return sum(PlanarYDecoder._operator_probability(p_i, n - n_y, p_y, n_y) for n_y in n_ys)
+        return sum(cls._operator_probability(p_i, n - n_y, p_y, n_y) for n_y in n_ys)
         # ALTERNATIVE CODE BELOW: This would be much faster but can fail with underflow
         # return sum(p_i ** (n - n_ys) * p_y ** n_ys)
 

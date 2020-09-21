@@ -4,6 +4,7 @@ import logging
 import operator
 
 import numpy as np
+
 from qecsim import graphtools as gt
 from qecsim.model import Decoder, cli_description
 
@@ -74,8 +75,8 @@ class StepGrid:
                 else:
                     self._box_tight(src_i, tgt_i, factor)
 
-    @staticmethod
-    def _syndrome_to_grid_index(*syndrome_indices):
+    @classmethod
+    def _syndrome_to_grid_index(cls, *syndrome_indices):
         """
         Convert given syndrome indices to grid indices allowing for border of virtual indices around grid.
 
@@ -86,8 +87,8 @@ class StepGrid:
         """
         return tuple((syndrome_index[0] + 1, syndrome_index[1] + 1) for syndrome_index in syndrome_indices)
 
-    @staticmethod
-    def _box_corners(*indices):
+    @classmethod
+    def _box_corners(cls, *indices):
         """
         Top-left and bottom-right corners of box that bounds the given indices.
 
@@ -526,8 +527,8 @@ class PlanarCMWPMDecoder(Decoder):
         self._distance_algorithm = distance_algorithm
         self._debug_iterations = False
 
-    @staticmethod
-    def _recovery_pauli(code, *match_sets):
+    @classmethod
+    def _recovery_pauli(cls, code, *match_sets):
         # prepare recovery
         recovery_pauli = code.new_pauli()
         for matches in match_sets:

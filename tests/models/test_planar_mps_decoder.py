@@ -5,6 +5,7 @@ import time
 import numpy as np
 import pytest
 from mpmath import mp
+
 from qecsim import paulitools as pt
 from qecsim.models.generic import BitFlipErrorModel
 from qecsim.models.generic import DepolarizingErrorModel, BiasedDepolarizingErrorModel
@@ -85,7 +86,7 @@ def test_planar_mps_decoder_sample_recovery(error_pauli):
     error = error_pauli.to_bsf()
     code = error_pauli.code
     syndrome = pt.bsp(error, code.stabilizers.T)
-    recovery_pauli = PlanarMPSDecoder._sample_recovery(code, syndrome)
+    recovery_pauli = PlanarMPSDecoder.sample_recovery(code, syndrome)
     recovery = recovery_pauli.to_bsf()
     assert np.array_equal(pt.bsp(recovery, code.stabilizers.T), syndrome), (
         'recovery {} does not give the same syndrome as the error {}'.format(recovery, error))
@@ -377,7 +378,7 @@ def test_planar_mps_decoder_zero_max_coset_probability(code, chi):
     # syndrome
     syndrome = pt.bsp(error, code.stabilizers.T)
     # any_recovery
-    any_recovery = decoder._sample_recovery(code, syndrome)
+    any_recovery = decoder.sample_recovery(code, syndrome)
     # coset probabilities
     coset_ps, _ = decoder._coset_probabilities(prob_dist, any_recovery)
     print(coset_ps)
@@ -420,7 +421,7 @@ def test_planar_mps_decoder_positive_max_coset_probability(mode):
     # print(code.ascii_art(syndrome, code.new_pauli(error)))
     # decode
     prob_dist = error_model.probability_distribution(error_probability)
-    any_recovery = decoder._sample_recovery(code, syndrome)
+    any_recovery = decoder.sample_recovery(code, syndrome)
     # coset probabilities
     coset_ps, recoveries = decoder._coset_probabilities(prob_dist, any_recovery)
     print('mode={}, coset_ps={}'.format(mode, coset_ps))
@@ -453,7 +454,7 @@ def test_planar_mps_decoder_small_code_negative_coset_probability(chi, mode):
     print(code.ascii_art(syndrome, code.new_pauli(error)))
     # decode
     prob_dist = error_model.probability_distribution(error_probability)
-    any_recovery = decoder._sample_recovery(code, syndrome)
+    any_recovery = decoder.sample_recovery(code, syndrome)
     # coset probabilities
     coset_ps, recoveries = decoder._coset_probabilities(prob_dist, any_recovery)
     print('chi={}, mode={}, coset_ps={}'.format(chi, mode, coset_ps))

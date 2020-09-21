@@ -139,8 +139,8 @@ class PlanarCode(StabilizerCode):
         """
         return self._size
 
-    @staticmethod
-    def is_plaquette(index):
+    @classmethod
+    def is_plaquette(cls, index):
         """
         Return True if the index specifies a plaquette, irrespective of lattice bounds, i.e. (row + column) mod 2 = 1.
 
@@ -152,8 +152,8 @@ class PlanarCode(StabilizerCode):
         r, c = index
         return (r + c) % 2 == 1
 
-    @staticmethod
-    def is_site(index):
+    @classmethod
+    def is_site(cls, index):
         """
         Return True if the index specifies a site (i.e. (row + column) mod 2 = 0), irrespective of lattice bounds.
 
@@ -162,10 +162,10 @@ class PlanarCode(StabilizerCode):
         :return: If the index specifies a site.
         :rtype: bool
         """
-        return not PlanarCode.is_plaquette(index)
+        return not cls.is_plaquette(index)
 
-    @staticmethod
-    def is_primal(index):
+    @classmethod
+    def is_primal(cls, index):
         """
         Return True if the index specifies a primal plaquette (i.e. row mod 2 = 1) or site (i.e. row mod 2 = 0),
         irrespective of lattice bounds.
@@ -176,10 +176,10 @@ class PlanarCode(StabilizerCode):
         :rtype: bool
         """
         r, c = index
-        return (PlanarCode.is_plaquette(index) and r % 2 == 1) or (PlanarCode.is_site(index) and r % 2 == 0)
+        return (cls.is_plaquette(index) and r % 2 == 1) or (cls.is_site(index) and r % 2 == 0)
 
-    @staticmethod
-    def is_dual(index):
+    @classmethod
+    def is_dual(cls, index):
         """
         Return True if the index specifies a dual plaquette (i.e. row mod 2 = 0) or site (i.e. row mod 2 = 1),
         irrespective of lattice bounds.
@@ -189,7 +189,7 @@ class PlanarCode(StabilizerCode):
         :return: If the index specifies a dual plaquette or site.
         :rtype: bool
         """
-        return not PlanarCode.is_primal(index)
+        return not cls.is_primal(index)
 
     @property
     def bounds(self):

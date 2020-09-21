@@ -5,6 +5,7 @@ import time
 import numpy as np
 import pytest
 from mpmath import mp
+
 from qecsim import paulitools as pt
 from qecsim.models.planar import PlanarCode, PlanarYDecoder
 
@@ -195,13 +196,13 @@ def test_planar_y_decoder_residual_recovery(code, syndrome_index):
 
 ])
 def test_planar_y_decoder_sample_recovery_sans_residual(error_pauli):
-    def _mock_residual_recovery(code, syndrome):
+    def _mock_residual_recovery(cls, code, syndrome):
         raise AssertionError('Residual recovery called unexpectedly')
 
     real_residual_recovery = PlanarYDecoder._residual_recovery
     try:
         # mock function
-        PlanarYDecoder._residual_recovery = _mock_residual_recovery
+        PlanarYDecoder._residual_recovery = classmethod(_mock_residual_recovery)
 
         error = error_pauli.to_bsf()
         code = error_pauli.code

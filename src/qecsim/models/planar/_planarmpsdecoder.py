@@ -5,6 +5,7 @@ import operator
 
 import numpy as np
 from mpmath import mp
+
 from qecsim import paulitools as pt, tensortools as tt
 from qecsim.model import Decoder, cli_description
 from qecsim.models.generic import DepolarizingErrorModel
@@ -119,8 +120,8 @@ class PlanarMPSDecoder(Decoder):
         self._stp = stp
         self._tol = tol
 
-    @staticmethod
-    def _sample_recovery(code, syndrome):
+    @classmethod
+    def sample_recovery(cls, code, syndrome):
         """
         Return a sample Pauli consistent with the syndrome, created by applying a path between each plaquette identified
         by the syndrome and the nearest boundary of the same type as the plaquette.
@@ -258,7 +259,7 @@ class PlanarMPSDecoder(Decoder):
         :rtype: numpy.array (1d)
         """
         # any recovery
-        any_recovery = self._sample_recovery(code, syndrome)
+        any_recovery = self.sample_recovery(code, syndrome)
         # probability distribution
         prob_dist = error_model.probability_distribution(error_probability)
         # coset probabilities, recovery operations
