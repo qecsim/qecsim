@@ -145,15 +145,15 @@ class BiasedYXErrorModel(SimpleErrorModel):
         """
         return self._bias
 
-    @staticmethod
-    def _rate_x(bias, probability):
+    @classmethod
+    def _rate_x(cls, bias, probability):
         if bias == 0:  # zero-bias => pure X-noise
             return probability
         h, p = bias, probability
         return 1 / 2 * (1 + h + p - h * p - math.sqrt(-4 * p + (1 + h + p - h * p) ** 2))
 
-    @staticmethod
-    def _rate_y(bias, probability):
+    @classmethod
+    def _rate_y(cls, bias, probability):
         if bias == 0:  # zero-bias => pure X-noise
             return 0
         h, p = bias, probability

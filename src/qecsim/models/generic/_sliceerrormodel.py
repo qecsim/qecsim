@@ -1,6 +1,7 @@
 import functools
 
 import numpy as np
+
 from qecsim.error import QecsimError
 from qecsim.model import cli_description
 from qecsim.models.generic import SimpleErrorModel
@@ -63,22 +64,22 @@ class CenterSliceErrorModel(SimpleErrorModel):
         self._lim = self._normalize(np.array(lim))
         self._pos = pos
 
-    @staticmethod
-    def _normalize(r):
+    @classmethod
+    def _normalize(cls, r):
         """params: lim:np.array(3d). return:lim:np.array(3d)."""
         return r / np.linalg.norm(r, ord=1)
 
-    @staticmethod
-    def _ratio(lim, pos):
+    @classmethod
+    def _ratio(cls, lim, pos):
         """params: lim:np.array(3d), pos:float. return:lim:np.array(3d)."""
         center = np.array([1 / 3, 1 / 3, 1 / 3])
         # if negative position, use negative limit with absolute position
-        lim = lim if pos >= 0 else CenterSliceErrorModel._neg_lim(lim)
+        lim = lim if pos >= 0 else cls._neg_lim(lim)
         pos = np.abs(pos)
         return pos * lim + (1 - pos) * center
 
-    @staticmethod
-    def _neg_lim(lim):
+    @classmethod
+    def _neg_lim(cls, lim):
         """params: lim:np.array(3d). return:lim:np.array(3d)."""
         pX, pY, pZ, pO, pC = map(np.array, ((1, 0, 0), (0, 1, 0), (0, 0, 1), (0, 0, 0), (1 / 3, 1 / 3, 1 / 3)))
         pL = lim
@@ -91,12 +92,11 @@ class CenterSliceErrorModel(SimpleErrorModel):
                 else:
                     pN = p3  # opposing limit at intersect with 12-plane
                 # return slice and plane interest
-                csem = CenterSliceErrorModel
-                return csem._normalize(csem._line_plane_intersect(pN, pO, pC - pL, pL))
+                return cls._normalize(cls._line_plane_intersect(pN, pO, pC - pL, pL))
         raise QecsimError('CenterSliceErrorModel: failed to find negative-limit.')
 
-    @staticmethod
-    def _line_plane_intersect(plane_normal, plane_point, line_direction, line_point):
+    @classmethod
+    def _line_plane_intersect(cls, plane_normal, plane_point, line_direction, line_point):
         """params: *:np.array(3d). return:np.array(3d)."""
         # see https://rosettacode.org/wiki/Find_the_intersection_of_a_line_with_a_plane#Python
         w = line_point - plane_point
