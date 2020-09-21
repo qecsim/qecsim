@@ -3,6 +3,7 @@ import itertools
 import operator
 
 import numpy as np
+
 from qecsim.model import StabilizerCode, cli_description
 from qecsim.models.planar import PlanarPauli
 
@@ -356,7 +357,7 @@ class PlanarCode(StabilizerCode):
                 return r, d_max_c + 2
 
     def __eq__(self, other):
-        if isinstance(other, PlanarCode):
+        if type(other) is type(self):
             return self._size == other._size
         return NotImplemented
 

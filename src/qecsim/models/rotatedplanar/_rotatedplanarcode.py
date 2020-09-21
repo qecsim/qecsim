@@ -3,6 +3,7 @@ import itertools
 import operator
 
 import numpy as np
+
 from qecsim.model import StabilizerCode, cli_description
 from qecsim.models.rotatedplanar import RotatedPlanarPauli
 
@@ -260,7 +261,7 @@ class RotatedPlanarCode(StabilizerCode):
         return set(tuple(index) for index in np.array(self._plaquette_indices)[syndrome.nonzero()])
 
     def __eq__(self, other):
-        if isinstance(other, RotatedPlanarCode):
+        if type(other) is type(self):
             return self._size == other._size
         return NotImplemented
 

@@ -44,9 +44,9 @@
 # TODO: set up tox for lint flake8
 # DONE: update docs for C++ matching library
 # DONE: test docs for C++ matching library
-# TODO: Port legacy refactorings: type equality, MPS TN extensibility, classmethod extensibility
-# TODO: Port legacy refactorings: MPS TN extensibility
-# TODO: Port legacy refactorings: dynamic type name in model exceptions
+# DONE: port legacy refactorings: type equality
+# TODO: port legacy refactorings: MPS decoder tensor network extensibility
+# TODO: port legacy refactorings: dynamic type name in model exceptions
 # TODO: add EQUS acknowledgment
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data

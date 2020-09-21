@@ -3,6 +3,7 @@ import itertools
 import operator
 
 import numpy as np
+
 from qecsim.model import StabilizerCode, cli_description
 from qecsim.models.color import Color666Pauli
 
@@ -216,7 +217,7 @@ class Color666Code(StabilizerCode):
             return r, r + 1  # red: go to diagonal boundary
 
     def __eq__(self, other):
-        if isinstance(other, Color666Code):
+        if type(other) is type(self):
             return self._size == other._size
         return NotImplemented
 

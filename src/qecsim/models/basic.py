@@ -71,7 +71,7 @@ class BasicCode(StabilizerCode):
         return self._label
 
     def __eq__(self, other):
-        if isinstance(other, BasicCode):
+        if type(other) is type(self):
             return ((self._pauli_stabilizers, self._pauli_logical_xs,
                      self._pauli_logical_zs, self._n_k_d, self._label)
                     == (other._pauli_stabilizers, other._pauli_logical_xs,

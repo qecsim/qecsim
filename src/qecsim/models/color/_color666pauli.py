@@ -196,7 +196,7 @@ class Color666Pauli:
         return self
 
     def __eq__(self, other):
-        if isinstance(other, Color666Pauli):
+        if type(other) is type(self):
             return np.array_equal(self._xs, other._xs) and np.array_equal(self._zs, other._zs)
         return NotImplemented
 

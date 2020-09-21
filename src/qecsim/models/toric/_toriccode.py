@@ -2,6 +2,7 @@ import functools
 import operator
 
 import numpy as np
+
 from qecsim.model import StabilizerCode, cli_description
 from qecsim.models.toric import ToricPauli
 
@@ -255,7 +256,7 @@ class ToricCode(StabilizerCode):
         return [tuple(index) for index in np.array(self._indices)[syndrome.nonzero()]]
 
     def __eq__(self, other):
-        if isinstance(other, ToricCode):
+        if type(other) is type(self):
             return self._size == other._size
         return NotImplemented
 

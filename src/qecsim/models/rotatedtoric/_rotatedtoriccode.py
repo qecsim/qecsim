@@ -3,6 +3,7 @@ import itertools
 import operator
 
 import numpy as np
+
 from qecsim.model import StabilizerCode, cli_description
 from qecsim.models.rotatedtoric import RotatedToricPauli
 
@@ -267,7 +268,7 @@ class RotatedToricCode(StabilizerCode):
         return x_steps, y_steps
 
     def __eq__(self, other):
-        if isinstance(other, RotatedToricCode):
+        if type(other) is type(self):
             return self._size == other._size
         return NotImplemented
 
