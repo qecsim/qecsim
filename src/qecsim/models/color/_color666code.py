@@ -116,8 +116,8 @@ class Color666Code(StabilizerCode):
         """
         return 3 * (self.size - 1) // 2
 
-    @staticmethod
-    def is_plaquette(index):
+    @classmethod
+    def is_plaquette(cls, index):
         """
         Return True if the index specifies a plaquette, irrespective of lattice bounds,
         i.e. column mod 3 == 2 - (row mod 3).
@@ -130,8 +130,8 @@ class Color666Code(StabilizerCode):
         r, c = index
         return c % 3 == 2 - (r % 3)
 
-    @staticmethod
-    def is_site(index):
+    @classmethod
+    def is_site(cls, index):
         """
         Return True if the index specifies a site, irrespective of lattice bounds,
         i.e. column mod 3 != 2 - (row mod 3).
@@ -141,7 +141,7 @@ class Color666Code(StabilizerCode):
         :return: If the index specifies a site
         :rtype: bool
         """
-        return not Color666Code.is_plaquette(index)
+        return not cls.is_plaquette(index)
 
     def is_in_bounds(self, index):
         """

@@ -56,7 +56,7 @@ def test_color666_mps_decoder_sample_recovery(error_pauli):
     error = error_pauli.to_bsf()
     code = error_pauli.code
     syndrome = pt.bsp(error, code.stabilizers.T)
-    recovery_pauli = Color666MPSDecoder._sample_recovery(code, syndrome)
+    recovery_pauli = Color666MPSDecoder.sample_recovery(code, syndrome)
     recovery = recovery_pauli.to_bsf()
     assert np.array_equal(pt.bsp(recovery, code.stabilizers.T), syndrome), (
         'recovery {} does not give the same syndrome as the error {}'.format(recovery, error))
@@ -250,7 +250,7 @@ def test_color666_mps_decoder_decode_value():
     # syndrome
     syndrome = pt.bsp(error.to_bsf(), code.stabilizers.T)
     # sample
-    sample = decoder._sample_recovery(code, syndrome)
+    sample = decoder.sample_recovery(code, syndrome)
     print(sample)
     # probabilities
     prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
