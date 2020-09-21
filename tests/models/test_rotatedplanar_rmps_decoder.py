@@ -5,6 +5,7 @@ import time
 import numpy as np
 import pytest
 from mpmath import mp
+
 from qecsim import paulitools as pt
 from qecsim.models.generic import DepolarizingErrorModel, BiasedDepolarizingErrorModel
 from qecsim.models.rotatedplanar import RotatedPlanarCode, RotatedPlanarRMPSDecoder
@@ -85,7 +86,7 @@ def test_rotated_planar_rmps_decoder_sample_recovery(error_pauli):
     syndrome = pt.bsp(error, code.stabilizers.T)
     print('SYNDROME:')
     print(code.ascii_art(syndrome=syndrome))
-    recovery_pauli = RotatedPlanarRMPSDecoder._sample_recovery(code, syndrome)
+    recovery_pauli = RotatedPlanarRMPSDecoder.sample_recovery(code, syndrome)
     print('SAMPLE_RECOVERY:')
     print(recovery_pauli)
     recovery = recovery_pauli.to_bsf()
@@ -223,7 +224,7 @@ def test_rotated_planar_rmps_mps_accuracy(error_pauli):
     error = error_pauli.to_bsf()
     code = error_pauli.code
     syndrome = pt.bsp(error, code.stabilizers.T)
-    recovery_pauli = RotatedPlanarRMPSDecoder._sample_recovery(code, syndrome)
+    recovery_pauli = RotatedPlanarRMPSDecoder.sample_recovery(code, syndrome)
     prob_dist = BiasedDepolarizingErrorModel(bias=10).probability_distribution(probability=0.1)
     rmps_coset_ps, _ = RotatedPlanarRMPSDecoder(chi=16)._coset_probabilities(prob_dist, recovery_pauli)
     print('#rmps_coset_ps (chi=8)=', rmps_coset_ps)

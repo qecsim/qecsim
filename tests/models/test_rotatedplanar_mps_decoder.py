@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import pytest
 from mpmath import mp
+
 from qecsim import paulitools as pt
 from qecsim.models.generic import DepolarizingErrorModel, BiasedDepolarizingErrorModel
 from qecsim.models.rotatedplanar import RotatedPlanarCode, RotatedPlanarMPSDecoder
@@ -84,7 +85,7 @@ def test_rotated_planar_mps_decoder_sample_recovery(error_pauli):
     syndrome = pt.bsp(error, code.stabilizers.T)
     print('SYNDROME:')
     print(code.ascii_art(syndrome=syndrome))
-    recovery_pauli = RotatedPlanarMPSDecoder._sample_recovery(code, syndrome)
+    recovery_pauli = RotatedPlanarMPSDecoder.sample_recovery(code, syndrome)
     print('SAMPLE_RECOVERY:')
     print(recovery_pauli)
     recovery = recovery_pauli.to_bsf()
