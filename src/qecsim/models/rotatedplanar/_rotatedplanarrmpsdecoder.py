@@ -150,6 +150,7 @@ class RotatedPlanarRMPSDecoder(Decoder):
         self._chi = chi
         self._mode = mode
         self._tol = tol
+        self._tnc = self.TNC()
 
     @classmethod
     def sample_recovery(cls, code, syndrome):
@@ -213,7 +214,7 @@ class RotatedPlanarRMPSDecoder(Decoder):
             sample_pauli.copy().logical_z()
         )
         # tensor networks: tns are common to both contraction by column and by row (after transposition)
-        tns = [_create_tn(prob_dist, sp) for sp in sample_paulis]
+        tns = [self._tnc.create_tn(prob_dist, sp) for sp in sample_paulis]
         # probabilities
         coset_ps = (0.0, 0.0, 0.0, 0.0)  # default coset probabilities
         coset_ps_col = coset_ps_row = None  # undefined coset probabilities by column and row
@@ -334,184 +335,182 @@ class RotatedPlanarRMPSDecoder(Decoder):
     def __repr__(self):
         return '{}({!r}, {!r}, {!r})'.format(type(self).__name__, self._chi, self._mode, self._tol)
 
+    class TNC:
+        """Tensor network creator"""
 
-# < Tensor network creation functions >
+        @functools.lru_cache()
+        def h_node_value(self, prob_dist, f, n, e, s, w):
+            """Return horizontal edge tensor element value."""
+            paulis = ('I', 'X', 'Y', 'Z')
+            op_to_pr = dict(zip(paulis, prob_dist))
+            f = pt.pauli_to_bsf(f)
+            I, X, Y, Z = pt.pauli_to_bsf(paulis)
+            # n, e, s, w are in {0, 1} so multiply op to turn on or off
+            op = (f + (n * Z) + (e * X) + (s * Z) + (w * X)) % 2
+            return op_to_pr[pt.bsf_to_pauli(op)]
 
-@functools.lru_cache()
-def _h_node_value(prob_dist, f, n, e, s, w):
-    """Return horizontal edge tensor element value."""
-    paulis = ('I', 'X', 'Y', 'Z')
-    op_to_pr = dict(zip(paulis, prob_dist))
-    f = pt.pauli_to_bsf(f)
-    I, X, Y, Z = pt.pauli_to_bsf(paulis)
-    # n, e, s, w are in {0, 1} so multiply op to turn on or off
-    op = (f + (n * Z) + (e * X) + (s * Z) + (w * X)) % 2
-    return op_to_pr[pt.bsf_to_pauli(op)]
+        @functools.lru_cache(maxsize=256)
+        def create_q_node(self, prob_dist, f, h_node, even_column, compass_direction=None):
+            """Create q-node for tensor network.
 
+            Notes:
 
-@functools.lru_cache(maxsize=256)
-def _create_q_node(prob_dist, f, h_node, even_column, compass_direction=None):
-    """Create q-node for tensor network.
+            * H-nodes have Z-plaquettes above and below (i.e. in NE and SW directions).
+            * V-nodes have Z-plaquettes on either side (i.e. in NW and SE directions).
+            * Columns are considered even/odd according to indexing defined in :class:`RotatedPlanarCode`.
 
-    Notes:
+            :param h_node: If h-node, else V-node.
+            :type h_node: bool
+            :param prob_dist: Probability distribution in the format (Pr(I), Pr(X), Pr(Y), Pr(Z)).
+            :type prob_dist: (float, float, float, float)
+            :param f: Pauli operator on qubit as 'I', 'X', 'Y', or 'Z'.
+            :type f: str
+            :param even_column: If even column, else odd column.
+            :type even_column: bool
+            :param compass_direction: Compass direction as 'n', 'ne', 'e', ..., 'nw', or falsy for bulk.
+            :type compass_direction: str
+            :return: Q-node for tensor network.
+            :rtype: numpy.array (4d)
+            """
 
-    * H-nodes have Z-plaquettes above and below (i.e. in NE and SW directions).
-    * V-nodes have Z-plaquettes on either side (i.e. in NW and SE directions).
-    * Columns are considered even/odd according to indexing defined in :class:`qecsim.models.planar.RotatedPlanarCode`.
+            # H indicates h-node with shape (n,e,s,w).
+            # * indicates delta nodes with shapes (n,I,j), (e,J,k), (s,K,l), (w,L,i) for n-, e-, s-, and w-deltas
+            #   respectively.
+            # n,e,s,w,i,j,k,I,J,K are bond labels
+            #
+            #   i     I
+            #   |     |
+            # L-*     *-j
+            #    \   /
+            #    w\ /n
+            #      H
+            #    s/ \e
+            #    /   \
+            # l-*     *-J
+            #   |     |
+            #   K     k
+            #
+            # Deltas are absorbed into h-node over n,e,s,w legs and reshaped as follows:
+            # nesw -> (iI)(jJ)(Kk)(Ll)
 
-    :param h_node: If h-node, else V-node.
-    :type h_node: bool
-    :param prob_dist: Probability distribution in the format (Pr(I), Pr(X), Pr(Y), Pr(Z)).
-    :type prob_dist: (float, float, float, float)
-    :param f: Pauli operator on qubit as 'I', 'X', 'Y', or 'Z'.
-    :type f: str
-    :param even_column: If even column, else odd column.
-    :type even_column: bool
-    :param compass_direction: Compass direction as 'n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw', or falsy for bulk.
-    :type compass_direction: str
-    :return: Q-node for tensor network.
-    :rtype: numpy.array (4d)
-    """
+            # define shapes # q_node:(n, e, s, w); delta_nodes: n:(n,I,j), e:(e,J,k), s:(s,K,l), w:(w,L,i)
+            if h_node:
+                # bulk h-node
+                q_shape = (2, 2, 2, 2)
+                if even_column:
+                    n_shape, e_shape, s_shape, w_shape = (2, 2, 2), (2, 1, 2), (2, 2, 2), (2, 1, 2)
+                else:
+                    n_shape, e_shape, s_shape, w_shape = (2, 2, 1), (2, 2, 2), (2, 2, 1), (2, 2, 2)
+                # modifications for directions
+                if compass_direction == 'n':
+                    q_shape = (2, 2, 2, 1)
+                    n_shape, w_shape = (2, 1, 2), (1, 1, 1)
+                elif compass_direction == 'ne':
+                    q_shape = (1, 2, 2, 1)
+                    n_shape, e_shape, w_shape = (1, 1, 1), (2, 1, 2), (1, 1, 1)
+                elif compass_direction == 'e':
+                    q_shape = (1, 2, 2, 2)
+                    n_shape, e_shape = (1, 1, 1), (2, 1, 2)
+                elif compass_direction == 'se':  # always even
+                    q_shape = (1, 1, 2, 2)
+                    n_shape, e_shape, s_shape = (1, 1, 1), (1, 1, 1), (2, 1, 2)
+                elif compass_direction == 's':  # always even
+                    q_shape = (2, 1, 2, 2)
+                    e_shape, s_shape = (1, 1, 1), (2, 1, 2)
+                elif compass_direction == 'sw':  # always even
+                    q_shape = (2, 1, 1, 2)
+                    e_shape, s_shape, w_shape = (1, 1, 1), (1, 1, 1), (2, 1, 2)
+                elif compass_direction == 'w':  # always even
+                    q_shape = (2, 2, 1, 2)
+                    s_shape, w_shape = (1, 1, 1), (2, 1, 2)
+                elif compass_direction == 'nw':  # always even
+                    q_shape = (2, 2, 1, 1)
+                    n_shape, s_shape, w_shape = (2, 1, 2), (1, 1, 1), (1, 1, 1)
+            else:
+                # bulk v-node
+                q_shape = (2, 2, 2, 2)
+                if even_column:
+                    n_shape, e_shape, s_shape, w_shape = (2, 2, 2), (2, 1, 2), (2, 2, 2), (2, 1, 2)
+                else:
+                    n_shape, e_shape, s_shape, w_shape = (2, 2, 1), (2, 2, 2), (2, 2, 1), (2, 2, 2)
+                # modifications for directions
+                if compass_direction == 'n':
+                    q_shape = (1, 2, 2, 2)
+                    n_shape, w_shape = (1, 1, 1), (2, 2, 1)
+                elif compass_direction == 'ne':
+                    q_shape = (1, 1, 2, 2)
+                    n_shape, e_shape, w_shape = (1, 1, 1), (1, 1, 1), (2, 2, 1)
+                elif compass_direction == 'e':
+                    q_shape = (2, 1, 2, 2)
+                    n_shape, e_shape = (2, 2, 1), (1, 1, 1)
+                elif compass_direction == 'se':  # always odd
+                    q_shape = (2, 1, 1, 2)
+                    n_shape, e_shape, s_shape = (2, 2, 1), (1, 1, 1), (1, 1, 1)
+                elif compass_direction == 's':  # always odd
+                    q_shape = (2, 2, 1, 2)
+                    e_shape, s_shape = (2, 2, 1), (1, 1, 1)
+                elif compass_direction == 'sw':  # not possible
+                    raise ValueError('Cannot have v-node in SW corner of lattice.')
+                elif compass_direction == 'w':  # always even
+                    q_shape = (2, 2, 2, 1)
+                    s_shape, w_shape = (2, 2, 1), (1, 1, 1)
+                elif compass_direction == 'nw':  # always even
+                    q_shape = (1, 2, 2, 1)
+                    n_shape, s_shape, w_shape = (1, 1, 1), (2, 2, 1), (1, 1, 1)
 
-    # H indicates h-node with shape (n,e,s,w).
-    # * indicates delta nodes with shapes (n,I,j), (e,J,k), (s,K,l), (w,L,i) for n-, e-, s-, and w-deltas respectively.
-    # n,e,s,w,i,j,k,I,J,K are bond labels
-    #
-    #   i     I
-    #   |     |
-    # L-*     *-j
-    #    \   /
-    #    w\ /n
-    #      H
-    #    s/ \e
-    #    /   \
-    # l-*     *-J
-    #   |     |
-    #   K     k
-    #
-    # Deltas are absorbed into h-node over n,e,s,w legs and reshaped as follows:
-    # nesw -> (iI)(jJ)(Kk)(Ll)
+            # create deltas
+            n_delta = tt.tsr.delta(n_shape)
+            e_delta = tt.tsr.delta(e_shape)
+            s_delta = tt.tsr.delta(s_shape)
+            w_delta = tt.tsr.delta(w_shape)
+            # create q_node and fill values
+            q_node = np.empty(q_shape, dtype=np.float64)
+            for n, e, s, w in np.ndindex(q_node.shape):
+                if h_node:
+                    # N.B. for h_node use standard order of nesw
+                    q_node[(n, e, s, w)] = self.h_node_value(prob_dist, f, n, e, s, w)
+                else:
+                    # N.B. for v_node order of nesw is rotated relative to h_node
+                    q_node[(n, e, s, w)] = self.h_node_value(prob_dist, f, e, s, w, n)
+            # derive combined node shape
+            shape = (w_shape[2] * n_shape[1], n_shape[2] * e_shape[1], e_shape[2] * s_shape[1], s_shape[2] * w_shape[1])
+            # create combined node by absorbing deltas into q_node: nesw -> (iI)(jJ)(Kk)(Ll)
+            node = np.einsum('nesw,nIj,eJk,sKl,wLi->iIjJKkLl', q_node, n_delta, e_delta, s_delta, w_delta).reshape(
+                shape)
+            # return combined node
+            return node
 
-    # define shapes # q_node:(n, e, s, w); delta_nodes: n:(n,I,j), e:(e,J,k), s:(s,K,l), w:(w,L,i)
-    if h_node:
-        # bulk h-node
-        q_shape = (2, 2, 2, 2)
-        if even_column:
-            n_shape, e_shape, s_shape, w_shape = (2, 2, 2), (2, 1, 2), (2, 2, 2), (2, 1, 2)
-        else:
-            n_shape, e_shape, s_shape, w_shape = (2, 2, 1), (2, 2, 2), (2, 2, 1), (2, 2, 2)
-        # modifications for directions
-        if compass_direction == 'n':
-            q_shape = (2, 2, 2, 1)
-            n_shape, w_shape = (2, 1, 2), (1, 1, 1)
-        elif compass_direction == 'ne':
-            q_shape = (1, 2, 2, 1)
-            n_shape, e_shape, w_shape = (1, 1, 1), (2, 1, 2), (1, 1, 1)
-        elif compass_direction == 'e':
-            q_shape = (1, 2, 2, 2)
-            n_shape, e_shape = (1, 1, 1), (2, 1, 2)
-        elif compass_direction == 'se':  # always even
-            q_shape = (1, 1, 2, 2)
-            n_shape, e_shape, s_shape = (1, 1, 1), (1, 1, 1), (2, 1, 2)
-        elif compass_direction == 's':  # always even
-            q_shape = (2, 1, 2, 2)
-            e_shape, s_shape = (1, 1, 1), (2, 1, 2)
-        elif compass_direction == 'sw':  # always even
-            q_shape = (2, 1, 1, 2)
-            e_shape, s_shape, w_shape = (1, 1, 1), (1, 1, 1), (2, 1, 2)
-        elif compass_direction == 'w':  # always even
-            q_shape = (2, 2, 1, 2)
-            s_shape, w_shape = (1, 1, 1), (2, 1, 2)
-        elif compass_direction == 'nw':  # always even
-            q_shape = (2, 2, 1, 1)
-            n_shape, s_shape, w_shape = (2, 1, 2), (1, 1, 1), (1, 1, 1)
-    else:
-        # bulk v-node
-        q_shape = (2, 2, 2, 2)
-        if even_column:
-            n_shape, e_shape, s_shape, w_shape = (2, 2, 2), (2, 1, 2), (2, 2, 2), (2, 1, 2)
-        else:
-            n_shape, e_shape, s_shape, w_shape = (2, 2, 1), (2, 2, 2), (2, 2, 1), (2, 2, 2)
-        # modifications for directions
-        if compass_direction == 'n':
-            q_shape = (1, 2, 2, 2)
-            n_shape, w_shape = (1, 1, 1), (2, 2, 1)
-        elif compass_direction == 'ne':
-            q_shape = (1, 1, 2, 2)
-            n_shape, e_shape, w_shape = (1, 1, 1), (1, 1, 1), (2, 2, 1)
-        elif compass_direction == 'e':
-            q_shape = (2, 1, 2, 2)
-            n_shape, e_shape = (2, 2, 1), (1, 1, 1)
-        elif compass_direction == 'se':  # always odd
-            q_shape = (2, 1, 1, 2)
-            n_shape, e_shape, s_shape = (2, 2, 1), (1, 1, 1), (1, 1, 1)
-        elif compass_direction == 's':  # always odd
-            q_shape = (2, 2, 1, 2)
-            e_shape, s_shape = (2, 2, 1), (1, 1, 1)
-        elif compass_direction == 'sw':  # not possible
-            raise ValueError('Cannot have v-node in SW corner of lattice.')
-        elif compass_direction == 'w':  # always even
-            q_shape = (2, 2, 2, 1)
-            s_shape, w_shape = (2, 2, 1), (1, 1, 1)
-        elif compass_direction == 'nw':  # always even
-            q_shape = (1, 2, 2, 1)
-            n_shape, s_shape, w_shape = (1, 1, 1), (2, 2, 1), (1, 1, 1)
+        def create_tn(self, prob_dist, sample_pauli):
+            """Return a network (numpy.array 2d) of tensors (numpy.array 4d).
+            Note: The network contracts to the coset probability of the given sample_pauli.
+            """
 
-    # create deltas
-    n_delta = tt.tsr.delta(n_shape)
-    e_delta = tt.tsr.delta(e_shape)
-    s_delta = tt.tsr.delta(s_shape)
-    w_delta = tt.tsr.delta(w_shape)
-    # create q_node and fill values
-    q_node = np.empty(q_shape, dtype=np.float64)
-    for n, e, s, w in np.ndindex(q_node.shape):
-        if h_node:
-            # N.B. for h_node use standard order of nesw
-            q_node[(n, e, s, w)] = _h_node_value(prob_dist, f, n, e, s, w)
-        else:
-            # N.B. for v_node order of nesw is rotated relative to h_node
-            q_node[(n, e, s, w)] = _h_node_value(prob_dist, f, e, s, w, n)
-    # derive combined node shape
-    shape = (w_shape[2] * n_shape[1], n_shape[2] * e_shape[1], e_shape[2] * s_shape[1], s_shape[2] * w_shape[1])
-    # create combined node by absorbing deltas into q_node: nesw -> (iI)(jJ)(Kk)(Ll)
-    node = np.einsum('nesw,nIj,eJk,sKl,wLi->iIjJKkLl', q_node, n_delta, e_delta, s_delta, w_delta).reshape(shape)
-    # return combined node
-    return node
+            def _xy_to_rc_index(index, code):
+                """Convert code site index in format (x, y) to tensor network q-node index in format (r, c)"""
+                x, y = index
+                return code.site_bounds[1] - y, x
 
+            def _compass_direction(index, code):
+                """if the code site index in format (x, y) lies on border then give that direction, else empty string"""
+                direction = {code.site_bounds[1]: 'n', 0: 's'}.get(index[1], '')
+                direction += {0: 'w', code.site_bounds[0]: 'e'}.get(index[0], '')
+                return direction
 
-def _create_tn(prob_dist, sample_pauli):
-    """Return a network (numpy.array 2d) of tensors (numpy.array 4d).
-    Note: The network contracts to the coset probability of the given sample_pauli.
-    """
-
-    def _xy_to_rc_index(index, code):
-        """Convert code site index in format (x, y) to tensor network q-node index in format (r, c)"""
-        x, y = index
-        return code.site_bounds[1] - y, x
-
-    def _compass_direction(index, code):
-        """if the code site index in format (x, y) lies on border then give that direction, else empty string"""
-        direction = {code.site_bounds[1]: 'n', 0: 's'}.get(index[1], '')
-        direction += {0: 'w', code.site_bounds[0]: 'e'}.get(index[0], '')
-        return direction
-
-    # extract code
-    code = sample_pauli.code
-    # initialise empty tn
-    tn = np.empty(code.size, dtype=object)
-    # iterate over site indices
-    max_site_x, max_site_y = code.site_bounds
-    for code_index in itertools.product(range(max_site_x + 1), range(max_site_y + 1)):
-        # prepare parameters
-        is_h_node = code.is_z_plaquette(code_index)
-        q_node_index = _xy_to_rc_index(code_index, code)
-        is_even_column = not (q_node_index[1] % 2)
-        q_pauli = sample_pauli.operator(code_index)
-        q_direction = _compass_direction(code_index, code)
-        # create q-node
-        q_node = _create_q_node(prob_dist, q_pauli, is_h_node, is_even_column, q_direction)
-        # add q-node to tensor network
-        tn[q_node_index] = q_node
-    return tn
-
-# </ Tensor network creation functions >
+            # extract code
+            code = sample_pauli.code
+            # initialise empty tn
+            tn = np.empty(code.size, dtype=object)
+            # iterate over site indices
+            max_site_x, max_site_y = code.site_bounds
+            for code_index in itertools.product(range(max_site_x + 1), range(max_site_y + 1)):
+                # prepare parameters
+                is_h_node = code.is_z_plaquette(code_index)
+                q_node_index = _xy_to_rc_index(code_index, code)
+                is_even_column = not (q_node_index[1] % 2)
+                q_pauli = sample_pauli.operator(code_index)
+                q_direction = _compass_direction(code_index, code)
+                # create q-node
+                q_node = self.create_q_node(prob_dist, q_pauli, is_h_node, is_even_column, q_direction)
+                # add q-node to tensor network
+                tn[q_node_index] = q_node
+            return tn

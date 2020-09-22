@@ -124,6 +124,7 @@ class RotatedPlanarMPSDecoder(Decoder):
         self._chi = chi
         self._mode = mode
         self._tol = tol
+        self._tnc = self.TNC()
 
     @classmethod
     def sample_recovery(cls, code, syndrome):
@@ -187,7 +188,7 @@ class RotatedPlanarMPSDecoder(Decoder):
             sample_pauli.copy().logical_z()
         )
         # tensor networks: tns are common to both contraction by column and by row (after transposition)
-        tns = [_create_tn(prob_dist, sp) for sp in sample_paulis]
+        tns = [self._tnc.create_tn(prob_dist, sp) for sp in sample_paulis]
         # probabilities
         coset_ps = (0.0, 0.0, 0.0, 0.0)  # default coset probabilities
         coset_ps_col = coset_ps_row = None  # undefined coset probabilities by column and row
@@ -292,139 +293,133 @@ class RotatedPlanarMPSDecoder(Decoder):
     def __repr__(self):
         return '{}({!r}, {!r}, {!r})'.format(type(self).__name__, self._chi, self._mode, self._tol)
 
+    class TNC:
+        """Tensor network creator"""
 
-# < Tensor network creation functions >
+        @functools.lru_cache()
+        def h_node_value(self, prob_dist, f, n, e, s, w):
+            """Return horizontal edge tensor element value."""
+            paulis = ('I', 'X', 'Y', 'Z')
+            op_to_pr = dict(zip(paulis, prob_dist))
+            f = pt.pauli_to_bsf(f)
+            I, X, Y, Z = pt.pauli_to_bsf(paulis)
+            # n, e, s, w are in {0, 1} so multiply op to turn on or off
+            op = (f + (n * Z) + (e * X) + (s * Z) + (w * X)) % 2
+            return op_to_pr[pt.bsf_to_pauli(op)]
 
-@functools.lru_cache()
-def _h_node_value(prob_dist, f, n, e, s, w):
-    """Return horizontal edge tensor element value."""
-    paulis = ('I', 'X', 'Y', 'Z')
-    op_to_pr = dict(zip(paulis, prob_dist))
-    f = pt.pauli_to_bsf(f)
-    I, X, Y, Z = pt.pauli_to_bsf(paulis)
-    # n, e, s, w are in {0, 1} so multiply op to turn on or off
-    op = (f + (n * Z) + (e * X) + (s * Z) + (w * X)) % 2
-    return op_to_pr[pt.bsf_to_pauli(op)]
+        @functools.lru_cache()
+        def create_h_node(self, prob_dist, f, compass_direction=None):
+            """Return horizontal qubit tensor, i.e. has X plaquettes to left and right and Z plaquettes above and below."""
 
+            def _shape(compass_direction=None):
+                """Return shape of tensor including dummy indices."""
+                return {  # (ne, se, sw, nw)
+                    'n': (2, 2, 2, 1),
+                    'ne': (1, 2, 2, 1),
+                    'e': (1, 2, 2, 2),
+                    'se': (1, 1, 2, 2),
+                    's': (2, 1, 2, 2),
+                    'sw': (2, 1, 1, 2),
+                    'w': (2, 2, 1, 2),
+                    'nw': (2, 2, 1, 1),
+                }.get(compass_direction, (2, 2, 2, 2))
 
-@functools.lru_cache()
-def _create_h_node(prob_dist, f, compass_direction=None):
-    """Return horizontal qubit tensor, i.e. has X plaquettes to left and right and Z plaquettes above and below."""
+            # create bare h_node
+            node = np.empty(_shape(compass_direction), dtype=np.float64)
+            # fill values
+            for n, e, s, w in np.ndindex(node.shape):
+                node[(n, e, s, w)] = self.h_node_value(prob_dist, f, n, e, s, w)
+            return node
 
-    def _shape(compass_direction=None):
-        """Return shape of tensor including dummy indices."""
-        return {  # (ne, se, sw, nw)
-            'n': (2, 2, 2, 1),
-            'ne': (1, 2, 2, 1),
-            'e': (1, 2, 2, 2),
-            'se': (1, 1, 2, 2),
-            's': (2, 1, 2, 2),
-            'sw': (2, 1, 1, 2),
-            'w': (2, 2, 1, 2),
-            'nw': (2, 2, 1, 1),
-        }.get(compass_direction, (2, 2, 2, 2))
+        @functools.lru_cache()
+        def create_v_node(self, prob_dist, f, compass_direction=None):
+            """Return vertical qubit tensor, i.e. has Z plaquettes to left and right and X plaquettes above and below."""
 
-    # create bare h_node
-    node = np.empty(_shape(compass_direction), dtype=np.float64)
-    # fill values
-    for n, e, s, w in np.ndindex(node.shape):
-        node[(n, e, s, w)] = _h_node_value(prob_dist, f, n, e, s, w)
-    return node
+            def _shape(compass_direction=None):
+                """Return shape of tensor including dummy indices."""
+                return {  # (ne, se, sw, nw)
+                    'n': (1, 2, 2, 2),
+                    'ne': (1, 1, 2, 2),
+                    'e': (2, 1, 2, 2),
+                    'se': (2, 1, 1, 2),
+                    's': (2, 2, 1, 2),
+                    # 'sw': (2, 2, 1, 1),  # cannot happen
+                    'w': (2, 2, 2, 1),
+                    'nw': (1, 2, 2, 1),
+                }.get(compass_direction, (2, 2, 2, 2))
 
+            # create bare v_node
+            node = np.empty(_shape(compass_direction), dtype=np.float64)
+            # fill values
+            for n, e, s, w in np.ndindex(node.shape):
+                # N.B. order of nesw is rotated relative to h_node
+                node[(n, e, s, w)] = self.h_node_value(prob_dist, f, e, s, w, n)
+            return node
 
-@functools.lru_cache()
-def _create_v_node(prob_dist, f, compass_direction=None):
-    """Return vertical qubit tensor, i.e. has Z plaquettes to left and right and X plaquettes above and below."""
+        @functools.lru_cache()
+        def create_s_node(self, compass_direction=None):
+            """Return stabilizer tensor."""
 
-    def _shape(compass_direction=None):
-        """Return shape of tensor including dummy indices."""
-        return {  # (ne, se, sw, nw)
-            'n': (1, 2, 2, 2),
-            'ne': (1, 1, 2, 2),
-            'e': (2, 1, 2, 2),
-            'se': (2, 1, 1, 2),
-            's': (2, 2, 1, 2),
-            # 'sw': (2, 2, 1, 1),  # cannot happen
-            'w': (2, 2, 2, 1),
-            'nw': (1, 2, 2, 1),
-        }.get(compass_direction, (2, 2, 2, 2))
+            def _shape(compass_direction=None):
+                """Return shape of tensor including dummy indices."""
+                return {  # (ne, se, sw, nw)
+                    'n': (1, 2, 2, 1),
+                    'e': (1, 1, 2, 2),
+                    's': (2, 1, 1, 2),
+                    'w': (2, 2, 1, 1),
+                }.get(compass_direction, (2, 2, 2, 2))
 
-    # create bare v_node
-    node = np.empty(_shape(compass_direction), dtype=np.float64)
-    # fill values
-    for n, e, s, w in np.ndindex(node.shape):
-        # N.B. order of nesw is rotated relative to h_node
-        node[(n, e, s, w)] = _h_node_value(prob_dist, f, e, s, w, n)
-    return node
+            node = tt.tsr.delta(_shape(compass_direction))
+            return node
 
+        def create_tn(self, prob_dist, sample_pauli):
+            """Return a network (numpy.array 2d) of tensors (numpy.array 4d).
+            Note: The network contracts to the coset probability of the given sample_pauli.
+            """
 
-@functools.lru_cache()
-def _create_s_node(compass_direction=None):
-    """Return stabilizer tensor."""
+            def _rotate_q_index(index, code):
+                """Convert code site index in format (x, y) to tensor network q-node index in format (r, c)"""
+                site_x, site_y = index  # qubit index in (x, y)
+                site_r, site_c = code.site_bounds[1] - site_y, site_x  # qubit index in (r, c)
+                return code.site_bounds[0] - site_c + site_r, site_r + site_c  # q-node index in (r, c)
 
-    def _shape(compass_direction=None):
-        """Return shape of tensor including dummy indices."""
-        return {  # (ne, se, sw, nw)
-            'n': (1, 2, 2, 1),
-            'e': (1, 1, 2, 2),
-            's': (2, 1, 1, 2),
-            'w': (2, 2, 1, 1),
-        }.get(compass_direction, (2, 2, 2, 2))
+            def _rotate_p_index(index, code):
+                """Convert code plaquette index in format (x, y) to tensor network s-node index in format (r, c)"""
+                q_node_r, q_node_c = _rotate_q_index(index, code)  # q-node index in (r, c)
+                return q_node_r - 1, q_node_c  # s-node index in (r, c)
 
-    node = tt.tsr.delta(_shape(compass_direction))
-    return node
+            def _compass_q_direction(index, code):
+                """if the code site index lies on border of code lattice then give that direction, else empty string"""
+                direction = {code.site_bounds[1]: 'n', 0: 's'}.get(index[1], '')
+                direction += {0: 'w', code.site_bounds[0]: 'e'}.get(index[0], '')
+                return direction
 
+            def _compass_p_direction(index, code):
+                """if the code plaquette index lies on border of code lattice then give that direction, else empty string"""
+                direction = {code.site_bounds[1]: 'n', -1: 's'}.get(index[1], '')
+                direction += {-1: 'w', code.site_bounds[0]: 'e'}.get(index[0], '')
+                return direction
 
-def _create_tn(prob_dist, sample_pauli):
-    """Return a network (numpy.array 2d) of tensors (numpy.array 4d).
-    Note: The network contracts to the coset probability of the given sample_pauli.
-    """
-
-    def _rotate_q_index(index, code):
-        """Convert code site index in format (x, y) to tensor network q-node index in format (r, c)"""
-        site_x, site_y = index  # qubit index in (x, y)
-        site_r, site_c = code.site_bounds[1] - site_y, site_x  # qubit index in (r, c)
-        return code.site_bounds[0] - site_c + site_r, site_r + site_c  # q-node index in (r, c)
-
-    def _rotate_p_index(index, code):
-        """Convert code plaquette index in format (x, y) to tensor network s-node index in format (r, c)"""
-        q_node_r, q_node_c = _rotate_q_index(index, code)  # q-node index in (r, c)
-        return q_node_r - 1, q_node_c  # s-node index in (r, c)
-
-    def _compass_q_direction(index, code):
-        """if the code site index lies on border of code lattice then give that direction, else empty string"""
-        direction = {code.site_bounds[1]: 'n', 0: 's'}.get(index[1], '')
-        direction += {0: 'w', code.site_bounds[0]: 'e'}.get(index[0], '')
-        return direction
-
-    def _compass_p_direction(index, code):
-        """if the code plaquette index lies on border of code lattice then give that direction, else empty string"""
-        direction = {code.site_bounds[1]: 'n', -1: 's'}.get(index[1], '')
-        direction += {-1: 'w', code.site_bounds[0]: 'e'}.get(index[0], '')
-        return direction
-
-    # extract code
-    code = sample_pauli.code
-    # initialise empty tn
-    tn_max_r, _ = _rotate_q_index((0, 0), code)
-    _, tn_max_c = _rotate_q_index((code.site_bounds[0], 0), code)
-    tn = np.empty((tn_max_r + 1, tn_max_c + 1), dtype=object)
-    # iterate over
-    max_site_x, max_site_y = code.site_bounds
-    for code_index in itertools.product(range(-1, max_site_x + 1), range(-1, max_site_y + 1)):
-        is_z_plaquette = code.is_z_plaquette(code_index)
-        if code.is_in_site_bounds(code_index):
-            q_node_index = _rotate_q_index(code_index, code)
-            q_pauli = sample_pauli.operator(code_index)
-            if is_z_plaquette:
-                q_node = _create_h_node(prob_dist, q_pauli, _compass_q_direction(code_index, code))
-            else:
-                q_node = _create_v_node(prob_dist, q_pauli, _compass_q_direction(code_index, code))
-            tn[q_node_index] = q_node
-        if code.is_in_plaquette_bounds(code_index):
-            s_node_index = _rotate_p_index(code_index, code)
-            s_node = _create_s_node(_compass_p_direction(code_index, code))
-            tn[s_node_index] = s_node
-    return tn
-
-# </ Tensor network creation functions >
+            # extract code
+            code = sample_pauli.code
+            # initialise empty tn
+            tn_max_r, _ = _rotate_q_index((0, 0), code)
+            _, tn_max_c = _rotate_q_index((code.site_bounds[0], 0), code)
+            tn = np.empty((tn_max_r + 1, tn_max_c + 1), dtype=object)
+            # iterate over
+            max_site_x, max_site_y = code.site_bounds
+            for code_index in itertools.product(range(-1, max_site_x + 1), range(-1, max_site_y + 1)):
+                is_z_plaquette = code.is_z_plaquette(code_index)
+                if code.is_in_site_bounds(code_index):
+                    q_node_index = _rotate_q_index(code_index, code)
+                    q_pauli = sample_pauli.operator(code_index)
+                    if is_z_plaquette:
+                        q_node = self.create_h_node(prob_dist, q_pauli, _compass_q_direction(code_index, code))
+                    else:
+                        q_node = self.create_v_node(prob_dist, q_pauli, _compass_q_direction(code_index, code))
+                    tn[q_node_index] = q_node
+                if code.is_in_plaquette_bounds(code_index):
+                    s_node_index = _rotate_p_index(code_index, code)
+                    s_node = self.create_s_node(_compass_p_direction(code_index, code))
+                    tn[s_node_index] = s_node
+            return tn

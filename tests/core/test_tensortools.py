@@ -10,7 +10,7 @@ from qecsim.models.generic import DepolarizingErrorModel
 from qecsim.models.planar import PlanarCode
 from qecsim.models.planar import PlanarMPSDecoder
 from qecsim.models.rotatedplanar import RotatedPlanarCode
-from qecsim.models.rotatedplanar import _rotatedplanarrmpsdecoder
+from qecsim.models.rotatedplanar import RotatedPlanarRMPSDecoder
 
 
 def _is_close(a, b, rtol=1e-05, atol=1e-08):
@@ -548,7 +548,8 @@ def test_color666_mps2d_contract():
 ])
 def test_rotatedplanar_mps2d_contract(pauli):
     prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
-    tn = _rotatedplanarrmpsdecoder._create_tn(prob_dist, pauli)
+    tnc = RotatedPlanarRMPSDecoder.TNC()
+    tn = tnc.create_tn(prob_dist, pauli)
     print('tn.shape=', tn.shape)
     result = tt.mps2d.contract(tn)
     assert isinstance(result, mp.mpf), 'Contracted tensor network is not an mp.mpf'
