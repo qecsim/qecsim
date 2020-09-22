@@ -44,11 +44,11 @@ class BiasedDepolarizingErrorModel(SimpleErrorModel):
         """
         try:  # paranoid checking for CLI
             if not (bias > 0 and math.isfinite(bias)):
-                raise ValueError("BiasedDepolarizingErrorModel valid bias values are number > 0")
+                raise ValueError('{} valid bias values are number > 0'.format(type(self).__name__))
             if axis not in ('x', 'y', 'z', 'X', 'Y', 'Z'):
-                raise ValueError("BiasedDepolarizingErrorModel valid axis values are ('X', 'Y', 'Z')")
+                raise ValueError("{} valid axis values are ('X', 'Y', 'Z')".format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('BiasedDepolarizingErrorModel invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._bias = bias
         self._axis = axis.upper()
 
@@ -131,9 +131,9 @@ class BiasedYXErrorModel(SimpleErrorModel):
         """
         try:  # paranoid checking for CLI
             if not (bias >= 0 and math.isfinite(bias)):
-                raise ValueError("BiasedYXErrorModel valid bias values are number >= 0")
+                raise ValueError('{} valid bias values are number >= 0'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('BiasedYXErrorModel invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._bias = bias
 
     @property

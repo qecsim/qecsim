@@ -56,11 +56,11 @@ class Color666Code(StabilizerCode):
         """
         try:  # paranoid checking for CLI. (operator.index ensures the parameter can be treated as an int)
             if operator.index(size) < self.MIN_SIZE:
-                raise ValueError('Color666Code minimum size is {}.'.format(self.MIN_SIZE))
+                raise ValueError('{} minimum size is {}.'.format(type(self).__name__, self.MIN_SIZE))
             if size % 2 == 0:
-                raise ValueError('Color666Code size must be odd.')
+                raise ValueError('{} size must be odd.'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('Color666Code invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._size = size
 
     # < StabilizerCode interface methods >

@@ -512,15 +512,15 @@ class PlanarCMWPMDecoder(Decoder):
         """
         try:  # paranoid checking for CLI. (operator.index ensures the parameter can be treated as an int)
             if not factor >= 0.0:
-                raise ValueError('PlanarCMWPMDecoder valid factor values are number >= 0.0')
+                raise ValueError('{} valid factor values are number >= 0.0'.format(type(self).__name__))
             if not operator.index(max_iterations) >= 0:
-                raise ValueError('PlanarCMWPMDecoder valid max_iterations values are integer >= 0')
+                raise ValueError('{} valid max_iterations values are integer >= 0'.format(type(self).__name__))
             if box_shape not in ('t', 'r', 'f', 'l'):
-                raise ValueError("PlanarCMWPMDecoder valid box_shape values are ('t', 'r', 'f', 'l')")
+                raise ValueError("{} valid box_shape values are ('t', 'r', 'f', 'l')".format(type(self).__name__))
             if distance_algorithm not in (1, 2, 4):
-                raise ValueError("PlanarCMWPMDecoder valid distance_algorithm values are (1, 2, 4)")
+                raise ValueError('{} valid distance_algorithm values are (1, 2, 4)'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('PlanarCMWPMDecoder invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._factor = factor
         self._max_iterations = max_iterations
         self._box_shape = box_shape

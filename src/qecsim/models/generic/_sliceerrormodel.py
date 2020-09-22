@@ -56,11 +56,12 @@ class CenterSliceErrorModel(SimpleErrorModel):
         """
         try:  # paranoid checking for CLI
             if not (len(lim) == 3 and np.count_nonzero(lim) in (1, 2)):
-                raise ValueError("CenterSliceErrorModel valid lim values are 3-tuples of number with 1 or 2 zeros.")
+                raise ValueError('{} valid lim values are 3-tuples of number with 1 or 2 zeros.'
+                                 .format(type(self).__name__))
             if not -1.0 <= pos <= 1.0:
-                raise ValueError("CenterSliceErrorModel valid pos values -1.0 <= number <= 1.0.")
+                raise ValueError('{} valid pos values -1.0 <= number <= 1.0.'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('CenterSliceErrorModel invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._lim = self._normalize(np.array(lim))
         self._pos = pos
 
@@ -93,7 +94,7 @@ class CenterSliceErrorModel(SimpleErrorModel):
                     pN = p3  # opposing limit at intersect with 12-plane
                 # return slice and plane interest
                 return cls._normalize(cls._line_plane_intersect(pN, pO, pC - pL, pL))
-        raise QecsimError('CenterSliceErrorModel: failed to find negative-limit.')
+        raise QecsimError('Failed to find negative-limit.')
 
     @classmethod
     def _line_plane_intersect(cls, plane_normal, plane_point, line_direction, line_point):

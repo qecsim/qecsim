@@ -93,11 +93,11 @@ class RotatedToricCode(StabilizerCode):
         min_rows, min_cols = self.MIN_SIZE
         try:  # paranoid checking for CLI. (operator.index ensures the parameter can be treated as an int)
             if operator.index(rows) < min_rows or operator.index(columns) < min_cols:
-                raise ValueError('RotatedToricCode minimum size is {}.'.format(self.MIN_SIZE))
+                raise ValueError('{} minimum size is {}.'.format(type(self).__name__, self.MIN_SIZE))
             if rows % 2 or columns % 2:
-                raise ValueError('RotatedToricCode dimensions must be even.')
+                raise ValueError('{} dimensions must be even.'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('RotatedToricCode invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._size = rows, columns
 
     # < StabilizerCode interface methods >

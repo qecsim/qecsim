@@ -112,9 +112,9 @@ class FileErrorModel(ErrorModel):
             # open file for reading as JSON lines object
             self._json_lines = _JSONLines(filename)  # can raise TypeError / OSError / FileNotFoundError
             if not operator.index(start) >= 0:
-                raise ValueError("FileErrorModel valid start values are integer >= 0")
+                raise ValueError('{} valid start values are integer >= 0'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('FileErrorModel invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         # init parameters
         self._filename = filename
         self._start = start

@@ -137,11 +137,11 @@ class Color666MPSDecoder(Decoder):
         """
         try:  # paranoid checking for CLI. (operator.index ensures the parameter can be treated as an int)
             if not (not chi or operator.index(chi) > 0):
-                raise ValueError('Color666MPSDecoder valid chi values are falsy or integer > 0')
+                raise ValueError('{} valid chi values are falsy or integer > 0'.format(type(self).__name__))
             if not (not tol or tol > 0.0):
-                raise ValueError('Color666MPSDecoder valid tol values are falsy or number > 0.0')
+                raise ValueError('{} valid tol values are falsy or number > 0.0'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('Color666MPSDecoder invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._chi = chi
         self._tol = tol
 

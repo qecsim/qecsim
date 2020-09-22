@@ -1,6 +1,7 @@
 import operator
 
 import numpy as np
+
 from qecsim import paulitools as pt
 from qecsim.model import Decoder, cli_description
 
@@ -37,9 +38,9 @@ class NaiveDecoder(Decoder):
         """
         try:  # paranoid checking for CLI. (operator.index ensures the parameter can be treated as an int)
             if not (not max_qubits or operator.index(max_qubits) > 0):
-                raise ValueError("NaiveDecoder valid max_qubits values are falsy or integer > 0")
+                raise ValueError('{} valid max_qubits values are falsy or integer > 0'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('NaiveDecoder invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._max_qubits = max_qubits
 
     def decode(self, code, syndrome, **kwargs):

@@ -5,6 +5,7 @@ import math
 from collections import OrderedDict
 
 import numpy as np
+
 from qecsim import graphtools as gt
 from qecsim import paulitools as pt
 from qecsim.error import QecsimError
@@ -148,9 +149,9 @@ class RotatedPlanarSMWPMDecoder(Decoder, DecoderFTP):
         """
         try:  # paranoid checking for CLI.
             if not (eta is None or (eta > 0.0 and math.isfinite(eta))):
-                raise ValueError('RotatedPlanarSMWPMDecoder valid eta values are None or number > 0.0')
+                raise ValueError('{} valid eta values are None or number > 0.0'.format(type(self).__name__))
         except TypeError as ex:
-            raise TypeError('RotatedPlanarSMWPMDecoder invalid parameter type') from ex
+            raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._eta = eta
 
     def _bias(self, error_model):
