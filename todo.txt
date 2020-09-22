@@ -48,7 +48,7 @@
 # DONE: port legacy refactorings: dynamic type name in model exceptions
 # DONE: port legacy refactorings: MPS decoder tensor network extensibility
 # DONE: reformat all code
-# DONE: set up tox for lint flake8
+# DONE: set up tox for lint (flake8)
 # TODO: add EQUS acknowledgment
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
