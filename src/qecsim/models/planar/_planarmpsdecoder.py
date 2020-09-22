@@ -119,6 +119,7 @@ class PlanarMPSDecoder(Decoder):
         self._mode = mode
         self._stp = stp
         self._tol = tol
+        self._tnc = self.TNC()
 
     @classmethod
     def sample_recovery(cls, code, syndrome):
@@ -171,8 +172,8 @@ class PlanarMPSDecoder(Decoder):
             sample_pauli.copy().logical_z()
         ]
         # tensor networks
-        tns = [_create_tn(prob_dist, pauli) for pauli in sample_paulis]
-        mask = _create_mask(self._stp, tns[0].shape)  # same mask for all tns
+        tns = [self._tnc.create_tn(prob_dist, pauli) for pauli in sample_paulis]
+        mask = self._tnc.create_mask(self._stp, tns[0].shape)  # same mask for all tns
         # probabilities
         coset_ps = (0.0, 0.0, 0.0, 0.0)  # default coset probabilities
         coset_ps_col = coset_ps_row = None  # undefined coset probabilities by column and row
@@ -297,86 +298,78 @@ class PlanarMPSDecoder(Decoder):
             type(self).__name__, self._chi, self._mode, self._stp, self._tol,
         )
 
+    class TNC:
+        """Tensor network creator"""
 
-# < Tensor network creation functions >
+        def node_shape(self, compass_direction=None):
+            """Return shape of tensor including dummy indices."""
+            return {
+                'n': (1, 2, 2, 2),
+                'ne': (1, 1, 2, 2),
+                'e': (2, 1, 2, 2),
+                'se': (2, 1, 1, 2),
+                's': (2, 2, 1, 2),
+                'sw': (2, 2, 1, 1),
+                'w': (2, 2, 2, 1),
+                'nw': (1, 2, 2, 1),
+            }.get(compass_direction, (2, 2, 2, 2))
 
-def _node_shape(compass_direction=None):
-    """Return shape of tensor including dummy indices."""
-    return {
-        'n': (1, 2, 2, 2),
-        'ne': (1, 1, 2, 2),
-        'e': (2, 1, 2, 2),
-        'se': (2, 1, 1, 2),
-        's': (2, 2, 1, 2),
-        'sw': (2, 2, 1, 1),
-        'w': (2, 2, 2, 1),
-        'nw': (1, 2, 2, 1),
-    }.get(compass_direction, (2, 2, 2, 2))
+        @functools.lru_cache()
+        def create_s_node(self, compass_direction=None):
+            """Return stabilizer tensor."""
+            return tt.tsr.delta(self.node_shape(compass_direction))
 
+        @functools.lru_cache()
+        def h_node_value(self, prob_dist, f, n, e, s, w):
+            """Return horizontal edge tensor element value."""
+            paulis = ('I', 'X', 'Y', 'Z')
+            op_to_pr = dict(zip(paulis, prob_dist))
+            f = pt.pauli_to_bsf(f)
+            I, X, Y, Z = pt.pauli_to_bsf(paulis)
+            # n, e, s, w are in {0, 1} so multiply op to turn on or off
+            op = (f + (n * Z) + (e * X) + (s * Z) + (w * X)) % 2
+            return op_to_pr[pt.bsf_to_pauli(op)]
 
-@functools.lru_cache()
-def _create_s_node(compass_direction=None):
-    """Return stabilizer tensor."""
-    return tt.tsr.delta(_node_shape(compass_direction))
+        @functools.lru_cache()
+        def create_h_node(self, prob_dist, f, compass_direction=None):
+            """Return horizontal edge tensor."""
+            node = np.empty(self.node_shape(compass_direction), dtype=np.float64)
+            for n, e, s, w in np.ndindex(node.shape):
+                node[(n, e, s, w)] = self.h_node_value(prob_dist, f, n, e, s, w)
+            return node
 
+        @functools.lru_cache()
+        def create_v_node(self, prob_dist, f, compass_direction=None):
+            """Return vertical edge tensor."""
+            node = np.empty(self.node_shape(compass_direction), dtype=np.float64)
+            for n, e, s, w in np.ndindex(node.shape):
+                node[(n, e, s, w)] = self.h_node_value(prob_dist, f, e, s, w, n)
+            return node
 
-@functools.lru_cache()
-def _h_node_value(prob_dist, f, n, e, s, w):
-    """Return horizontal edge tensor element value."""
-    paulis = ('I', 'X', 'Y', 'Z')
-    op_to_pr = dict(zip(paulis, prob_dist))
-    f = pt.pauli_to_bsf(f)
-    I, X, Y, Z = pt.pauli_to_bsf(paulis)
-    # n, e, s, w are in {0, 1} so multiply op to turn on or off
-    op = (f + (n * Z) + (e * X) + (s * Z) + (w * X)) % 2
-    return op_to_pr[pt.bsf_to_pauli(op)]
+        def create_tn(self, prob_dist, sample_pauli):
+            """Return a network (numpy.array 2d) of tensors (numpy.array 4d).
+            Note: The network contracts to the coset probability of the given sample_pauli."""
+            # initialise empty tn
+            tn = np.empty((2 * sample_pauli.code.size[0] - 1, 2 * sample_pauli.code.size[1] - 1), dtype=object)
+            # index to direction maps
+            row_to_direction = {0: 'n', tn.shape[0] - 1: 's'}
+            col_to_direction = {0: 'w', tn.shape[1] - 1: 'e'}
+            # add nodes to tn
+            for row, col in np.ndindex(tn.shape):
+                # find direction
+                direction = row_to_direction.get(row, '')
+                direction += col_to_direction.get(col, '')
+                # add node
+                if 0 == row % 2 == col % 2:
+                    tn[row, col] = self.create_h_node(prob_dist, sample_pauli.operator((row, col)), direction)
+                elif 1 == row % 2 == col % 2:
+                    tn[row, col] = self.create_v_node(prob_dist, sample_pauli.operator((row, col)), direction)
+                else:
+                    tn[row, col] = self.create_s_node(direction)
+            return tn
 
-
-@functools.lru_cache()
-def _create_h_node(prob_dist, f, compass_direction=None):
-    """Return horizontal edge tensor."""
-    node = np.empty(_node_shape(compass_direction), dtype=np.float64)
-    for n, e, s, w in np.ndindex(node.shape):
-        node[(n, e, s, w)] = _h_node_value(prob_dist, f, n, e, s, w)
-    return node
-
-
-@functools.lru_cache()
-def _create_v_node(prob_dist, f, compass_direction=None):
-    """Return vertical edge tensor."""
-    node = np.empty(_node_shape(compass_direction), dtype=np.float64)
-    for n, e, s, w in np.ndindex(node.shape):
-        node[(n, e, s, w)] = _h_node_value(prob_dist, f, e, s, w, n)
-    return node
-
-
-def _create_tn(prob_dist, sample_pauli):
-    """Return a network (numpy.array 2d) of tensors (numpy.array 4d).
-    Note: The network contracts to the coset probability of the given sample_pauli."""
-    # initialise empty tn
-    tn = np.empty((2 * sample_pauli.code.size[0] - 1, 2 * sample_pauli.code.size[1] - 1), dtype=object)
-    # index to direction maps
-    row_to_direction = {0: 'n', tn.shape[0] - 1: 's'}
-    col_to_direction = {0: 'w', tn.shape[1] - 1: 'e'}
-    # add nodes to tn
-    for row, col in np.ndindex(tn.shape):
-        # find direction
-        direction = row_to_direction.get(row, '')
-        direction += col_to_direction.get(col, '')
-        # add node
-        if 0 == row % 2 == col % 2:
-            tn[row, col] = _create_h_node(prob_dist, sample_pauli.operator((row, col)), direction)
-        elif 1 == row % 2 == col % 2:
-            tn[row, col] = _create_v_node(prob_dist, sample_pauli.operator((row, col)), direction)
-        else:
-            tn[row, col] = _create_s_node(direction)
-    return tn
-
-
-def _create_mask(stp, shape):
-    """Return truncate mask (numpy.array 2d) of elements True with probability 1-stp and False with probability stp.
-    Note: None is returned if stp (skip truncate probability) is falsy."""
-    rng = np.random.default_rng()
-    return rng.choice((True, False), size=shape, p=(1 - stp, stp)) if stp else None
-
-# </ Tensor network creation functions >
+        def create_mask(self, stp, shape):
+            """Return truncate mask (numpy.array 2d) of elements True with probability 1-stp and False with probability
+            stp. Note: None is returned if stp (skip truncate probability) is falsy."""
+            rng = np.random.default_rng()
+            return rng.choice((True, False), size=shape, p=(1 - stp, stp)) if stp else None

@@ -8,7 +8,7 @@ from qecsim.models.color import Color666Code
 from qecsim.models.color import Color666MPSDecoder
 from qecsim.models.generic import DepolarizingErrorModel
 from qecsim.models.planar import PlanarCode
-from qecsim.models.planar import _planarmpsdecoder
+from qecsim.models.planar import PlanarMPSDecoder
 from qecsim.models.rotatedplanar import RotatedPlanarCode
 from qecsim.models.rotatedplanar import _rotatedplanarrmpsdecoder
 
@@ -95,21 +95,22 @@ def test_mps_zeros_like(mps):
 def test_planar_mps_functions():
     prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
     rng = np.random.default_rng()
+    tnc = PlanarMPSDecoder.TNC()
     # column bra, mpo and ket
     bra = [
-        _planarmpsdecoder._create_h_node(prob_dist, 'X', 'nw'),
-        _planarmpsdecoder._create_s_node('w'),
-        _planarmpsdecoder._create_h_node(prob_dist, 'Z', 'sw'),
+        tnc.create_h_node(prob_dist, 'X', 'nw'),
+        tnc.create_s_node('w'),
+        tnc.create_h_node(prob_dist, 'Z', 'sw'),
     ]
     mpo = [
-        _planarmpsdecoder._create_s_node('n'),
-        _planarmpsdecoder._create_v_node(prob_dist, 'Y'),
-        _planarmpsdecoder._create_s_node('s'),
+        tnc.create_s_node('n'),
+        tnc.create_v_node(prob_dist, 'Y'),
+        tnc.create_s_node('s'),
     ]
     ket = [
-        _planarmpsdecoder._create_h_node(prob_dist, 'Z', 'ne'),
-        _planarmpsdecoder._create_s_node('e'),
-        _planarmpsdecoder._create_h_node(prob_dist, 'I', 'se'),
+        tnc.create_h_node(prob_dist, 'Z', 'ne'),
+        tnc.create_s_node('e'),
+        tnc.create_h_node(prob_dist, 'I', 'se'),
     ]
     # tensor network corresponding to column bra, mpo and ket
     tn = np.array([bra, mpo, ket], dtype=object).transpose()
@@ -218,7 +219,8 @@ def test_planar_mps2d_contract():
     code = PlanarCode(3, 3)
     sample = code.new_pauli().site('Y', (2, 0), (2, 4))
     prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
-    tn = _planarmpsdecoder._create_tn(prob_dist, sample)
+    tnc = PlanarMPSDecoder.TNC()
+    tn = tnc.create_tn(prob_dist, sample)
     result = tt.mps2d.contract(tn)
     assert isinstance(result, mp.mpf), 'Contracted tensor network is not an mp.mpf'
     assert 0 <= result <= 1, 'Contracted tensor network not within bounds'
@@ -228,7 +230,8 @@ def test_planar_mps2d_transpose():
     code = PlanarCode(3, 3)
     sample = code.new_pauli().site('Y', (2, 0), (2, 4))
     prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
-    tn = _planarmpsdecoder._create_tn(prob_dist, sample)
+    tnc = PlanarMPSDecoder.TNC()
+    tn = tnc.create_tn(prob_dist, sample)
     result = tt.mps2d.contract(tn)
     tn_transpose = tt.mps2d.transpose(tn)
     result_transpose = tt.mps2d.contract(tn_transpose)
@@ -244,7 +247,8 @@ def test_planar_mps2d_contract_mask():
     code = PlanarCode(3, 4)
     sample = code.new_pauli().site('Y', (2, 0), (2, 4))
     prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
-    tn = _planarmpsdecoder._create_tn(prob_dist, sample)
+    tnc = PlanarMPSDecoder.TNC()
+    tn = tnc.create_tn(prob_dist, sample)
     rng = np.random.default_rng()
 
     # tn_contract exact
