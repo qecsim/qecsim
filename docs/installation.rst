@@ -1,8 +1,8 @@
 Installation
 ============
 
-qecsim is available from the Python Package Index (PyPI) for installation using the Python package installer `pip`_.
-Optionally, logging and a faster matching library can be configured.
+qecsim is available (TODO: COMING SOON) from the Python Package Index (PyPI) for installation using the Python package
+installer `pip`_. Optionally, logging and a faster matching library can be configured.
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
 

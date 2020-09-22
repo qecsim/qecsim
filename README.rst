@@ -15,7 +15,7 @@ Install and upgrade using `pip`_:
 
 .. code-block:: text
 
-    $ pip install -U qecsim
+    $ pip install -U qecsim   # TODO: COMING SOON
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
 
@@ -61,7 +61,7 @@ Links
 * Source code: https://bitbucket.org/qecsim/qecsim/
 * Documentation: https://davidtuckett.com/qit/qecsim/
 * Issue tracker: https://bitbucket.org/qecsim/qecsim/issues
-* Releases: TODO
+* Releases: TODO: COMING SOON
 * Contact: qecsim@gmail.com
 
 ----
