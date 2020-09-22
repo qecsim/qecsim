@@ -100,5 +100,6 @@ If your use case satisfies the license requirements of Blossom V, you can config
     >>> blossom5.available()
     True
 
-The above procedure has been tested on Linux and MacOS. The Blossom V README.TXT file states that it should compile with
-the Microsoft Visual C++ compiler, therefore the above procedure, with some adaptation, *should* work on Windows.
+This procedure, for installing Blossom V, has been tested on Linux and MacOS. The Blossom V README.TXT file states that
+it should compile with the Microsoft Visual C++ compiler, therefore the above procedure, with some adaptation, *should*
+work on Windows.
