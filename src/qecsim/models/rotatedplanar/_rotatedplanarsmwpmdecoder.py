@@ -183,8 +183,20 @@ class RotatedPlanarSMWPMDecoder(Decoder, DecoderFTP):
     def decode(self, code, syndrome,
                error_model=BitPhaseFlipErrorModel(),  # noqa: B008
                error_probability=0.1, **kwargs):
-        """See :meth:`qecsim.model.Decoder.decode`"""
+        """
+        See :meth:`qecsim.model.Decoder.decode`
 
+        :param code: Rotated planar code.
+        :type code: RotatedPlanarCode
+        :param syndrome: Syndrome as binary vector.
+        :type syndrome: numpy.array (1d)
+        :param error_model: Error model. (default=BitPhaseFlipErrorModel())
+        :type error_model: ErrorModel
+        :param error_probability: Overall probability of an error on a single qubit. (default=0.1)
+        :type error_probability: float
+        :return: Recovery operation as binary symplectic vector.
+        :rtype: numpy.array (1d)
+        """
         # Prepare decode_ftp parameters
         time_steps = 1
         syndrome = np.expand_dims(syndrome, axis=0)  # convert syndrome to 2d
@@ -195,8 +207,24 @@ class RotatedPlanarSMWPMDecoder(Decoder, DecoderFTP):
                    error_model=BitPhaseFlipErrorModel(),  # noqa: B008
                    error_probability=0.1,
                    measurement_error_probability=0.1, **kwargs):
-        """See :meth:`qecsim.model.DecoderFTP.decode_ftp`"""
+        """
+        See :meth:`qecsim.model.DecoderFTP.decode_ftp`
 
+        :param code: Rotated planar code.
+        :type code: RotatedPlanarCode
+        :param time_steps: Number of time steps.
+        :type time_steps: int
+        :param syndrome: Syndrome as binary array.
+        :type syndrome: numpy.array (2d)
+        :param error_model: Error model. (default=BitPhaseFlipErrorModel())
+        :type error_model: ErrorModel
+        :param error_probability: Overall probability of an error on a single qubit. (default=0.1)
+        :type error_probability: float
+        :param measurement_error_probability: Overall probability of an error on a single measurement. (default=0.1)
+        :type measurement_error_probability: float
+        :return: Recovery operation as binary symplectic vector.
+        :rtype: numpy.array (1d)
+        """
         # deduce bias (potentially overridden by eta)
         bias = self._bias(error_model)
 

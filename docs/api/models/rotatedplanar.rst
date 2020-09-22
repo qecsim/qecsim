@@ -26,6 +26,7 @@ models.rotatedplanar: rotated planar stabilizer codes
     :members:
     :inherited-members:
     :special-members: __init__
+    :exclude-members: TNC
 
 ``qecsim.models.rotatedplanar.RotatedPlanarRMPSDecoder``
 --------------------------------------------------------
@@ -34,6 +35,7 @@ models.rotatedplanar: rotated planar stabilizer codes
     :members:
     :inherited-members:
     :special-members: __init__
+    :exclude-members: TNC
 
 ``qecsim.models.rotatedplanar.RotatedPlanarSMWPMDecoder``
 ---------------------------------------------------------

@@ -138,7 +138,7 @@ class PlanarYDecoder(Decoder):
         :param start_index: Start index in format (row, column)
         :type start_index: 2-tuple of int
         :param down: Should fill downwards (default=True, falsy=rightwards).
-        :type down: boolean
+        :type down: bool
         :return: Snake filled-down operator in binary symplectic form.
         :rtype: numpy.array (1d)
         """
@@ -621,7 +621,20 @@ class PlanarYDecoder(Decoder):
     def decode(self, code, syndrome,
                error_model=BitPhaseFlipErrorModel(),  # noqa: B008
                error_probability=0.1, **kwargs):
-        """See :meth:`qecsim.model.Decoder.decode`"""
+        """
+        See :meth:`qecsim.model.Decoder.decode`
+
+        :param code: Planar code.
+        :type code: PlanarCode
+        :param syndrome: Syndrome as binary vector.
+        :type syndrome: numpy.array (1d)
+        :param error_model: Error model. (default=BitPhaseFlipErrorModel())
+        :type error_model: ErrorModel
+        :param error_probability: Overall probability of an error on a single qubit. (default=0.1)
+        :type error_probability: float
+        :return: Recovery operation as binary symplectic vector.
+        :rtype: numpy.array (1d)
+        """
         # extract probability distribution
         prob_dist = error_model.probability_distribution(error_probability)
         # build sample recoveries

@@ -27,3 +27,4 @@ models.color: color stabilizer codes
     :members:
     :inherited-members:
     :special-members: __init__
+    :exclude-members: TNC

@@ -6,6 +6,7 @@ import abc
 import functools
 
 import numpy as np
+
 from qecsim import paulitools as pt
 from qecsim.error import QecsimError
 
@@ -284,7 +285,7 @@ class DecoderFTP(metaclass=abc.ABCMeta):
         :param kwargs: Optional context parameters passed by a client.
         :type kwargs: dict
         :return: Recovery operation as binary symplectic vector, or boolean indicating recovery success.
-        :rtype: numpy.array (1d)
+        :rtype: numpy.array (1d) or bool
         """
 
     @property

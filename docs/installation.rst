@@ -14,7 +14,7 @@ qecsim requires Python 3.5+ and can be installed and upgraded using pip:
 
 .. code-block:: bash
 
-    $ pip install -U qecsim
+    $ pip install -U qecsim         # TODO: COMING SOON
 
 A nice way to install qecsim is using a virtual environment:
 

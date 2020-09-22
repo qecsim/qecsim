@@ -79,8 +79,20 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
     def decode(self, code, syndrome,
                error_model=BitPhaseFlipErrorModel(),  # noqa: B008
                error_probability=0.1, **kwargs):
-        """See :meth:`qecsim.model.Decoder.decode`"""
+        """
+        See :meth:`qecsim.model.Decoder.decode`
 
+        :param code: Rotated toric code.
+        :type code: RotatedToricCode
+        :param syndrome: Syndrome as binary vector.
+        :type syndrome: numpy.array (1d)
+        :param error_model: Error model. (default=BitPhaseFlipErrorModel())
+        :type error_model: ErrorModel
+        :param error_probability: Overall probability of an error on a single qubit. (default=0.1)
+        :type error_probability: float
+        :return: Recovery operation as binary symplectic vector.
+        :rtype: numpy.array (1d)
+        """
         # Prepare decode_ftp parameters
         time_steps = 1
         syndrome = np.expand_dims(syndrome, axis=0)  # convert syndrome to 2d
@@ -93,8 +105,24 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
                    error_probability=0.1,
                    measurement_error_probability=0.1,
                    step_measurement_errors=None, **kwargs):
-        """See :meth:`qecsim.model.DecoderFTP.decode_ftp`"""
+        """
+        See :meth:`qecsim.model.DecoderFTP.decode_ftp`
 
+        :param code: Rotated toric code.
+        :type code: RotatedToricCode
+        :param time_steps: Number of time steps.
+        :type time_steps: int
+        :param syndrome: Syndrome as binary array.
+        :type syndrome: numpy.array (2d)
+        :param error_model: Error model. (default=BitPhaseFlipErrorModel())
+        :type error_model: ErrorModel
+        :param error_probability: Overall probability of an error on a single qubit. (default=0.1)
+        :type error_probability: float
+        :param measurement_error_probability: Overall probability of an error on a single measurement. (default=0.1)
+        :type measurement_error_probability: float
+        :return: Recovery operation as binary symplectic vector, or boolean indicating recovery success.
+        :rtype: numpy.array (1d) or bool
+        """
         # deduce bias (potentially overridden by eta)
         bias = self._bias(error_model)
 

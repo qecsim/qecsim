@@ -34,6 +34,7 @@ models.planar: planar stabilizer codes
     :members:
     :inherited-members:
     :special-members: __init__
+    :exclude-members: TNC
 
 ``qecsim.models.planar.PlanarMWPMDecoder``
 ------------------------------------------
@@ -49,6 +50,7 @@ models.planar: planar stabilizer codes
     :members:
     :inherited-members:
     :special-members: __init__
+    :exclude-members: TNC
 
 ``qecsim.models.planar.PlanarYDecoder``
 ---------------------------------------
