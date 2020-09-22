@@ -59,7 +59,7 @@ class FileErrorModel(ErrorModel):
         // Non-comment lines are JSON-encoded per line.
         //
         // Header lines are JSON objects containing one or more keys.
-        // A dictionary is built from header lines; if keys are repeated across header lines then an exception is raised.
+        // A dictionary is built from header lines; an exception is raised if keys are repeated across header lines.
         // The following header key is required; it gives the marginal error probability per qubit.
         {"probability": 0.4}
         // The following header key is required; it identifies the algorithm/parameters used to generate the errors.

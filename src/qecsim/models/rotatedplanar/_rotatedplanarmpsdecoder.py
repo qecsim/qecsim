@@ -309,7 +309,7 @@ class RotatedPlanarMPSDecoder(Decoder):
 
         @functools.lru_cache()
         def create_h_node(self, prob_dist, f, compass_direction=None):
-            """Return horizontal qubit tensor, i.e. has X plaquettes to left and right and Z plaquettes above and below."""
+            """Return horizontal qubit tensor, i.e. has X plaquettes to left/right and Z plaquettes above/below."""
 
             def _shape(compass_direction=None):
                 """Return shape of tensor including dummy indices."""
@@ -333,7 +333,7 @@ class RotatedPlanarMPSDecoder(Decoder):
 
         @functools.lru_cache()
         def create_v_node(self, prob_dist, f, compass_direction=None):
-            """Return vertical qubit tensor, i.e. has Z plaquettes to left and right and X plaquettes above and below."""
+            """Return vertical qubit tensor, i.e. has Z plaquettes to left/right and X plaquettes above/below."""
 
             def _shape(compass_direction=None):
                 """Return shape of tensor including dummy indices."""
@@ -389,13 +389,13 @@ class RotatedPlanarMPSDecoder(Decoder):
                 return q_node_r - 1, q_node_c  # s-node index in (r, c)
 
             def _compass_q_direction(index, code):
-                """if the code site index lies on border of code lattice then give that direction, else empty string"""
+                """if the code site index lies on border of lattice then give that direction, else empty string."""
                 direction = {code.site_bounds[1]: 'n', 0: 's'}.get(index[1], '')
                 direction += {0: 'w', code.site_bounds[0]: 'e'}.get(index[0], '')
                 return direction
 
             def _compass_p_direction(index, code):
-                """if the code plaquette index lies on border of code lattice then give that direction, else empty string"""
+                """if the code plaquette index lies on border of lattice then give that direction, else empty string."""
                 direction = {code.site_bounds[1]: 'n', -1: 's'}.get(index[1], '')
                 direction += {-1: 'w', code.site_bounds[0]: 'e'}.get(index[0], '')
                 return direction
