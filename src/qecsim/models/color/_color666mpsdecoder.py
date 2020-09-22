@@ -144,6 +144,7 @@ class Color666MPSDecoder(Decoder):
             raise TypeError('{} invalid parameter type'.format(type(self).__name__)) from ex
         self._chi = chi
         self._tol = tol
+        self._tnc = self.TNC()
 
     @classmethod
     def sample_recovery(cls, code, syndrome):
@@ -206,7 +207,7 @@ class Color666MPSDecoder(Decoder):
             sample_pauli.copy().logical_z()
         ]
         # tensor networks
-        tns = [_create_tn(prob_dist, pauli) for pauli in sample_paulis]
+        tns = [self._tnc.create_tn(prob_dist, pauli) for pauli in sample_paulis]
         # probabilities
         coset_ps = [0.0, 0.0, 0.0, 0.0]  # default coset probabilities
         # N.B. After multiplication by mult, coset_ps will be of type mp.mpf so don't process with numpy!
@@ -299,167 +300,162 @@ class Color666MPSDecoder(Decoder):
             type(self).__name__, self._chi, self._tol,
         )
 
+    class TNC:
+        """Tensor network creator"""
 
-# < Tensor network creation functions >
+        @functools.lru_cache()
+        def create_s_node(self, compass_direction=None):
+            """
+            Return stabilizer tensor.
 
-@functools.lru_cache()
-def _create_s_node(compass_direction=None):
-    """
-    Return stabilizer tensor.
+            :param compass_direction: Location of tensor relative to squared lattice (figure 3), i.e. 'n', 's' or None.
+            :type compass_direction: str
+            :return: Stabilizer tensor
+            :rtype: numpy.array (4d)
+            """
 
-    :param compass_direction: Location of tensor relative to squared lattice (figure 3), i.e. 'n', 's' or None.
-    :type compass_direction: str
-    :return: Stabilizer tensor
-    :rtype: numpy.array (4d)
-    """
+            def _node_shape(direction=None):
+                """Return shape of tensor including dummy indices."""
+                return {  # direction order n,e,se,s,w,nw
+                    'n': (1, 4, 4, 4),
+                    's': (4, 4, 1, 4),
+                    'w': (4, 4, 4, 1),
+                }.get(direction, (4, 4, 4, 4))
 
-    def _node_shape(direction=None):
-        """Return shape of tensor including dummy indices."""
-        return {  # direction order n,e,se,s,w,nw
-            'n': (1, 4, 4, 4),
-            's': (4, 4, 1, 4),
-            'w': (4, 4, 4, 1),
-        }.get(direction, (4, 4, 4, 4))
+            node = tt.tsr.delta(_node_shape(compass_direction))
+            return node
 
-    node = tt.tsr.delta(_node_shape(compass_direction))
-    return node
+        @functools.lru_cache()
+        def q_node_value(self, prob_dist, f, n, e, s, w):
+            """Return qubit tensor element value."""
+            paulis = ('I', 'X', 'Y', 'Z')
+            op_to_pr = dict(zip(paulis, prob_dist))
+            f = pt.pauli_to_bsf(f)
+            # n, e, s, w are in {0, 1, 2, 3} so create dict from index to op
+            index_to_op = dict(zip((0, 1, 2, 3), pt.pauli_to_bsf(paulis)))
+            # apply ops from indices to f
+            op = (f + index_to_op[n] + index_to_op[e] + index_to_op[s] + index_to_op[w]) % 2
+            # return probability of op
+            return op_to_pr[pt.bsf_to_pauli(op)]
 
+        @functools.lru_cache(256)  # 256=2^8 is enough for fixed prob_dist
+        def create_q_node(self, prob_dist, fs, compass_direction=None):
+            """
+            Return qubit tensor.
 
-@functools.lru_cache()
-def _q_node_value(prob_dist, f, n, e, s, w):
-    """Return qubit tensor element value."""
-    paulis = ('I', 'X', 'Y', 'Z')
-    op_to_pr = dict(zip(paulis, prob_dist))
-    f = pt.pauli_to_bsf(f)
-    # n, e, s, w are in {0, 1, 2, 3} so create dict from index to op
-    index_to_op = dict(zip((0, 1, 2, 3), pt.pauli_to_bsf(paulis)))
-    # apply ops from indices to f
-    op = (f + index_to_op[n] + index_to_op[e] + index_to_op[s] + index_to_op[w]) % 2
-    # return probability of op
-    return op_to_pr[pt.bsf_to_pauli(op)]
+            :param prob_dist: Tuple of probability distribution in the format (P(I), P(X), P(Y), P(Z)).
+            :type prob_dist: 4-tuple of float
+            :param fs: Two qubit Paulis, e.g. ('I', None) or ('Z', 'I').
+            :type fs: 2-tuple of str
+            :param compass_direction: Location of tensor relative to squared lattice (figure 3), e.g. 'n', 'se' or None.
+            :type compass_direction: str
+            :return: Qubit tensor
+            :rtype: numpy.array (4d)
+            """
 
+            def _node_shapes(direction=None):
+                """Return shape of upper and lower tensors including dummy indices."""
+                return {  # direction order n,e,s,w
+                    'n': ((1, 4, 1, 4), (1, 4, 4, 4)),
+                    'ne': (None, (1, 1, 4, 4)),
+                    'e': ((1, 1, 1, 4), None),
+                    'se': ((4, 1, 1, 4), None),
+                    's': ((4, 4, 1, 4), (1, 4, 1, 4)),
+                    'sw': ((4, 1, 1, 1), None),
+                    'w': ((4, 4, 1, 1), (1, 4, 4, 1)),
+                    'nw': ((1, 4, 1, 1), (1, 4, 4, 1)),
+                }.get(direction, ((4, 4, 1, 4), (1, 4, 4, 4)))
 
-@functools.lru_cache(256)  # 256=2^8 is enough for fixed prob_dist
-def _create_q_node(prob_dist, fs, compass_direction=None):
-    """
-    Return qubit tensor.
+            # create tensors with values
+            nodes = []
+            for shape, f in zip(_node_shapes(compass_direction), fs):
+                assert (shape is None) == (f is None), 'Restricted Paulis do not match shapes.'
+                if shape is None:  # add dummy tensor
+                    nodes.append(np.ones((1, 1, 1, 1), dtype=np.float64))
+                else:  # add qubit tensor
+                    node = np.empty(shape, dtype=np.float64)
+                    for n, e, s, w in np.ndindex(node.shape):
+                        node[(n, e, s, w)] = self.q_node_value(prob_dist, f, n, e, s, w)
+                    nodes.append(node)
+            # merge upper and lower tensors
+            node = np.einsum('nesw,sESW->neESwW', nodes[0], nodes[1]).reshape(
+                (
+                    nodes[0].shape[0],  # n
+                    nodes[0].shape[1] * nodes[1].shape[1],  # eE
+                    nodes[1].shape[2],  # S
+                    nodes[0].shape[3] * nodes[1].shape[3]  # wW
+                )
+            )
+            # multiply dimension-16 legs with deltas to reduce dimension to 4
+            if node.shape[1] == 16:
+                node = np.einsum('nesw,Ee->nEsw', node, tt.tsr.delta((4, 4, 4)).reshape((4, 16)))
+            if node.shape[3] == 16:
+                node = np.einsum('nesw,Ww->nesW', node, tt.tsr.delta((4, 4, 4)).reshape((4, 16)))
+            return node
 
-    :param prob_dist: Tuple of probability distribution in the format (P(I), P(X), P(Y), P(Z)).
-    :type prob_dist: 4-tuple of float
-    :param fs: Two qubit Paulis, e.g. ('I', None) or ('Z', 'I').
-    :type fs: 2-tuple of str
-    :param compass_direction: Location of tensor relative to squared lattice (figure 3), e.g. 'n', 'se' or None.
-    :type compass_direction: str
-    :return: Qubit tensor
-    :rtype: numpy.array (4d)
-    """
+        def create_tn(self, prob_dist, sample_pauli):
+            """
+            Return a tensor network that contracts to the coset probability corresponding to the given probability
+            distribution and Pauli.
 
-    def _node_shapes(direction=None):
-        """Return shape of upper and lower tensors including dummy indices."""
-        return {  # direction order n,e,s,w
-            'n': ((1, 4, 1, 4), (1, 4, 4, 4)),
-            'ne': (None, (1, 1, 4, 4)),
-            'e': ((1, 1, 1, 4), None),
-            'se': ((4, 1, 1, 4), None),
-            's': ((4, 4, 1, 4), (1, 4, 1, 4)),
-            'sw': ((4, 1, 1, 1), None),
-            'w': ((4, 4, 1, 1), (1, 4, 4, 1)),
-            'nw': ((1, 4, 1, 1), (1, 4, 4, 1)),
-        }.get(direction, ((4, 4, 1, 4), (1, 4, 4, 4)))
+            See :class:`qecsim.models.color.Color666MPSDecoder` for more details.
 
-    # create tensors with values
-    nodes = []
-    for shape, f in zip(_node_shapes(compass_direction), fs):
-        assert (shape is None) == (f is None), 'Restricted Paulis do not match shapes.'
-        if shape is None:  # add dummy tensor
-            nodes.append(np.ones((1, 1, 1, 1), dtype=np.float64))
-        else:  # add qubit tensor
-            node = np.empty(shape, dtype=np.float64)
-            for n, e, s, w in np.ndindex(node.shape):
-                node[(n, e, s, w)] = _q_node_value(prob_dist, f, n, e, s, w)
-            nodes.append(node)
-    # merge upper and lower tensors
-    node = np.einsum('nesw,sESW->neESwW', nodes[0], nodes[1]).reshape(
-        (
-            nodes[0].shape[0],  # n
-            nodes[0].shape[1] * nodes[1].shape[1],  # eE
-            nodes[1].shape[2],  # S
-            nodes[0].shape[3] * nodes[1].shape[3]  # wW
-        )
-    )
-    # multiply dimension-16 legs with deltas to reduce dimension to 4
-    if node.shape[1] == 16:
-        node = np.einsum('nesw,Ee->nEsw', node, tt.tsr.delta((4, 4, 4)).reshape((4, 16)))
-    if node.shape[3] == 16:
-        node = np.einsum('nesw,Ww->nesW', node, tt.tsr.delta((4, 4, 4)).reshape((4, 16)))
-    return node
-
-
-def _create_tn(prob_dist, sample_pauli):
-    """
-    Return a tensor network that contracts to the coset probability corresponding to the given probability distribution
-    and Pauli.
-
-    See :class:`qecsim.models.color.Color666MPSDecoder` for more details.
-
-    :param prob_dist: Tuple of probability distribution in the format (P(I), P(X), P(Y), P(Z)).
-    :type prob_dist: 4-tuple of float
-    :param sample_pauli: Sample recovery operation as color 666 Pauli.
-    :type sample_pauli: Color666Pauli
-    :return: Tensor network
-    :rtype: numpy.array (2d) of numpy.array (4d)
-    """
-    code = sample_pauli.code
-    # initialise empty tn
-    tn = np.empty((code.size, code.bound + 1), dtype=object)
-    for c in range(code.bound + 1):  # iterate pauli columns
-        tn_r, tn_c = c // 3, c  # tn rows and columns (column has c // 3 blanks at top)
-        r = c  # start at first in bounds row in pauli column
-        while r <= code.bound:  # iterate pauli rows
-            if code.is_site((r, c)):  # create node for site(s)
-                # pauli restricted to site
-                f1 = sample_pauli.operator((r, c))
-                # pauli restricted to site below if there
-                if code.is_in_bounds((r + 1, c)) and code.is_site((r + 1, c)):
-                    f2 = sample_pauli.operator((r + 1, c))
-                else:
-                    f2 = None
-                # create node
-                if c == 0:  # left side
-                    if r == 0:
-                        node = _create_q_node(prob_dist, (f1, f2), 'nw')
-                    elif r == code.bound:
-                        node = _create_q_node(prob_dist, (f1, None), 'sw')
-                    else:
-                        node = _create_q_node(prob_dist, (f1, f2), 'w')
-                elif r == c:  # diagonal side
-                    if c == code.bound:
-                        node = _create_q_node(prob_dist, (f1, None), 'e')
-                    elif c % 3 == 2:
-                        node = _create_q_node(prob_dist, (None, f1), 'ne')
-                    else:
-                        node = _create_q_node(prob_dist, (f1, f2), 'n')
-                elif r == code.bound - 1:  # lower side - 1 because we merge in lower qubits
-                    node = _create_q_node(prob_dist, (f1, f2), 's')
-                elif r == code.bound:  # lower side
-                    node = _create_q_node(prob_dist, (f1, None), 'se')
-                else:  # bulk
-                    node = _create_q_node(prob_dist, (f1, f2))
-                if f2 is not None:
-                    r += 1  # skip next merged qubit
-            else:  # create node for stabilizer
-                if c == 0:  # left side
-                    node = _create_s_node('w')
-                elif r == c:  # diagonal side
-                    node = _create_s_node('n')
-                elif r == code.bound:  # lower side
-                    node = _create_s_node('s')
-                else:  # bulk
-                    node = _create_s_node()
-            # add node to tn
-            tn[tn_r, tn_c] = node
-            r += 1  # increment pauli row
-            tn_r += 1  # increment tn row
-    return tn
-
-# </ Tensor network creation functions >
+            :param prob_dist: Tuple of probability distribution in the format (P(I), P(X), P(Y), P(Z)).
+            :type prob_dist: 4-tuple of float
+            :param sample_pauli: Sample recovery operation as color 666 Pauli.
+            :type sample_pauli: Color666Pauli
+            :return: Tensor network
+            :rtype: numpy.array (2d) of numpy.array (4d)
+            """
+            code = sample_pauli.code
+            # initialise empty tn
+            tn = np.empty((code.size, code.bound + 1), dtype=object)
+            for c in range(code.bound + 1):  # iterate pauli columns
+                tn_r, tn_c = c // 3, c  # tn rows and columns (column has c // 3 blanks at top)
+                r = c  # start at first in bounds row in pauli column
+                while r <= code.bound:  # iterate pauli rows
+                    if code.is_site((r, c)):  # create node for site(s)
+                        # pauli restricted to site
+                        f1 = sample_pauli.operator((r, c))
+                        # pauli restricted to site below if there
+                        if code.is_in_bounds((r + 1, c)) and code.is_site((r + 1, c)):
+                            f2 = sample_pauli.operator((r + 1, c))
+                        else:
+                            f2 = None
+                        # create node
+                        if c == 0:  # left side
+                            if r == 0:
+                                node = self.create_q_node(prob_dist, (f1, f2), 'nw')
+                            elif r == code.bound:
+                                node = self.create_q_node(prob_dist, (f1, None), 'sw')
+                            else:
+                                node = self.create_q_node(prob_dist, (f1, f2), 'w')
+                        elif r == c:  # diagonal side
+                            if c == code.bound:
+                                node = self.create_q_node(prob_dist, (f1, None), 'e')
+                            elif c % 3 == 2:
+                                node = self.create_q_node(prob_dist, (None, f1), 'ne')
+                            else:
+                                node = self.create_q_node(prob_dist, (f1, f2), 'n')
+                        elif r == code.bound - 1:  # lower side - 1 because we merge in lower qubits
+                            node = self.create_q_node(prob_dist, (f1, f2), 's')
+                        elif r == code.bound:  # lower side
+                            node = self.create_q_node(prob_dist, (f1, None), 'se')
+                        else:  # bulk
+                            node = self.create_q_node(prob_dist, (f1, f2))
+                        if f2 is not None:
+                            r += 1  # skip next merged qubit
+                    else:  # create node for stabilizer
+                        if c == 0:  # left side
+                            node = self.create_s_node('w')
+                        elif r == c:  # diagonal side
+                            node = self.create_s_node('n')
+                        elif r == code.bound:  # lower side
+                            node = self.create_s_node('s')
+                        else:  # bulk
+                            node = self.create_s_node()
+                    # add node to tn
+                    tn[tn_r, tn_c] = node
+                    r += 1  # increment pauli row
+                    tn_r += 1  # increment tn row
+            return tn

@@ -1,15 +1,16 @@
 import numpy as np
 import pytest
 from mpmath import mp
+from scipy import linalg as sp_linalg
+
 from qecsim import tensortools as tt
 from qecsim.models.color import Color666Code
-from qecsim.models.color import _color666mpsdecoder
+from qecsim.models.color import Color666MPSDecoder
 from qecsim.models.generic import DepolarizingErrorModel
 from qecsim.models.planar import PlanarCode
 from qecsim.models.planar import _planarmpsdecoder
 from qecsim.models.rotatedplanar import RotatedPlanarCode
 from qecsim.models.rotatedplanar import _rotatedplanarrmpsdecoder
-from scipy import linalg as sp_linalg
 
 
 def _is_close(a, b, rtol=1e-05, atol=1e-08):
@@ -382,24 +383,25 @@ def test_svd_sign_flip_from_matrix_product_associativity():
 
 def test_color666_mps_functions():
     prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
+    tnc = Color666MPSDecoder.TNC()
     bra = [
-        _color666mpsdecoder._create_q_node(prob_dist, ('I', 'I'), 'nw'),
-        _color666mpsdecoder._create_s_node('w'),
-        _color666mpsdecoder._create_q_node(prob_dist, ('I', None), 'sw'),
+        tnc.create_q_node(prob_dist, ('I', 'I'), 'nw'),
+        tnc.create_s_node('w'),
+        tnc.create_q_node(prob_dist, ('I', None), 'sw'),
     ]
     mpo1 = [
-        _color666mpsdecoder._create_s_node('n'),
-        _color666mpsdecoder._create_q_node(prob_dist, ('I', 'I'), 's'),
+        tnc.create_s_node('n'),
+        tnc.create_q_node(prob_dist, ('I', 'I'), 's'),
         None,
     ]
     mpo2 = [
-        _color666mpsdecoder._create_q_node(prob_dist, (None, 'I'), 'ne'),
-        _color666mpsdecoder._create_s_node('s'),
+        tnc.create_q_node(prob_dist, (None, 'I'), 'ne'),
+        tnc.create_s_node('s'),
         None,
     ]
     ket = [
         None,
-        _color666mpsdecoder._create_q_node(prob_dist, ('I', None), 'e'),
+        tnc.create_q_node(prob_dist, ('I', None), 'e'),
         None,
     ]
     expected = 0.47831585185185249
@@ -516,7 +518,8 @@ def test_color666_mps2d_contract():
     print()
     print(code.ascii_art(pauli=sample))
     prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
-    tn = _color666mpsdecoder._create_tn(prob_dist, sample)
+    tnc = Color666MPSDecoder.TNC()
+    tn = tnc.create_tn(prob_dist, sample)
     result_forwards = tt.mps2d.contract(tn)
     print('Forward contraction result: ', repr(result_forwards))
     assert isinstance(result_forwards, mp.mpf), 'Contracted tensor network is not an mp.mpf'
