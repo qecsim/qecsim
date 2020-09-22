@@ -21,15 +21,15 @@ A nice way to install qecsim is using a virtual environment:
 .. code-block:: bash
 
     $ python3 --version             # qecsim requires Python 3.5+
-    Python 3.7.7
+    Python 3.7.8
     $ python3 -m venv venv          # create new virtual environment
     $ source venv/bin/activate      # activate venv (Windows: venv\Scripts\activate)
     (venv) $ pip install qecsim     # install qecsim
     ...
-    Successfully installed ... qecsim-1.0b2 ...
+    Successfully installed ... qecsim-1.0b3 ...
     (venv) $
     (venv) $ qecsim --version       # verify qecsim cli
-    qecsim, version 1.0b2
+    qecsim, version 1.0b3
     (venv) $ deactivate             # deactivate venv
     $
 
