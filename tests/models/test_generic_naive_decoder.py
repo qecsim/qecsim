@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from qecsim import paulitools as pt
 from qecsim.models.basic import FiveQubitCode, SteaneCode
 from qecsim.models.generic import NaiveDecoder

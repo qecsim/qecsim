@@ -2,6 +2,7 @@ import abc
 import functools
 
 import numpy as np
+
 from qecsim import paulitools as pt
 from qecsim.model import ErrorModel, cli_description
 

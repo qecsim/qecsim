@@ -27,6 +27,7 @@ import re
 
 import click
 import pkg_resources
+
 import qecsim
 from qecsim import app
 from qecsim import util

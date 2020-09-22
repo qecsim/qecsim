@@ -4,6 +4,7 @@ import sys
 
 import numpy as np
 import pytest
+
 from qecsim import app
 from qecsim.models.basic import FiveQubitCode
 from qecsim.models.basic import SteaneCode

@@ -29,8 +29,9 @@ import sys
 
 import numpy as np
 from mpmath import mp
-from qecsim.tensortools import tsr as tt_tsr
 from scipy import linalg as sp_linalg
+
+from qecsim.tensortools import tsr as tt_tsr
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,5 @@
 import numpy as np
+
 from qecsim import paulitools as pt
 from qecsim.models.basic import FiveQubitCode
 from qecsim.models.generic import BitFlipErrorModel

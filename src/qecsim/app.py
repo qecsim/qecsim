@@ -9,6 +9,7 @@ import statistics
 import time
 
 import numpy as np
+
 from qecsim import paulitools as pt
 
 logger = logging.getLogger(__name__)

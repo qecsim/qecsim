@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pytest
 from click.testing import CliRunner  # use for isolated_filesystem feature
+
 from qecsim import app
 from qecsim import paulitools as pt
 from qecsim.models.basic import FiveQubitCode
