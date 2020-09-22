@@ -46,7 +46,7 @@
 # DONE: port legacy refactorings: type equality
 # DONE: port legacy refactorings: classmethod extensibility
 # DONE: port legacy refactorings: dynamic type name in model exceptions
-# TODO: port legacy refactorings: MPS decoder tensor network extensibility
+# DONE: port legacy refactorings: MPS decoder tensor network extensibility
 # TODO: reformat all code
 # TODO: set up tox for lint flake8
 # TODO: reformat all code
