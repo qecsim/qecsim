@@ -25,6 +25,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output ----------------------------------------------
 
+html_copy_source = False  # do not copy rst files
+html_show_sourcelink = False
+
 html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
