@@ -331,6 +331,12 @@ class PlanarMPSDecoder(Decoder):
             return op_to_pr[pt.bsf_to_pauli(op)]
 
         @functools.lru_cache()
+        def v_node_value(self, prob_dist, f, n, e, s, w):
+            """Return vertical edge tensor element value."""
+            # N.B. for v_node order of nesw is rotated relative to h_node
+            return self.h_node_value(prob_dist, f, e, s, w, n)
+
+        @functools.lru_cache()
         def create_h_node(self, prob_dist, f, compass_direction=None):
             """Return horizontal edge tensor."""
             node = np.empty(self.node_shape(compass_direction), dtype=np.float64)
@@ -343,7 +349,7 @@ class PlanarMPSDecoder(Decoder):
             """Return vertical edge tensor."""
             node = np.empty(self.node_shape(compass_direction), dtype=np.float64)
             for n, e, s, w in np.ndindex(node.shape):
-                node[(n, e, s, w)] = self.h_node_value(prob_dist, f, e, s, w, n)
+                node[(n, e, s, w)] = self.v_node_value(prob_dist, f, n, e, s, w)
             return node
 
         def create_tn(self, prob_dist, sample_pauli):

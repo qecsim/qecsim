@@ -49,7 +49,7 @@
 # DONE: port legacy refactorings: MPS decoder tensor network extensibility
 # DONE: reformat all code
 # DONE: set up tox for lint (flake8)
-# TODO: refactoring: MPS decoders use H and V node value methods for extensibility.
+# DONE: refactoring: MPS decoders to use separate H and V node value methods for extensibility.
 # TODO: refactoring: Remove ErrorModel.probability_distribution to allow non-IID noise.
 # TODO: add EQUS acknowledgment
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)

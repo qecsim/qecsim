@@ -471,6 +471,12 @@ class PlanarRMPSDecoder(Decoder):
             return op_to_pr[pt.bsf_to_pauli(op)]
 
         @functools.lru_cache()
+        def v_node_value(self, prob_dist, f, n, e, s, w):
+            """Return vertical edge tensor element value."""
+            # N.B. for v_node order of nesw is rotated relative to h_node
+            return self.h_node_value(prob_dist, f, e, s, w, n)
+
+        @functools.lru_cache()
         def create_h_node(self, prob_dist, f, compass_direction=None):
             """Return horizontal edge tensor."""
 
@@ -522,8 +528,7 @@ class PlanarRMPSDecoder(Decoder):
             node = np.empty((2, 2, 2, 2), dtype=np.float64)
             # fill values
             for n, e, s, w in np.ndindex(node.shape):
-                # N.B. order of nesw is rotated relative to h_node
-                node[(n, e, s, w)] = self.h_node_value(prob_dist, f, e, s, w, n)
+                node[(n, e, s, w)] = self.v_node_value(prob_dist, f, n, e, s, w)
             # multiply in deltas to link directly with surrounding h_nodes
             delta = tt.tsr.delta((2, 2, 2))
             # nesw -> (Ii)(Jj)(Kk)(Ll)  N.B. order within each leg is reversed relative to h_node

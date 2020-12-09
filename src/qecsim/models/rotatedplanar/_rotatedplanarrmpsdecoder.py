@@ -349,6 +349,12 @@ class RotatedPlanarRMPSDecoder(Decoder):
             op = (f + (n * Z) + (e * X) + (s * Z) + (w * X)) % 2
             return op_to_pr[pt.bsf_to_pauli(op)]
 
+        @functools.lru_cache()
+        def v_node_value(self, prob_dist, f, n, e, s, w):
+            """Return vertical edge tensor element value."""
+            # N.B. for v_node order of nesw is rotated relative to h_node
+            return self.h_node_value(prob_dist, f, e, s, w, n)
+
         @functools.lru_cache(maxsize=256)
         def create_q_node(self, prob_dist, f, h_node, even_column, compass_direction=None):
             """Create q-node for tensor network.
@@ -359,7 +365,7 @@ class RotatedPlanarRMPSDecoder(Decoder):
             * V-nodes have Z-plaquettes on either side (i.e. in NW and SE directions).
             * Columns are considered even/odd according to indexing defined in :class:`RotatedPlanarCode`.
 
-            :param h_node: If h-node, else V-node.
+            :param h_node: If H-node, else V-node.
             :type h_node: bool
             :param prob_dist: Probability distribution in the format (Pr(I), Pr(X), Pr(Y), Pr(Z)).
             :type prob_dist: (float, float, float, float)
@@ -467,11 +473,9 @@ class RotatedPlanarRMPSDecoder(Decoder):
             q_node = np.empty(q_shape, dtype=np.float64)
             for n, e, s, w in np.ndindex(q_node.shape):
                 if h_node:
-                    # N.B. for h_node use standard order of nesw
                     q_node[(n, e, s, w)] = self.h_node_value(prob_dist, f, n, e, s, w)
                 else:
-                    # N.B. for v_node order of nesw is rotated relative to h_node
-                    q_node[(n, e, s, w)] = self.h_node_value(prob_dist, f, e, s, w, n)
+                    q_node[(n, e, s, w)] = self.v_node_value(prob_dist, f, n, e, s, w)
             # derive combined node shape
             shape = (w_shape[2] * n_shape[1], n_shape[2] * e_shape[1], e_shape[2] * s_shape[1], s_shape[2] * w_shape[1])
             # create combined node by absorbing deltas into q_node: nesw -> (iI)(jJ)(Kk)(Ll)

@@ -308,6 +308,12 @@ class RotatedPlanarMPSDecoder(Decoder):
             return op_to_pr[pt.bsf_to_pauli(op)]
 
         @functools.lru_cache()
+        def v_node_value(self, prob_dist, f, n, e, s, w):
+            """Return vertical edge tensor element value."""
+            # N.B. for v_node order of nesw is rotated relative to h_node
+            return self.h_node_value(prob_dist, f, e, s, w, n)
+
+        @functools.lru_cache()
         def create_h_node(self, prob_dist, f, compass_direction=None):
             """Return horizontal qubit tensor, i.e. has X plaquettes to left/right and Z plaquettes above/below."""
 
@@ -352,8 +358,7 @@ class RotatedPlanarMPSDecoder(Decoder):
             node = np.empty(_shape(compass_direction), dtype=np.float64)
             # fill values
             for n, e, s, w in np.ndindex(node.shape):
-                # N.B. order of nesw is rotated relative to h_node
-                node[(n, e, s, w)] = self.h_node_value(prob_dist, f, e, s, w, n)
+                node[(n, e, s, w)] = self.v_node_value(prob_dist, f, n, e, s, w)
             return node
 
         @functools.lru_cache()

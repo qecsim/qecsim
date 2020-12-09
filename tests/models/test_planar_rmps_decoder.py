@@ -234,13 +234,13 @@ def test_planar_rmps_decoder_small_codes_exact_approx():
     approx_decoder = PlanarRMPSDecoder(chi=8)
     identity = code.new_pauli()
     # probabilities
-    prob_dist = DepolarizingErrorModel().probability_distribution(0.1)
+    prob_dist = BiasedDepolarizingErrorModel(bias=10).probability_distribution(probability=0.1)
     # coset probabilities
     exact_coset_ps, _ = exact_decoder._coset_probabilities(prob_dist, identity)
     approx_coset_ps, _ = approx_decoder._coset_probabilities(prob_dist, identity)
     print('#exact Pr(G)=', exact_coset_ps)
     print('#approx Pr(G)=', approx_coset_ps)
-    assert all(_is_close(exact_coset_ps, approx_coset_ps, rtol=1e-12, atol=0)), (
+    assert all(_is_close(exact_coset_ps, approx_coset_ps, rtol=1e-11, atol=0)), (
         'Coset probabilites do not satisfy exact Pr(G) ~= approx Pr(G)')
 
 
