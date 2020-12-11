@@ -52,8 +52,9 @@
 # DONE: refactoring: MPS decoders to use separate H and V node value methods for extensibility.
 # DONE: document pandoc requirement in tox.ini
 # TODO: refactoring: Remove ErrorModel.probability_distribution to allow non-IID noise.
-# TODO: rename doc section acknowledgment to citing
-# TODO: add citing section to README
+# TODO: docs: rename acknowledgment section to citing
+# TODO: README.rst: add citing section, remove copyright, fix spacing
+# TODO: update author with initial: setup.cfg and docs/conf.py
 # TODO: add EQUS acknowledgment
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
 # TODO: finalize setup.cfg meta-data
