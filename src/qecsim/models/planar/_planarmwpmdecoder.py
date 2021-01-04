@@ -29,6 +29,11 @@ class PlanarMWPMDecoder(Decoder):
       :meth:`qecsim.models.planar.PlanarPauli.path` and returned.
     """
 
+    @classmethod
+    def distance(cls, code, a_index, b_index):
+        # TODO: move from code class
+        return code.distance(a_index, b_index)
+
     def decode(self, code, syndrome, **kwargs):
         """See :meth:`qecsim.model.Decoder.decode`"""
         # prepare recovery
@@ -52,12 +57,14 @@ class PlanarMWPMDecoder(Decoder):
             # add weighted edges to graph
             for a_node, b_node in itertools.chain(
                     itertools.combinations(nodes, 2),  # all nodes to all nodes
-                    itertools.combinations(vnodes, 2),  # all vnodes to all vnodes
                     zip(nodes, vnodes)):  # each node to corresponding vnode
                 # find taxi-cab distance between a and b
-                distance = code.distance(a_node.index, b_node.index)
+                distance = self.distance(code, a_node.index, b_node.index)
                 # add edge with weight=distance
                 graph.add_edge(a_node, b_node, distance)
+            for a_node, b_node in itertools.combinations(vnodes, 2):  # all vnodes to all vnodes
+                # add edge with weight=0
+                graph.add_edge(a_node, b_node, 0)
             # find MWPM edges {(a, b), (c, d), ...}
             mates = gt.mwpm(graph)
             # iterate edges
