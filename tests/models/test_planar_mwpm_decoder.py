@@ -13,6 +13,7 @@ def test_planar_mwpm_decoder_properties():
 
 
 @pytest.mark.parametrize('error_pauli', [
+    (PlanarCode(5, 5).new_pauli().site('X', (2, 0))),
     (PlanarCode(5, 5).new_pauli().site('X', (2, 2), (4, 2))),
     (PlanarCode(5, 5).new_pauli().site('X', (2, 2), (4, 2)).site('Z', (6, 4), (2, 0))),
     (PlanarCode(5, 5).new_pauli().site('X', (1, 3), (4, 2)).site('Z', (6, 4), (1, 1))),
