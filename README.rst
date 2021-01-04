@@ -29,7 +29,7 @@ CLI
 .. code-block:: text
 
     $ qecsim --version
-    qecsim, version 1.0b3
+    qecsim, version 1.0b5
     $ qecsim --help
     ...
 
@@ -41,7 +41,7 @@ API
 
     >>> import qecsim
     >>> qecsim.__version__
-    '1.0b3'
+    '1.0b5'
     >>> from qecsim import app
     >>> help(app)
     ...
