@@ -5,7 +5,7 @@ from qecsim.model import cli_description
 from qecsim.models.generic import SimpleErrorModel
 
 
-@cli_description('Biased (bias FLOAT >= 0, [axis] CHAR)')
+@cli_description('Biased (bias FLOAT > 0, [axis] CHAR)')
 class BiasedDepolarizingErrorModel(SimpleErrorModel):
     """
     Implements a biased-depolarizing error model.
