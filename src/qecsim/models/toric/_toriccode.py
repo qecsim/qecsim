@@ -250,10 +250,10 @@ class ToricCode(StabilizerCode):
 
         :param syndrome: Binary vector identifying commuting and non-commuting stabilizers by 0 and 1 respectively.
         :type syndrome: numpy.array (1d)
-        :return: List of plaquette indices.
-        :rtype: list of 3-tuple of int
+        :return: Set of plaquette indices.
+        :rtype: set of 3-tuple of int
         """
-        return [tuple(index) for index in np.array(self._indices)[syndrome.nonzero()]]
+        return set(tuple(index) for index in np.array(self._indices)[syndrome.nonzero()])
 
     def __eq__(self, other):
         if type(other) is type(self):
