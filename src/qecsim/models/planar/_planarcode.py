@@ -310,8 +310,8 @@ class PlanarCode(StabilizerCode):
 
         :param syndrome: Binary vector identifying commuting and non-commuting stabilizers by 0 and 1 respectively.
         :type syndrome: numpy.array (1d)
-        :return: List of plaquette indices.
-        :rtype: list of 2-tuple of int
+        :return: Set of plaquette indices.
+        :rtype: set of 2-tuple of int
         """
         return set(tuple(index) for index in np.array(self._plaquette_indices)[syndrome.nonzero()])
 
