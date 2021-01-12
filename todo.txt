@@ -51,14 +51,17 @@
 # DONE: set up tox for lint (flake8)
 # DONE: refactoring: MPS decoders to use separate H and V node value methods for extensibility.
 # DONE: document pandoc requirement in tox.ini
+# TODO: refactoring: Move distance methods from codes to decoders.
+# TODO: refactoring: Move SMWPM decoder module functions to class methods.
 # TODO: refactoring: Remove ErrorModel.probability_distribution to allow non-IID noise.
-# TODO: docs: rename acknowledgment section to citing
-# TODO: README.rst: add citing section, remove copyright, fix spacing
-# TODO: update author with initial: setup.cfg and docs/conf.py
-# TODO: add EQUS acknowledgment
-# TODO: choose licence (update LICENSE and setup.cfg license and classifiers)
-# TODO: finalize setup.cfg meta-data
-# TODO: test upload to PyPI
-# TODO: create qecsimdev repo
-# TODO: host documentation on readthedocs (update setup.cfg project_urls, README.rst and doc)
-# TODO: set up continuous integration
+# TODO: docs: rename acknowledgment section to citing.
+# TODO: docs: how to optimize CLI.
+# TODO: README.rst: add citing section, remove copyright/add license, fix spacing.
+# TODO: update author with initial: setup.cfg and docs/conf.py.
+# TODO: add EQUS acknowledgment.
+# TODO: choose licence (update LICENSE and setup.cfg license and classifiers).
+# TODO: finalize setup.cfg meta-data.
+# TODO: test upload to PyPI.
+# TODO: create qecsimdev repo.
+# TODO: host documentation on readthedocs (update setup.cfg project_urls, README.rst and doc).
+# TODO: set up continuous integration.
