@@ -280,30 +280,6 @@ class PlanarCode(StabilizerCode):
             col_steps = (b_c - a_c) // 2
         return row_steps, col_steps
 
-    @functools.lru_cache(maxsize=2 ** 28)  # for MxN lattice, cache_size <~ 2(MN)(MN-1) so handle 100x100 codes.
-    def distance(self, a_index, b_index):
-        """
-        Evaluate the taxi-cab distance between the plaquettes indexed by A and B, where distance is the number of
-        plaquette steps not the difference in indices.
-
-        Notes:
-
-        * Indices are in the format (row, column).
-        * Both indices must index the same lattice, see :meth:`is_primal` / :meth:`is_dual`.
-        * Plaquettes not indexed within the lattice are said to be virtual, see :meth:`bounds`.
-        * If both plaquettes are virtual then the distance is defined to be 0.
-
-        :param a_index: Index identifying a plaquette in the format (row, column).
-        :type a_index: 2-tuple of int
-        :param b_index: Index identifying a plaquette in the format (row, column).
-        :type b_index: 2-tuple of int
-        :return: Taxi-cab distance between plaquettes.
-        :rtype: int
-        :raises IndexError: If indices are not plaquette indices on the same lattice.
-        """
-        row_steps, col_steps = self.translation(a_index, b_index)
-        return abs(row_steps) + abs(col_steps)
-
     def syndrome_to_plaquette_indices(self, syndrome):
         """
         Returns the indices of the plaquettes associated with the non-commuting stabilizers identified by the syndrome.

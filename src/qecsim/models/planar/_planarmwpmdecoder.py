@@ -27,9 +27,9 @@ class PlanarMWPMDecoder(Decoder):
     @functools.lru_cache(maxsize=2 ** 28)  # for MxN lattice, cache_size <~ 2(MN)(MN-1) so handle 100x100 codes.
     def distance(cls, code, a_index, b_index):
         """
-        Distance between plaquettes in terms of plaquette steps within the lattice.
+        Distance between plaquettes in terms of plaquette steps.
 
-        Note: This implmentation returns the taxi-cab distance based on
+        Note: This implementation returns the taxi-cab distance based on
         :meth:`qecsim.models.planar.PlanarCode.translation`.
 
         :param code: Planar code.
@@ -40,6 +40,7 @@ class PlanarMWPMDecoder(Decoder):
         :type b_index: 2-tuple of int
         :return: Distance between plaquettes.
         :rtype: int
+        :raises IndexError: If indices are not plaquette indices on the same lattice.
         """
         row_steps, col_steps = code.translation(a_index, b_index)
         return abs(row_steps) + abs(col_steps)
