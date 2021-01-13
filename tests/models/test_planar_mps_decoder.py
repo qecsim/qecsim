@@ -20,6 +20,7 @@ def _is_close(a, b, rtol=1e-05, atol=1e-08):
         return mp.almosteq(a, b, rel_eps=rtol, abs_eps=atol)
 
 
+# @pytest.mark.perf
 # @pytest.mark.parametrize('error_pauli, chi', [
 #     (PlanarCode(29, 29).new_pauli().site('X', (1, 3), (4, 2)).site('Z', (6, 4), (1, 1)), 8),
 # ])
@@ -304,6 +305,7 @@ def test_planar_mps_decoder_cosets_probability_stp():
         'coset_ps (chi=6, stp=0.5) not close to approx_coset_ps')
 
 
+@pytest.mark.perf
 def test_planar_mps_mwpm_performance():
     n_run = 5
     code = PlanarCode(25, 25)

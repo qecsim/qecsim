@@ -310,6 +310,7 @@ def test_planar_y_decoder_coset_probability(prob_dist, pauli, expected_probabili
             'Coset probability not as expected')
 
 
+@pytest.mark.perf
 def test_planar_y_decoder_coset_probability_performance():
     print()
     with mp.workdps(50):

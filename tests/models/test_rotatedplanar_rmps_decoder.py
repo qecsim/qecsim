@@ -19,6 +19,7 @@ def _is_close(a, b, rtol=1e-05, atol=1e-08):
         return mp.almosteq(a, b, rel_eps=rtol, abs_eps=atol)
 
 
+# @pytest.mark.perf
 # @pytest.mark.parametrize('error_pauli, chi', [
 #     (RotatedPlanarCode(29, 29).new_pauli().site('X', (1, 3), (4, 2)).site('Z', (6, 4), (1, 1)), 8),
 # ])
@@ -234,6 +235,7 @@ def test_rotated_planar_rmps_mps_accuracy(error_pauli):
         'rmps_coset_ps (chi=8) not close to mps_coset_ps (chi=8)')
 
 
+@pytest.mark.perf
 def test_rotated_planar_rmps_mps_performance():
     from qecsim.models.rotatedplanar import RotatedPlanarMPSDecoder
     n_run = 5

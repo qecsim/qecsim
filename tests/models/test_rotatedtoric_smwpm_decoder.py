@@ -60,6 +60,7 @@ def _code_error_syndrome(code, error_dicts, measurement_error_indices):
     return code, error, syndrome, step_errors, step_measurement_errors
 
 
+# @pytest.mark.perf
 # def test_rotated_toric_smwpm_perf():
 #     from click.testing import CliRunner
 #     from qecsim import app
@@ -71,6 +72,7 @@ def _code_error_syndrome(code, error_dicts, measurement_error_indices):
 #         app.run(code, error_model, decoder, error_probability, max_runs=5)
 
 
+# @pytest.mark.perf
 # def test_rotated_toric_smwpm_perf_ftp():
 #     from click.testing import CliRunner
 #     from qecsim import app
