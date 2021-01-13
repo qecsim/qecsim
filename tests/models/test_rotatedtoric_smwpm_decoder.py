@@ -5,7 +5,6 @@ from qecsim import paulitools as pt
 from qecsim.models.generic import BiasedDepolarizingErrorModel, BitPhaseFlipErrorModel, DepolarizingErrorModel
 from qecsim.models.generic import BitFlipErrorModel
 from qecsim.models.rotatedtoric import RotatedToricCode, RotatedToricSMWPMDecoder
-from qecsim.models.rotatedtoric import _rotatedtoricsmwpmdecoder as _rtsd
 
 
 # utility functions
@@ -154,7 +153,7 @@ def test_rotated_toric_smwpm_decoder_bias_override(error_model):
     RotatedToricCode(4, 4),
 ])
 def test_rotated_toric_smwpm_decoder_plaquette_indices(code):
-    plaquette_indices = _rtsd._plaquette_indices(code)
+    plaquette_indices = RotatedToricSMWPMDecoder._plaquette_indices(code)
     # check size
     n_rows, n_cols = code.size
     assert plaquette_indices.shape == (n_rows, n_cols), 'plaquette_indices wrong shape'
@@ -175,7 +174,7 @@ def test_rotated_toric_smwpm_decoder_plaquette_indices(code):
     (RotatedToricCode(4, 6), ((0, 0, 0), False), ((0, 0, 3), False), 1),  # col: in bulk
 ])
 def test_rotated_toric_smwpm_decoder_distance(code, a, b, expected):
-    assert _rtsd._distance(code, 1, a, b) == expected, 'Distance not as expected'
+    assert RotatedToricSMWPMDecoder._distance(code, 1, a, b) == expected, 'Distance not as expected'
 
 
 @pytest.mark.parametrize('code, time_steps, a, b, error_probability, measurement_error_probability, eta', [
@@ -196,31 +195,32 @@ def test_rotated_toric_smwpm_decoder_distance(code, a, b, expected):
 def test_rotated_toric_smwpm_decoder_distance_invalid(code, time_steps, a, b, error_probability,
                                                       measurement_error_probability, eta):
     with pytest.raises(ValueError):
-        _rtsd._distance(code, time_steps, a, b, error_probability, measurement_error_probability, eta)
+        RotatedToricSMWPMDecoder._distance(code, time_steps, a, b, error_probability,
+                                           measurement_error_probability, eta)
 
 
 def test_rotated_toric_smwpm_decoder_space_step_weights():
     p = 0.1
     eta = 0.5
-    parallel_step_wt_half = _rtsd._step_weight_parallel(eta, p)
-    diagonal_step_wt_half = _rtsd._step_weight_diagonal(eta, p)
+    parallel_step_wt_half = RotatedToricSMWPMDecoder._step_weight_parallel(eta, p)
+    diagonal_step_wt_half = RotatedToricSMWPMDecoder._step_weight_diagonal(eta, p)
     print('eta=', eta, 'p=', p, 'parallel_wt=', parallel_step_wt_half, 'diagonal_wt=', diagonal_step_wt_half)
     assert 0 < parallel_step_wt_half == diagonal_step_wt_half
     eta = 10
-    parallel_step_wt_10 = _rtsd._step_weight_parallel(eta, p)
-    diagonal_step_wt_10 = _rtsd._step_weight_diagonal(eta, p)
+    parallel_step_wt_10 = RotatedToricSMWPMDecoder._step_weight_parallel(eta, p)
+    diagonal_step_wt_10 = RotatedToricSMWPMDecoder._step_weight_diagonal(eta, p)
     print('eta=', eta, 'p=', p, 'parallel_wt=', parallel_step_wt_10, 'diagonal_wt=', diagonal_step_wt_10)
     assert 0 < parallel_step_wt_10 < diagonal_step_wt_10
     eta = 100
-    parallel_step_wt_100 = _rtsd._step_weight_parallel(eta, p)
-    diagonal_step_wt_100 = _rtsd._step_weight_diagonal(eta, p)
+    parallel_step_wt_100 = RotatedToricSMWPMDecoder._step_weight_parallel(eta, p)
+    diagonal_step_wt_100 = RotatedToricSMWPMDecoder._step_weight_diagonal(eta, p)
     print('eta=', eta, 'p=', p, 'parallel_wt=', parallel_step_wt_100, 'diagonal_wt=', diagonal_step_wt_100)
     assert 0 < parallel_step_wt_100 < diagonal_step_wt_100
     assert 0 < parallel_step_wt_100 < parallel_step_wt_10
     assert 0 < diagonal_step_wt_10 < diagonal_step_wt_100
     eta = 1000
-    parallel_step_wt_1000 = _rtsd._step_weight_parallel(eta, p)
-    diagonal_step_wt_1000 = _rtsd._step_weight_diagonal(eta, p)
+    parallel_step_wt_1000 = RotatedToricSMWPMDecoder._step_weight_parallel(eta, p)
+    diagonal_step_wt_1000 = RotatedToricSMWPMDecoder._step_weight_diagonal(eta, p)
     print('eta=', eta, 'p=', p, 'parallel_wt=', parallel_step_wt_1000, 'diagonal_wt=', diagonal_step_wt_1000)
     assert 0 < parallel_step_wt_1000 < diagonal_step_wt_1000
     assert 0 < parallel_step_wt_1000 < parallel_step_wt_100
@@ -230,39 +230,39 @@ def test_rotated_toric_smwpm_decoder_space_step_weights():
 def test_rotated_toric_smwpm_decoder_time_step_weights_ftp():
     # infinite bias
     eta = None
-    time_step_wt_10pc = _rtsd._step_weight_time(0.1)
-    parallel_step_wt_10pc = _rtsd._step_weight_parallel(eta, 0.1)
-    time_step_wt_20pc = _rtsd._step_weight_time(0.2)
-    parallel_step_wt_20pc = _rtsd._step_weight_parallel(eta, 0.2)
+    time_step_wt_10pc = RotatedToricSMWPMDecoder._step_weight_time(0.1)
+    parallel_step_wt_10pc = RotatedToricSMWPMDecoder._step_weight_parallel(eta, 0.1)
+    time_step_wt_20pc = RotatedToricSMWPMDecoder._step_weight_time(0.2)
+    parallel_step_wt_20pc = RotatedToricSMWPMDecoder._step_weight_parallel(eta, 0.2)
     assert 0 < time_step_wt_20pc < time_step_wt_10pc
     assert 0 < parallel_step_wt_20pc < parallel_step_wt_10pc
     assert time_step_wt_10pc == parallel_step_wt_10pc
     assert time_step_wt_20pc == parallel_step_wt_20pc
     # finite bias
     eta = 100
-    parallel_step_wt_10pc = _rtsd._step_weight_parallel(eta, 0.1)
-    parallel_step_wt_20pc = _rtsd._step_weight_parallel(eta, 0.2)
+    parallel_step_wt_10pc = RotatedToricSMWPMDecoder._step_weight_parallel(eta, 0.1)
+    parallel_step_wt_20pc = RotatedToricSMWPMDecoder._step_weight_parallel(eta, 0.2)
     assert 0 < time_step_wt_10pc < parallel_step_wt_10pc
     assert 0 < time_step_wt_20pc < parallel_step_wt_20pc
 
 
 def test_rotated_toric_smwpm_decoder_step_weights_invalid_ftp():
     with pytest.raises(ValueError):
-        _rtsd._step_weight_time(q=None)
+        RotatedToricSMWPMDecoder._step_weight_time(q=None)
     with pytest.raises(ValueError):
-        _rtsd._step_weight_time(q=0)
+        RotatedToricSMWPMDecoder._step_weight_time(q=0)
     with pytest.raises(ValueError):
-        _rtsd._step_weight_time(q=1)
+        RotatedToricSMWPMDecoder._step_weight_time(q=1)
     with pytest.raises(ValueError):
-        _rtsd._step_weight_parallel(eta=100, p=None)
+        RotatedToricSMWPMDecoder._step_weight_parallel(eta=100, p=None)
     with pytest.raises(ValueError):
-        _rtsd._step_weight_parallel(eta=100, p=0)
+        RotatedToricSMWPMDecoder._step_weight_parallel(eta=100, p=0)
     with pytest.raises(ValueError):
-        _rtsd._step_weight_diagonal(eta=100, p=None)
+        RotatedToricSMWPMDecoder._step_weight_diagonal(eta=100, p=None)
     with pytest.raises(ValueError):
-        _rtsd._step_weight_diagonal(eta=100, p=0)
+        RotatedToricSMWPMDecoder._step_weight_diagonal(eta=100, p=0)
     with pytest.raises(ValueError):
-        _rtsd._step_weight_diagonal(eta=None, p=0.1)
+        RotatedToricSMWPMDecoder._step_weight_diagonal(eta=None, p=0.1)
 
 
 @pytest.mark.parametrize('code, time_steps, a, b, eta, exp_delta_time, exp_delta_parallel, exp_delta_diagonal', [
@@ -378,13 +378,13 @@ def test_rotated_toric_smwpm_decoder_distance_ftp(code, time_steps, a, b, eta, e
     p, q = 0.2, 0.1
     expected_distance = 0
     if exp_delta_time:
-        expected_distance += exp_delta_time * _rtsd._step_weight_time(q)
+        expected_distance += exp_delta_time * RotatedToricSMWPMDecoder._step_weight_time(q)
     if exp_delta_parallel:
-        expected_distance += exp_delta_parallel * _rtsd._step_weight_parallel(eta, p)
+        expected_distance += exp_delta_parallel * RotatedToricSMWPMDecoder._step_weight_parallel(eta, p)
     if exp_delta_diagonal:
-        expected_distance += exp_delta_diagonal * _rtsd._step_weight_diagonal(eta, p)
-    assert _rtsd._distance(code, time_steps, a, b, eta=eta,
-                           error_probability=p, measurement_error_probability=q) == expected_distance, (
+        expected_distance += exp_delta_diagonal * RotatedToricSMWPMDecoder._step_weight_diagonal(eta, p)
+    assert RotatedToricSMWPMDecoder._distance(code, time_steps, a, b, eta=eta, error_probability=p,
+                                              measurement_error_probability=q) == expected_distance, (
         'Distance with bias not as expected')
 
 
@@ -413,7 +413,7 @@ def test_rotated_toric_smwpm_decoder_graph(error_pauli, expected):
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # call
-    graphs = _rtsd._graphs(code, time_steps, syndrome)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, time_steps, syndrome)
     # prepare actual (sort nodes within edges, and extract a_node, b_node, weight)
     actual = {(*sorted((a_node, b_node)), wt) for graph in graphs for (a_node, b_node), wt in graph.items()}
     # prepare expected (sort nodes within edges)
@@ -451,7 +451,7 @@ def test_rotated_toric_smwpm_decoder_graph_with_bias(error_pauli, eta, error_pro
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # call
-    graphs = _rtsd._graphs(code, time_steps, syndrome, error_probability, eta=eta)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, time_steps, syndrome, error_probability, eta=eta)
     # prepare actual
     # i.e. sort edges by weight, a_node, b_node where nodes are sorted within edges, and extract a_node, b_node
     actual = tuple((a_node, b_node) for wt, a_node, b_node in
@@ -483,7 +483,7 @@ def test_rotated_toric_smwpm_decoder_graph_with_bias(error_pauli, eta, error_pro
 ])
 def test_rotated_toric_smwpm_decoder_graph_ftp(code, error, syndrome, step_errors, step_measurement_errors, expected):
     # call
-    graphs = _rtsd._graphs(code, len(syndrome), syndrome)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, len(syndrome), syndrome)
     # prepare actual (sort nodes within edges, and extract a_node, b_node, weight)
     actual = set((*sorted((a_node, b_node)), wt) for graph in graphs for (a_node, b_node), wt in graph.items())
     # prepare expected (sort nodes within edges)
@@ -702,8 +702,8 @@ def test_rotated_toric_smwpm_decoder_matching(error_pauli, expected):
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # calls
-    graphs = _rtsd._graphs(code, time_steps, syndrome)
-    matches = _rtsd._matching(graphs)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, time_steps, syndrome)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
     # prepare actual (filter out same index mates and convert mates to frozenset)
     actual = set()
     for ((a_index, a_is_row), (b_index, b_is_row)) in matches:
@@ -742,8 +742,8 @@ def test_rotated_toric_smwpm_decoder_matching_with_bias(error_pauli, eta, error_
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # calls
-    graphs = _rtsd._graphs(code, time_steps, syndrome, error_probability, eta=eta)
-    matches = _rtsd._matching(graphs)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, time_steps, syndrome, error_probability, eta=eta)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
     # prepare actual (convert mates to frozenset)
     actual = set()
     for ((a_index, a_is_row), (b_index, b_is_row)) in matches:
@@ -812,8 +812,8 @@ def test_rotated_toric_smwpm_decoder_matching_ftp(code, error, syndrome, step_er
                                                   p, q, eta, expected):
     # parameters
     # calls
-    graphs = _rtsd._graphs(code, len(syndrome), syndrome, p, q, eta)
-    matches = _rtsd._matching(graphs)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, len(syndrome), syndrome, p, q, eta)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
     # prepare actual (filter out same index mates and convert mates to frozenset)
     actual = set()
     for ((a_index, a_is_row), (b_index, b_is_row)) in matches:
@@ -903,8 +903,8 @@ def test_rotated_toric_smwpm_decoder_matching_tparity(code, error, syndrome, ste
                                                       p, q, eta, expected):
     # parameters
     # calls
-    graphs = _rtsd._graphs(code, len(syndrome), syndrome, p, q, eta)
-    matches = _rtsd._matching(graphs)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, len(syndrome), syndrome, p, q, eta)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
     # prepare actual (filter out same index mates and convert mates to frozenset)
     actual = set()
     for ((a_index, a_is_row), (b_index, b_is_row)) in matches:
@@ -981,9 +981,9 @@ def test_rotated_toric_smwpm_decoder_clusters(error_pauli, expected):
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # calls
-    graphs = _rtsd._graphs(code, time_steps, syndrome)
-    matches = _rtsd._matching(graphs)
-    clusters = _rtsd._clusters(matches)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, time_steps, syndrome)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
+    clusters = RotatedToricSMWPMDecoder._clusters(matches)
     print('### clusters=', clusters)
     print('### expected=', expected)
     _print_clusters(code, clusters)
@@ -1078,9 +1078,9 @@ def test_rotated_toric_smwpm_decoder_clusters_with_bias(error_pauli, eta, error_
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # calls
-    graphs = _rtsd._graphs(code, time_steps, syndrome, error_probability, eta=eta)
-    matches = _rtsd._matching(graphs)
-    clusters = _rtsd._clusters(matches)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, time_steps, syndrome, error_probability, eta=eta)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
+    clusters = RotatedToricSMWPMDecoder._clusters(matches)
     print('### clusters=', clusters)
     print('### expected=', expected)
     _print_clusters(code, clusters)
@@ -1107,9 +1107,9 @@ def test_rotated_toric_smwpm_decoder_clusters_with_bias(error_pauli, eta, error_
 def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_errors, step_measurement_errors,
                                                   expected):
     # calls
-    graphs = _rtsd._graphs(code, len(syndrome), syndrome)
-    matches = _rtsd._matching(graphs)
-    clusters = _rtsd._clusters(matches)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, len(syndrome), syndrome)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
+    clusters = RotatedToricSMWPMDecoder._clusters(matches)
     # check
     assert clusters == expected, 'Clusters not as expected.'
 
@@ -1187,9 +1187,9 @@ def test_rotated_toric_smwpm_decoder_clusters_ftp(code, error, syndrome, step_er
 def test_rotated_toric_smwpm_decoder_clusters_tparity(code, error, syndrome, step_errors, step_measurement_errors,
                                                       p, q, eta, expected):
     # calls
-    graphs = _rtsd._graphs(code, len(syndrome), syndrome, p, q, eta)
-    matches = _rtsd._matching(graphs)
-    clusters = _rtsd._clusters(matches)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, len(syndrome), syndrome, p, q, eta)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
+    clusters = RotatedToricSMWPMDecoder._clusters(matches)
     # check
     assert clusters == expected, 'Clusters not as expected.'
 
@@ -1247,7 +1247,7 @@ def test_rotated_toric_smwpm_decoder_clusters_tparity(code, error, syndrome, ste
      ),
 ])
 def test_rotated_toric_smwpm_decoder_cluster_to_paths_and_defect_ftp(code, cluster, expected):
-    x_path, z_path, y_defect = _rtsd._cluster_to_paths_and_defect(code, cluster)
+    x_path, z_path, y_defect = RotatedToricSMWPMDecoder._cluster_to_paths_and_defect(code, cluster)
     print()
     print('actual:')
     print(x_path, z_path, y_defect)
@@ -1417,7 +1417,7 @@ def test_rotated_toric_smwpm_decoder_decode_ftp(code, error, syndrome, step_erro
     (7, -1, -1, 0),  # 6 to 5 thru -1
 ])
 def test_rotated_toric_smwpm_decoder_tparity(time_steps, a_t, b_t, expected):
-    tparity = _rtsd._tparity(time_steps, a_t, b_t)
+    tparity = RotatedToricSMWPMDecoder._tparity(time_steps, a_t, b_t)
     assert tparity == expected
 
 
@@ -1434,7 +1434,7 @@ def test_rotated_toric_smwpm_decoder_measurement_error_tparities():
         measurement_error.append(1 if index in measurement_error_indices else 0)
     measurement_error = np.array(measurement_error)
     # call
-    measurement_error_tps = _rtsd._measurement_error_tparities(code, measurement_error)
+    measurement_error_tps = RotatedToricSMWPMDecoder._measurement_error_tparities(code, measurement_error)
     assert measurement_error_tps == expected
 
 
@@ -1503,42 +1503,42 @@ def test_rotated_toric_smwpm_decoder_decode_ftp_tparity(code, error, syndrome, s
 
 @pytest.mark.parametrize('code, time_steps, a_node, b_node, expected', [
     (RotatedToricCode(6, 6), 1,
-     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-     _rtsd._ClusterNode([(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)], (0, 2, 3), (0, 2, 4)),
+     RotatedToricSMWPMDecoder._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     RotatedToricSMWPMDecoder._ClusterNode([(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)], (0, 2, 3), (0, 2, 4)),
      3  # manhattan distance between (0, 1, 1) and (0, 2, 3)
      ),
     (RotatedToricCode(6, 6), 1,
-     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-     _rtsd._ClusterNode([(0, 1, 4), (0, 1, 5), (0, 2, 5), (0, 2, 4)], (0, 1, 4), (0, 1, 5)),
+     RotatedToricSMWPMDecoder._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     RotatedToricSMWPMDecoder._ClusterNode([(0, 1, 4), (0, 1, 5), (0, 2, 5), (0, 2, 4)], (0, 1, 4), (0, 1, 5)),
      1  # manhattan distance between (0, 1, 0) and (0, 1, 5) (periodic in y)
      ),
     (RotatedToricCode(6, 6), 1,
-     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-     _rtsd._ClusterNode([(0, 4, 1), (0, 4, 2)], (0, 4, 1), (0, 4, 2)),
+     RotatedToricSMWPMDecoder._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     RotatedToricSMWPMDecoder._ClusterNode([(0, 4, 1), (0, 4, 2)], (0, 4, 1), (0, 4, 2)),
      2  # manhattan distance between (0, 0, 1) and (0, 4, 1) (periodic in x)
      ),
     (RotatedToricCode(6, 6), 6,
-     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-     _rtsd._ClusterNode([(2, 2, 3), (2, 2, 4), (2, 3, 4), (2, 3, 3)], (2, 2, 3), (2, 2, 4)),
+     RotatedToricSMWPMDecoder._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     RotatedToricSMWPMDecoder._ClusterNode([(2, 2, 3), (2, 2, 4), (2, 3, 4), (2, 3, 3)], (2, 2, 3), (2, 2, 4)),
      5  # manhattan distance between (0, 1, 1) and (2, 2, 3)
      ),
     (RotatedToricCode(6, 6), 6,
-     _rtsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-     _rtsd._ClusterNode([(5, 2, 3), (5, 2, 4), (5, 3, 4), (5, 3, 3)], (5, 2, 3), (5, 2, 4)),
+     RotatedToricSMWPMDecoder._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     RotatedToricSMWPMDecoder._ClusterNode([(5, 2, 3), (5, 2, 4), (5, 3, 4), (5, 3, 3)], (5, 2, 3), (5, 2, 4)),
      4  # manhattan distance between (0, 1, 1) and (5, 2, 3) (periodic in t)
      ),
 ])
 def test_rotated_toric_smwpm_decoder_cluster_distance_ftp(code, time_steps, a_node, b_node, expected):
-    distance = _rtsd._cluster_distance(code, time_steps, a_node, b_node)
+    distance = RotatedToricSMWPMDecoder._cluster_distance(code, time_steps, a_node, b_node)
     assert distance == expected, 'Cluster distance not as expected'
 
 
 def test_rotated_toric_smwpm_decoder_cluster_distance_twins_ftp():
     code = RotatedToricCode(6, 6)
     time_steps = 6
-    a_node = _rtsd._ClusterNode([(0, 0, 0), (1, 0, 1), (2, 1, 1), (3, 1, 0)], (1, 0, 1), (0, 0, 0))
-    b_node = _rtsd._ClusterNode([(0, 0, 0), (1, 0, 1), (2, 1, 1), (3, 1, 0)], (1, 0, 1), (0, 0, 0))
-    distance = _rtsd._cluster_distance(code, time_steps, a_node, b_node)
+    a_node = RotatedToricSMWPMDecoder._ClusterNode([(0, 0, 0), (1, 0, 1), (2, 1, 1), (3, 1, 0)], (1, 0, 1), (0, 0, 0))
+    b_node = RotatedToricSMWPMDecoder._ClusterNode([(0, 0, 0), (1, 0, 1), (2, 1, 1), (3, 1, 0)], (1, 0, 1), (0, 0, 0))
+    distance = RotatedToricSMWPMDecoder._cluster_distance(code, time_steps, a_node, b_node)
     expected = 0  # manhattan distance between twin clusters
     assert distance == expected, 'Cluster distance not as expected'
 
@@ -1567,13 +1567,14 @@ def test_rotated_toric_smwpm_decoder_cluster_graph_and_matching():
     recovery_z_tp = 0
     # SYMMETRY DECODING
     # prepare graph
-    graphs = _rtsd._graphs(code, time_steps, syndrome, error_probability, measurement_error_probability, eta)
+    graphs = RotatedToricSMWPMDecoder._graphs(code, time_steps, syndrome, error_probability,
+                                              measurement_error_probability, eta)
     # minimum weight matching
-    matches = _rtsd._matching(graphs)
+    matches = RotatedToricSMWPMDecoder._matching(graphs)
     # cluster matches
-    clusters = _rtsd._clusters(matches)
+    clusters = RotatedToricSMWPMDecoder._clusters(matches)
     # resolve symmetry recovery from fusing within clusters
-    symmetry_recovery, symmetry_recovery_x_tp, symmetry_recovery_z_tp = _rtsd._recovery_tparities(
+    symmetry_recovery, symmetry_recovery_x_tp, symmetry_recovery_z_tp = RotatedToricSMWPMDecoder._recovery_tparities(
         code, time_steps, clusters)
     # add symmetry recovery and t-parities
     recovery ^= symmetry_recovery
@@ -1585,7 +1586,7 @@ def test_rotated_toric_smwpm_decoder_cluster_graph_and_matching():
     assert np.any(cluster_syndrome), 'There should be two isolated Y defects'
 
     # CLUSTER GRAPH
-    cluster_graph = _rtsd._cluster_graph(code, time_steps, clusters)
+    cluster_graph = RotatedToricSMWPMDecoder._cluster_graph(code, time_steps, clusters)
     # prepare actual as {((x_index, z_index), (x_index, z_index), weight), ...}
     actual = set((*sorted(((a.x_index, a.z_index), (b.x_index, b.z_index))), weight)
                  for (a, b), weight in cluster_graph.items())
@@ -1596,7 +1597,7 @@ def test_rotated_toric_smwpm_decoder_cluster_graph_and_matching():
     assert actual == expected, 'Cluster graph not as expected'
 
     # CLUSTER MATCHING
-    cluster_matches = _rtsd._matching([cluster_graph])
+    cluster_matches = RotatedToricSMWPMDecoder._matching([cluster_graph])
     # prepare actual as {((x_index, z_index), (x_index, z_index)), ...} excluding matches between virtual nodes
     actual = set((*sorted(((a.x_index, a.z_index), (b.x_index, b.z_index))),) for a, b in cluster_matches)
     # expected
