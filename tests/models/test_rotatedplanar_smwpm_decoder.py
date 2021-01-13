@@ -5,7 +5,6 @@ from qecsim import paulitools as pt
 from qecsim.models.generic import BiasedDepolarizingErrorModel, BitPhaseFlipErrorModel, DepolarizingErrorModel
 from qecsim.models.generic import BitFlipErrorModel
 from qecsim.models.rotatedplanar import RotatedPlanarCode, RotatedPlanarSMWPMDecoder
-from qecsim.models.rotatedplanar import _rotatedplanarsmwpmdecoder as _rpsd
 
 
 # utility functions
@@ -31,8 +30,8 @@ def _code_error_syndrome(code, error_dicts, measurement_error_indices):
     :type code: RotatedPlanarCode
     :param error_dicts: List of error dicts, e.g. [{'X': [(0, 0)]}, {'Y': [(1, 1), (1, 2)]}, ...]
     :type error_dicts: list of dict
-    :param measurement_error_lists: List of measurement error indices, e.g. [[(1, 1)], [(1, 1), (2, 1), ...] ]
-    :type measurement_error_lists: list of list
+    :param measurement_error_indices: List of measurement error indices, e.g. [[(1, 1)], [(1, 1), (2, 1), ...] ]
+    :type measurement_error_indices: list of list
     :return: Code, Error, Periodic syndrome
     :rtype: RotatedPlanarCode, np.array (1d), np.array (2d)
     """
@@ -153,7 +152,7 @@ def test_rotated_planar_smwpm_decoder_bias_override(error_model):
     RotatedPlanarCode(4, 4),
 ])
 def test_rotated_planar_smwpm_decoder_plaquette_indices(code):
-    plaquette_indices = _rpsd._plaquette_indices(code)
+    plaquette_indices = RotatedPlanarSMWPMDecoder._plaquette_indices(code)
     # check size
     n_rows, n_cols = code.size
     assert plaquette_indices.shape == (n_rows + 1, n_cols + 1), 'plaquette_indices wrong shape'
@@ -218,7 +217,7 @@ def test_rotated_planar_smwpm_decoder_plaquette_indices(code):
     (RotatedPlanarCode(5, 5), ((0, 4, 1), False), ((0, 4, -1), False), 2),  # col: real to virt boundary (right)
 ])
 def test_rotated_planar_smwpm_decoder_distance(code, a, b, expected):
-    assert _rpsd._distance(code, 1, a, b) == expected, 'Distance not as expected'
+    assert RotatedPlanarSMWPMDecoder._distance(code, 1, a, b) == expected, 'Distance not as expected'
 
 
 # @pytest.mark.parametrize('code, a, b', [
@@ -250,31 +249,32 @@ def test_rotated_planar_smwpm_decoder_distance(code, a, b, expected):
 def test_rotated_planar_smwpm_decoder_distance_invalid(code, time_steps, a, b, error_probability,
                                                        measurement_error_probability, eta):
     with pytest.raises(ValueError):
-        _rpsd._distance(code, time_steps, a, b, error_probability, measurement_error_probability, eta)
+        RotatedPlanarSMWPMDecoder._distance(code, time_steps, a, b, error_probability,
+                                            measurement_error_probability, eta)
 
 
 def test_rotated_planar_smwpm_decoder_space_step_weights():
     p = 0.1
     eta = 0.5
-    parallel_step_wt_half = _rpsd._step_weight_parallel(eta, p)
-    diagonal_step_wt_half = _rpsd._step_weight_diagonal(eta, p)
+    parallel_step_wt_half = RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, p)
+    diagonal_step_wt_half = RotatedPlanarSMWPMDecoder._step_weight_diagonal(eta, p)
     print('eta=', eta, 'p=', p, 'parallel_wt=', parallel_step_wt_half, 'diagonal_wt=', diagonal_step_wt_half)
     assert 0 < parallel_step_wt_half == diagonal_step_wt_half
     eta = 10
-    parallel_step_wt_10 = _rpsd._step_weight_parallel(eta, p)
-    diagonal_step_wt_10 = _rpsd._step_weight_diagonal(eta, p)
+    parallel_step_wt_10 = RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, p)
+    diagonal_step_wt_10 = RotatedPlanarSMWPMDecoder._step_weight_diagonal(eta, p)
     print('eta=', eta, 'p=', p, 'parallel_wt=', parallel_step_wt_10, 'diagonal_wt=', diagonal_step_wt_10)
     assert 0 < parallel_step_wt_10 < diagonal_step_wt_10
     eta = 100
-    parallel_step_wt_100 = _rpsd._step_weight_parallel(eta, p)
-    diagonal_step_wt_100 = _rpsd._step_weight_diagonal(eta, p)
+    parallel_step_wt_100 = RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, p)
+    diagonal_step_wt_100 = RotatedPlanarSMWPMDecoder._step_weight_diagonal(eta, p)
     print('eta=', eta, 'p=', p, 'parallel_wt=', parallel_step_wt_100, 'diagonal_wt=', diagonal_step_wt_100)
     assert 0 < parallel_step_wt_100 < diagonal_step_wt_100
     assert 0 < parallel_step_wt_100 < parallel_step_wt_10
     assert 0 < diagonal_step_wt_10 < diagonal_step_wt_100
     eta = 1000
-    parallel_step_wt_1000 = _rpsd._step_weight_parallel(eta, p)
-    diagonal_step_wt_1000 = _rpsd._step_weight_diagonal(eta, p)
+    parallel_step_wt_1000 = RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, p)
+    diagonal_step_wt_1000 = RotatedPlanarSMWPMDecoder._step_weight_diagonal(eta, p)
     print('eta=', eta, 'p=', p, 'parallel_wt=', parallel_step_wt_1000, 'diagonal_wt=', diagonal_step_wt_1000)
     assert 0 < parallel_step_wt_1000 < diagonal_step_wt_1000
     assert 0 < parallel_step_wt_1000 < parallel_step_wt_100
@@ -284,39 +284,39 @@ def test_rotated_planar_smwpm_decoder_space_step_weights():
 def test_rotated_planar_smwpm_decoder_time_step_weights_ftp():
     # infinite bias
     eta = None
-    time_step_wt_10pc = _rpsd._step_weight_time(0.1)
-    parallel_step_wt_10pc = _rpsd._step_weight_parallel(eta, 0.1)
-    time_step_wt_20pc = _rpsd._step_weight_time(0.2)
-    parallel_step_wt_20pc = _rpsd._step_weight_parallel(eta, 0.2)
+    time_step_wt_10pc = RotatedPlanarSMWPMDecoder._step_weight_time(0.1)
+    parallel_step_wt_10pc = RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, 0.1)
+    time_step_wt_20pc = RotatedPlanarSMWPMDecoder._step_weight_time(0.2)
+    parallel_step_wt_20pc = RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, 0.2)
     assert 0 < time_step_wt_20pc < time_step_wt_10pc
     assert 0 < parallel_step_wt_20pc < parallel_step_wt_10pc
     assert time_step_wt_10pc == parallel_step_wt_10pc
     assert time_step_wt_20pc == parallel_step_wt_20pc
     # finite bias
     eta = 100
-    parallel_step_wt_10pc = _rpsd._step_weight_parallel(eta, 0.1)
-    parallel_step_wt_20pc = _rpsd._step_weight_parallel(eta, 0.2)
+    parallel_step_wt_10pc = RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, 0.1)
+    parallel_step_wt_20pc = RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, 0.2)
     assert 0 < time_step_wt_10pc < parallel_step_wt_10pc
     assert 0 < time_step_wt_20pc < parallel_step_wt_20pc
 
 
 def test_rotated_planar_smwpm_decoder_step_weights_invalid_ftp():
     with pytest.raises(ValueError):
-        _rpsd._step_weight_time(q=None)
+        RotatedPlanarSMWPMDecoder._step_weight_time(q=None)
     with pytest.raises(ValueError):
-        _rpsd._step_weight_time(q=0)
+        RotatedPlanarSMWPMDecoder._step_weight_time(q=0)
     with pytest.raises(ValueError):
-        _rpsd._step_weight_time(q=1)
+        RotatedPlanarSMWPMDecoder._step_weight_time(q=1)
     with pytest.raises(ValueError):
-        _rpsd._step_weight_parallel(eta=100, p=None)
+        RotatedPlanarSMWPMDecoder._step_weight_parallel(eta=100, p=None)
     with pytest.raises(ValueError):
-        _rpsd._step_weight_parallel(eta=100, p=0)
+        RotatedPlanarSMWPMDecoder._step_weight_parallel(eta=100, p=0)
     with pytest.raises(ValueError):
-        _rpsd._step_weight_diagonal(eta=100, p=None)
+        RotatedPlanarSMWPMDecoder._step_weight_diagonal(eta=100, p=None)
     with pytest.raises(ValueError):
-        _rpsd._step_weight_diagonal(eta=100, p=0)
+        RotatedPlanarSMWPMDecoder._step_weight_diagonal(eta=100, p=0)
     with pytest.raises(ValueError):
-        _rpsd._step_weight_diagonal(eta=None, p=0.1)
+        RotatedPlanarSMWPMDecoder._step_weight_diagonal(eta=None, p=0.1)
 
 
 @pytest.mark.parametrize('code, time_steps, a, b, eta, exp_delta_time, exp_delta_parallel, exp_delta_diagonal', [
@@ -407,13 +407,13 @@ def test_rotated_planar_smwpm_decoder_distance_ftp(code, time_steps, a, b, eta, 
     p, q = 0.2, 0.1
     expected_distance = 0
     if exp_delta_time:
-        expected_distance += exp_delta_time * _rpsd._step_weight_time(q)
+        expected_distance += exp_delta_time * RotatedPlanarSMWPMDecoder._step_weight_time(q)
     if exp_delta_parallel:
-        expected_distance += exp_delta_parallel * _rpsd._step_weight_parallel(eta, p)
+        expected_distance += exp_delta_parallel * RotatedPlanarSMWPMDecoder._step_weight_parallel(eta, p)
     if exp_delta_diagonal:
-        expected_distance += exp_delta_diagonal * _rpsd._step_weight_diagonal(eta, p)
-    assert _rpsd._distance(code, time_steps, a, b,
-                           eta=eta, error_probability=p, measurement_error_probability=q) == expected_distance, (
+        expected_distance += exp_delta_diagonal * RotatedPlanarSMWPMDecoder._step_weight_diagonal(eta, p)
+    assert RotatedPlanarSMWPMDecoder._distance(code, time_steps, a, b, eta=eta, error_probability=p,
+                                               measurement_error_probability=q) == expected_distance, (
         'Distance with bias not as expected')
 
 
@@ -442,7 +442,7 @@ def test_rotated_planar_smwpm_decoder_graph(error_pauli, expected):
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # call
-    graph = _rpsd._graph(code, time_steps, syndrome)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, time_steps, syndrome)
     # prepare actual
     # i.e. filter out edges to virtual plaquettes, sort nodes within edges, and extract a_node, b_node, weight
     actual = {(*sorted((a_node, b_node)), weight) for (a_node, b_node), weight in graph.items()
@@ -482,7 +482,7 @@ def test_rotated_planar_smwpm_decoder_graph_with_bias(error_pauli, eta, error_pr
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # call
-    graph = _rpsd._graph(code, time_steps, syndrome, error_probability, eta=eta)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, time_steps, syndrome, error_probability, eta=eta)
     # prepare actual
     # i.e. filter out edges to virtual plaquettes,
     #      sort edges by weight, a_node, b_node where nodes are sorted within edges,
@@ -518,7 +518,7 @@ def test_rotated_planar_smwpm_decoder_graph_with_bias(error_pauli, eta, error_pr
 ])
 def test_rotated_planar_smwpm_decoder_graph_ftp(code, error, syndrome, expected):
     # call
-    graph = _rpsd._graph(code, len(syndrome), syndrome)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, len(syndrome), syndrome)
     # prepare actual
     # i.e. filter out edges to virtual plaquettes, sort nodes within edges, and extract a_node, b_node, weight
     actual = {(*sorted((a_node, b_node)), weight) for (a_node, b_node), weight in graph.items()
@@ -739,8 +739,8 @@ def test_rotated_planar_smwpm_decoder_matching(error_pauli, expected):
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # calls
-    graph = _rpsd._graph(code, time_steps, syndrome)
-    matches = _rpsd._matching(graph)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, time_steps, syndrome)
+    matches = RotatedPlanarSMWPMDecoder._matching(graph)
     # prepare actual (filter out same index mates and convert mates to frozenset)
     actual = set()
     for ((a_index, a_is_row), (b_index, b_is_row)) in matches:
@@ -779,8 +779,8 @@ def test_rotated_planar_smwpm_decoder_matching_with_bias(error_pauli, eta, error
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # calls
-    graph = _rpsd._graph(code, time_steps, syndrome, error_probability, eta=eta)
-    matches = _rpsd._matching(graph)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, time_steps, syndrome, error_probability, eta=eta)
+    matches = RotatedPlanarSMWPMDecoder._matching(graph)
     # prepare actual (convert mates to frozenset)
     actual = set()
     for ((a_index, a_is_row), (b_index, b_is_row)) in matches:
@@ -848,8 +848,8 @@ def test_rotated_planar_smwpm_decoder_matching_with_bias(error_pauli, eta, error
 def test_rotated_planar_smwpm_decoder_matching_ftp(code, error, syndrome, p, q, eta, expected):
     # parameters
     # calls
-    graph = _rpsd._graph(code, len(syndrome), syndrome, p, q, eta)
-    matches = _rpsd._matching(graph)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, len(syndrome), syndrome, p, q, eta)
+    matches = RotatedPlanarSMWPMDecoder._matching(graph)
     # prepare actual (filter out same index mates and convert mates to frozenset)
     actual = set()
     for ((a_index, a_is_row), (b_index, b_is_row)) in matches:
@@ -917,9 +917,9 @@ def test_rotated_planar_smwpm_decoder_clusters(error_pauli, expected):
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # calls
-    graph = _rpsd._graph(code, time_steps, syndrome)
-    matches = _rpsd._matching(graph)
-    clusters = _rpsd._clusters(matches)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, time_steps, syndrome)
+    matches = RotatedPlanarSMWPMDecoder._matching(graph)
+    clusters = RotatedPlanarSMWPMDecoder._clusters(matches)
     # check
     assert clusters == expected, 'Clusters not as expected.'
 
@@ -1016,9 +1016,9 @@ def test_rotated_planar_smwpm_decoder_clusters_with_bias(error_pauli, eta, error
     # ensure syndrome is 2d
     syndrome = np.expand_dims(syndrome, axis=0)
     # calls
-    graph = _rpsd._graph(code, time_steps, syndrome, error_probability, eta=eta)
-    matches = _rpsd._matching(graph)
-    clusters = _rpsd._clusters(matches)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, time_steps, syndrome, error_probability, eta=eta)
+    matches = RotatedPlanarSMWPMDecoder._matching(graph)
+    clusters = RotatedPlanarSMWPMDecoder._clusters(matches)
     print('### clusters=', clusters)
     print('### expected=', expected)
     _print_clusters(code, clusters)
@@ -1044,9 +1044,9 @@ def test_rotated_planar_smwpm_decoder_clusters_with_bias(error_pauli, eta, error
 ])
 def test_rotated_planar_smwpm_decoder_clusters_ftp(code, error, syndrome, expected):
     # calls
-    graph = _rpsd._graph(code, len(syndrome), syndrome)
-    matches = _rpsd._matching(graph)
-    clusters = _rpsd._clusters(matches)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, len(syndrome), syndrome)
+    matches = RotatedPlanarSMWPMDecoder._matching(graph)
+    clusters = RotatedPlanarSMWPMDecoder._clusters(matches)
     # check
     assert clusters == expected, 'Clusters not as expected.'
 
@@ -1104,7 +1104,7 @@ def test_rotated_planar_smwpm_decoder_clusters_ftp(code, error, syndrome, expect
      ),
 ])
 def test_rotated_planar_smwpm_decoder_cluster_to_paths_and_defect_ftp(code, cluster, expected):
-    x_path, z_path, y_defect = _rpsd._cluster_to_paths_and_defect(code, cluster)
+    x_path, z_path, y_defect = RotatedPlanarSMWPMDecoder._cluster_to_paths_and_defect(code, cluster)
     print()
     print('actual:')
     print(x_path, z_path, y_defect)
@@ -1151,7 +1151,7 @@ def test_rotated_planar_smwpm_decoder_cluster_to_paths_and_defect_ftp(code, clus
      RotatedPlanarCode(5, 5).new_pauli().site('Z', (3, 1), (3, 2), (3, 3))),  # dog-leg column
 ])
 def test_rotated_planar_smwpm_decoder_path_operator(code, a_index, b_index, expected):
-    path_operator = _rpsd._path_operator(code, a_index, b_index)
+    path_operator = RotatedPlanarSMWPMDecoder._path_operator(code, a_index, b_index)
     path_pauli = code.new_pauli(path_operator)
     print()
     print('actual:')
@@ -1168,7 +1168,7 @@ def test_rotated_planar_smwpm_decoder_path_operator(code, a_index, b_index, expe
 ])
 def test_rotated_planar_smwpm_decoder_path_operator_invalid(code, a_index, b_index):
     with pytest.raises(ValueError):
-        _rpsd._path_operator(code, a_index, b_index)
+        RotatedPlanarSMWPMDecoder._path_operator(code, a_index, b_index)
 
 
 @pytest.mark.parametrize('error_pauli', [
@@ -1259,31 +1259,31 @@ def test_rotated_planar_smwpm_decoder_decode_ftp(code, error, syndrome):
 
 @pytest.mark.parametrize('time_steps, a_node, b_node, expected', [
     (1,
-     _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-     _rpsd._ClusterNode([(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)], (0, 2, 3), (0, 2, 4)),
+     RotatedPlanarSMWPMDecoder._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     RotatedPlanarSMWPMDecoder._ClusterNode([(0, 2, 3), (0, 2, 4), (0, 3, 4), (0, 3, 3)], (0, 2, 3), (0, 2, 4)),
      3  # manhattan distance between (0, 1, 1) and (0, 2, 3)
      ),
     (5,
-     _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-     _rpsd._ClusterNode([(2, 2, 3), (2, 2, 4), (2, 3, 4), (2, 3, 3)], (2, 2, 3), (2, 2, 4)),
+     RotatedPlanarSMWPMDecoder._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     RotatedPlanarSMWPMDecoder._ClusterNode([(2, 2, 3), (2, 2, 4), (2, 3, 4), (2, 3, 3)], (2, 2, 3), (2, 2, 4)),
      5  # manhattan distance between (0, 1, 1) and (2, 2, 3)
      ),
     (5,
-     _rpsd._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
-     _rpsd._ClusterNode([(4, 2, 3), (4, 2, 4), (4, 3, 4), (4, 3, 3)], (4, 2, 3), (4, 2, 4)),
+     RotatedPlanarSMWPMDecoder._ClusterNode([(0, 0, 0), (0, 0, 1), (0, 1, 1), (0, 1, 0)], (0, 0, 1), (0, 0, 0)),
+     RotatedPlanarSMWPMDecoder._ClusterNode([(4, 2, 3), (4, 2, 4), (4, 3, 4), (4, 3, 3)], (4, 2, 3), (4, 2, 4)),
      4  # periodic manhattan distance between (0, 1, 1) and (4, 2, 3)
      ),
 ])
 def test_rotated_planar_smwpm_decoder_cluster_distance_ftp(time_steps, a_node, b_node, expected):
-    distance = _rpsd._cluster_distance(time_steps, a_node, b_node)
+    distance = RotatedPlanarSMWPMDecoder._cluster_distance(time_steps, a_node, b_node)
     assert distance == expected, 'Cluster distance not as expected'
 
 
 def test_rotated_planar_smwpm_decoder_cluster_distance_twins_ftp():
     time_steps = 5
-    a_node = _rpsd._ClusterNode([(0, 0, 0), (1, 0, 1), (2, 1, 1), (3, 1, 0)], (1, 0, 1), (0, 0, 0))
-    b_node = _rpsd._ClusterNode([(0, 0, 0), (1, 0, 1), (2, 1, 1), (3, 1, 0)], (1, 0, 1), (0, 0, 0))
-    distance = _rpsd._cluster_distance(time_steps, a_node, b_node)
+    a_node = RotatedPlanarSMWPMDecoder._ClusterNode([(0, 0, 0), (1, 0, 1), (2, 1, 1), (3, 1, 0)], (1, 0, 1), (0, 0, 0))
+    b_node = RotatedPlanarSMWPMDecoder._ClusterNode([(0, 0, 0), (1, 0, 1), (2, 1, 1), (3, 1, 0)], (1, 0, 1), (0, 0, 0))
+    distance = RotatedPlanarSMWPMDecoder._cluster_distance(time_steps, a_node, b_node)
     expected = 0  # manhattan distance between twin clusters
     assert distance == expected, 'Cluster distance not as expected'
 
@@ -1299,7 +1299,7 @@ def test_rotated_planar_smwpm_decoder_cluster_distance_twins_ftp():
     RotatedPlanarCode(6, 4),
 ])
 def test_rotated_planar_smwpm_decoder_cluster_corner_indices(code):
-    for x_plaquette_index, z_plaquette_index in _rpsd._cluster_corner_indices(code):
+    for x_plaquette_index, z_plaquette_index in RotatedPlanarSMWPMDecoder._cluster_corner_indices(code):
         assert code.is_x_plaquette(x_plaquette_index)
         assert code.is_z_plaquette(z_plaquette_index)
         assert code.is_virtual_plaquette(x_plaquette_index)
@@ -1320,19 +1320,20 @@ def test_rotated_planar_smwpm_decoder_cluster_graph_and_matching():
     recovery = code.new_pauli().to_bsf()
     # SYMMETRY DECODING
     # prepare graph
-    graph = _rpsd._graph(code, time_steps, syndrome, error_probability, measurement_error_probability, eta)
+    graph = RotatedPlanarSMWPMDecoder._graph(code, time_steps, syndrome, error_probability,
+                                             measurement_error_probability, eta)
     # minimum weight matching
-    matches = _rpsd._matching(graph)
+    matches = RotatedPlanarSMWPMDecoder._matching(graph)
     # cluster matches
-    clusters = _rpsd._clusters(matches)
+    clusters = RotatedPlanarSMWPMDecoder._clusters(matches)
     # add recovery from fusing within clusters
-    recovery ^= _rpsd._recovery(code, clusters)
+    recovery ^= RotatedPlanarSMWPMDecoder._recovery(code, clusters)
     # residual cluster syndrome
     cluster_syndrome = np.bitwise_xor.reduce(syndrome) ^ pt.bsp(recovery, code.stabilizers.T)
     assert np.any(cluster_syndrome), 'There should be one isolated Y defect'
     # CLUSTER GRAPH
     # prepare cluster graph
-    cluster_graph = _rpsd._cluster_graph(code, time_steps, clusters)
+    cluster_graph = RotatedPlanarSMWPMDecoder._cluster_graph(code, time_steps, clusters)
     # i.e. filter out edges virtual nodes, sort by node indices,
     # and extract as {((x_index, z_index), (x_index, z_index), weight), ...}
     actual = {(*sorted(((a.x_index, a.z_index), (b.x_index, b.z_index))), weight)
@@ -1346,7 +1347,7 @@ def test_rotated_planar_smwpm_decoder_cluster_graph_and_matching():
     }
     assert actual == expected, 'Cluster graph not as expected'
     # CLUSTER MATCHING
-    cluster_matches = _rpsd._matching(cluster_graph)
+    cluster_matches = RotatedPlanarSMWPMDecoder._matching(cluster_graph)
     # prepare actual as {((x_index, z_index), (x_index, z_index)), ...} excluding matches between virtual nodes
     actual = set((*sorted(((a.x_index, a.z_index), (b.x_index, b.z_index))),)
                  for a, b in cluster_matches if not (True is a.is_virtual is b.is_virtual))
