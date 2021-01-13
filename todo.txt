@@ -54,7 +54,7 @@
 # DONE: tests: Mark performance tests to exclude in general testing.
 # DONE: refactoring: Move distance methods from codes to decoders.
 # DONE: refactoring: Move SMWPM decoder module functions to class methods.
-# TODO: refactoring: Move CMWPM decoder utilities to class.
+# DONE: refactoring: Move CMWPM decoder utilities to class.
 # TODO: refactoring: Remove ErrorModel.probability_distribution to allow non-IID noise.
 # TODO: refactoring: Allow decoders to return DecodeResult object.
 # TODO: docs: rename acknowledgment section to citing.

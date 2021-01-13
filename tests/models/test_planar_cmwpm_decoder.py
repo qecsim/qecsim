@@ -3,7 +3,6 @@ import pytest
 
 from qecsim import paulitools as pt
 from qecsim.models.planar import PlanarCode, PlanarCMWPMDecoder
-from qecsim.models.planar._planarcmwpmdecoder import StepGrid
 
 
 def test_planar_cmwpm_decoder_properties():
@@ -235,7 +234,7 @@ def test_planar_cmwpm_step_grid_tight_box():
     # matches = {tuple(code.syndrome_to_plaquette_indices(syndrome))}  # {((0, 1), (4, 5))}
     # print(code.ascii_art(syndrome=syndrome))
     # print(matches)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((0, 1), (4, 5))}, factor=3, initial=1, box_shape='t')
     # expected grid. Note: border of virtual indices around grid.
@@ -263,7 +262,7 @@ def test_planar_cmwpm_step_grid_rounded_box():
     ──┴───┴───X──
     """
     code = PlanarCode(3, 4)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((0, 1), (4, 5))}, factor=3, initial=1, box_shape='r')
     # expected grid. Note: border of virtual indices around grid.
@@ -291,7 +290,7 @@ def test_planar_cmwpm_step_grid_rounded_horizontal_line():
     ──┴───┴───┴──
     """
     code = PlanarCode(3, 4)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((2, 1), (2, 5))}, factor=3, initial=1, box_shape='r')
     # expected grid. Note: border of virtual indices around grid.
@@ -316,7 +315,7 @@ def test_planar_cmwpm_step_grid_rounded_vertical_line():
     ──┴───X───┴──
     """
     code = PlanarCode(3, 4)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((0, 3), (4, 3))}, factor=3, initial=1, box_shape='r')
     # expected grid. Note: border of virtual indices around grid.
@@ -341,7 +340,7 @@ def test_planar_cmwpm_step_grid_fitted_box():
     ──┴───┴───X──
     """
     code = PlanarCode(3, 4)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((0, 1), (4, 5))}, factor=3, initial=1, box_shape='f')
     # expected grid. Note: border of virtual indices around grid.
@@ -377,7 +376,7 @@ def test_planar_cmwpm_step_grid_fitted_horizontal_line():
     ──┴───┴───┴──
     """
     code = PlanarCode(3, 4)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((2, 1), (2, 5))}, factor=3, initial=1, box_shape='f')
     # expected grid. Note: border of virtual indices around grid.
@@ -402,7 +401,7 @@ def test_planar_cmwpm_step_grid_fitted_vertical_line():
     ──┴───X───┴──
     """
     code = PlanarCode(3, 4)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((0, 3), (4, 3))}, factor=3, initial=1, box_shape='f')
     # expected grid. Note: border of virtual indices around grid.
@@ -427,7 +426,7 @@ def test_planar_cmwpm_step_grid_loose_box():
     ──┴───┴───X──
     """
     code = PlanarCode(3, 4)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((0, 1), (4, 5))}, factor=3, initial=1, box_shape='l')
     # expected grid. Note: border of virtual indices around grid.
@@ -455,7 +454,7 @@ def test_planar_cmwpm_step_grid_loose_box_off_boundaries():
     ──┴───┴───┴──
     """
     code = PlanarCode(3, 4)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     # set background from matches
     grid.set_background({((0, -1), (2, 3))}, factor=3, initial=1, box_shape='l')  # top-off-left to bulk
     # expected grid. Note: border of virtual indices around grid.
@@ -535,7 +534,7 @@ def test_planar_cmwpm_step_distance():
     i = 1  # initial
     code = PlanarCode(4, 4)
     # prepare grid distance 1: v+h (i.e. vertical + horizontal)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     grid.set_background({((0, 1), (4, 5))}, factor=f, initial=i, box_shape='t')
     assert grid.distance((1, 0), (5, 4), algorithm=1) == 2 * f + 2 * f, 'Distance 1 left-to-bottom not as expected'
     assert grid.distance((5, 4), (1, 0), algorithm=1) == 2 * i + 2 * i, 'Distance 1 bottom-to-left not as expected'
@@ -546,7 +545,7 @@ def test_planar_cmwpm_step_distance():
     assert grid.distance((-1, 2), (5, 4), algorithm=1) == 3 * i + 1 * f, 'Distance 1 top-to-bottom not as expected'
     assert grid.distance((5, 4), (-1, 2), algorithm=1) == 1 * f + 3 * i, 'Distance 1 bottom-to-top not as expected'
     # prepare grid distance 2: min(v+h, h+v)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     grid.set_background({((0, 1), (4, 5))}, factor=3, initial=1, box_shape='t')
     assert grid.distance((1, 0), (5, 4), algorithm=2) == 2 * i + 2 * i, 'Distance 2 left-to-bottom not as expected'
     assert grid.distance((5, 4), (1, 0), algorithm=2) == 2 * i + 2 * i, 'Distance 2 bottom-to-left not as expected'
@@ -557,7 +556,7 @@ def test_planar_cmwpm_step_distance():
     assert grid.distance((-1, 2), (5, 4), algorithm=2) == 3 * i + 1 * f, 'Distance 2 top-to-bottom not as expected'
     assert grid.distance((5, 4), (-1, 2), algorithm=2) == 3 * i + 1 * f, 'Distance 2 bottom-to-top not as expected'
     # prepare grid distance 4: min(v+h, h+v, v+h+v, h+v+h)
-    grid = StepGrid(code)
+    grid = PlanarCMWPMDecoder.StepGrid(code)
     grid.set_background({((0, 1), (4, 5))}, factor=3, initial=1, box_shape='t')
     assert grid.distance((1, 0), (5, 4), algorithm=4) == 4 * 1, 'Distance 4 left-to-bottom not as expected'
     assert grid.distance((5, 4), (1, 0), algorithm=4) == 4 * i, 'Distance 4 bottom-to-left not as expected'
