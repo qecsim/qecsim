@@ -52,7 +52,7 @@
 # DONE: refactoring: MPS decoders to use separate H and V node value methods for extensibility.
 # DONE: document pandoc requirement in tox.ini
 # DONE: tests: Mark performance tests to exclude in general testing.
-# TODO: refactoring: Move distance methods from codes to decoders.
+# DONE: refactoring: Move distance methods from codes to decoders.
 # TODO: refactoring: Move SMWPM decoder module functions to class methods.
 # TODO: refactoring: Remove ErrorModel.probability_distribution to allow non-IID noise.
 # TODO: refactoring: Allow decoders to return DecodeResult object.

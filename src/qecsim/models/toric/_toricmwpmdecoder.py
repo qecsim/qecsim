@@ -1,3 +1,4 @@
+import functools
 import itertools
 
 from qecsim import graphtools as gt
@@ -18,6 +19,28 @@ class ToricMWPMDecoder(Decoder):
       :meth:`qecsim.models.toric.ToricPauli.path`.
     """
 
+    @classmethod
+    @functools.lru_cache(maxsize=2 ** 28)  # for MxN lattice, cache_size <~ 2(MN)(MN-1) so handle 100x100 codes.
+    def distance(cls, code, a_index, b_index):
+        """
+        Distance between plaquettes in terms of plaquette steps.
+
+        Note: This implementation returns the taxi-cab distance based on
+        :meth:`qecsim.models.toric.ToricCode.translation`.
+
+        :param code: Toric code.
+        :type code: ToricCode
+        :param a_index: Index identifying a plaquette in the format (lattice, row, column).
+        :type a_index: 3-tuple of int
+        :param b_index: Index identifying a plaquette in the format (lattice, row, column).
+        :type b_index: 3-tuple of int
+        :return: Distance between plaquettes.
+        :rtype: int
+        :raises IndexError: If indices do not index the same valid lattice.
+        """
+        row_steps, col_steps = code.translation(a_index, b_index)
+        return abs(row_steps) + abs(col_steps)
+
     def decode(self, code, syndrome, **kwargs):
         """See :meth:`qecsim.model.Decoder.decode`"""
         # prepare recovery
@@ -33,7 +56,7 @@ class ToricMWPMDecoder(Decoder):
             # add weighted edges to lattice graph
             for a_index, b_index in itertools.combinations(l_plaquette_indices, 2):
                 # add edge with taxi-cab distance between a and b
-                l_graph.add_edge(a_index, b_index, code.distance(a_index, b_index))
+                l_graph.add_edge(a_index, b_index, self.distance(code, a_index, b_index))
             # find MWPM edges {(a, b), (c, d), ...}
             l_mates = gt.mwpm(l_graph)
             # iterate edges
