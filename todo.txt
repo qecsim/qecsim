@@ -59,10 +59,10 @@
 # DONE: refactoring: Allow decoders to return DecodeResult as alternative to recovery operation.
 # DONE: docs: rename acknowledgment section to citing.
 # DONE: update author with initial: setup.cfg and docs/conf.py.
-# TODO: README.rst: add license / citing section, fix spacing.
+# DONE: README.rst: add license / citing section, fix spacing.
 # TODO: docs: how to optimize CLI.
 # TODO: add EQUS acknowledgment.
-# TODO: choose licence (update LICENSE and setup.cfg license and classifiers).
+# TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
 # TODO: finalize setup.cfg meta-data.
 # TODO: test upload to PyPI.
 # TODO: create qecsimdev repo.

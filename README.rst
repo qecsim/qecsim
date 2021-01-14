@@ -8,6 +8,8 @@ It provides access to all features via a command-line interface. It can also be
 used as a library via the fully-documented API. It includes many common codes,
 error models and decoders, and can be extended with additional components.
 
+|
+
 Installation
 ------------
 
@@ -19,9 +21,12 @@ Install and upgrade using `pip`_:
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
 
+|
 
 Usage
 -----
+
+|
 
 CLI
 ~~~
@@ -33,6 +38,7 @@ CLI
     $ qecsim --help
     ...
 
+|
 
 API
 ~~~
@@ -46,6 +52,7 @@ API
     >>> help(app)
     ...
 
+|
 
 Extension
 ~~~~~~~~~
@@ -54,6 +61,19 @@ qecsim can be extended with additional codes, error models and decoders that
 integrate into the command-line interface.
 See https://bitbucket.org/qecsim/qecsimext/ for a basic example.
 
+|
+
+License / Citing
+----------------
+
+qecsim is released under the TODO; see `<LICENSE>`__.
+
+If you use qecsim in your research, please see the `qecsim documentation`_ for
+citing details.
+
+.. _qecsim documentation: https://davidtuckett.com/qit/qecsim/
+
+|
 
 Links
 -----
