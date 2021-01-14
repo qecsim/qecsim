@@ -1,5 +1,5 @@
-Acknowledgment
-==============
+Citing
+======
 
 
 Citing qecsim

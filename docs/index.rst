@@ -19,9 +19,9 @@ Contents
     usage
     demos
     api
-    links
     license
-    acknowledgment
+    citing
+    links
 
 
 Indices
