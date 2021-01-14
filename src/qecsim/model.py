@@ -172,7 +172,7 @@ class ErrorModel(metaclass=abc.ABCMeta):
         Notes:
 
         * Implementing this method is **optional**. It is **not** invoked by any core modules. By default, it raises
-          NotImplementedError.
+          :class:`NotImplementedError`.
         * Since this method is often useful for decoders, it is provided as a template and subclasses are encouraged to
           implement it when appropriate, particularly for IID error models.
 
