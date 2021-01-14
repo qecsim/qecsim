@@ -60,6 +60,7 @@
 # DONE: docs: rename acknowledgment section to citing.
 # DONE: update author with initial: setup.cfg and docs/conf.py.
 # DONE: README.rst: add license / citing section, fix spacing.
+# TODO: docs: Update citing with DOI link.
 # TODO: docs: how to optimize CLI.
 # TODO: add EQUS acknowledgment.
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
