@@ -58,9 +58,9 @@
 # DONE: refactoring: Make ErrorModel.probability_distribution optional to simplify non-IID noise.
 # DONE: refactoring: Allow decoders to return DecodeResult as alternative to recovery operation.
 # DONE: docs: rename acknowledgment section to citing.
+# DONE: update author with initial: setup.cfg and docs/conf.py.
+# TODO: README.rst: add license / citing section, fix spacing.
 # TODO: docs: how to optimize CLI.
-# TODO: README.rst: add citing section, remove copyright/add license, fix spacing.
-# TODO: update author with initial: setup.cfg and docs/conf.py.
 # TODO: add EQUS acknowledgment.
 # TODO: choose licence (update LICENSE and setup.cfg license and classifiers).
 # TODO: finalize setup.cfg meta-data.

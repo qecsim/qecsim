@@ -2,8 +2,8 @@ import qecsim
 
 # -- Project information --------------------------------------------------
 project = 'qecsim'
-copyright = '2016, David Tuckett'
-author = 'David Tuckett'
+copyright = '2016, David K. Tuckett'
+author = 'David K. Tuckett'
 
 version = qecsim.__version__
 release = qecsim.__version__
