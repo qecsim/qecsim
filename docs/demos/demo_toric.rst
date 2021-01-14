@@ -120,7 +120,7 @@ perfect matching decoder that finds the recovery operation as follows:
 -  The syndrome is resolved to plaquettes using:
    ``ToricCode.syndrome_to_plaquette_indices``.
 -  A graph between plaquettes is built with weights given by:
-   ``ToricPauli.distance``.
+   ``ToricMWPMDecoder.distance``.
 -  A MWPM algorithm is used to match plaquettes into pairs.
 -  A recovery operator is constructed by applying the shortest path
    between matching plaquette pairs using: ``ToricPauli.path``.

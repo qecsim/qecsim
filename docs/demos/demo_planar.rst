@@ -120,7 +120,7 @@ perfect matching decoder that finds the recovery operation as follows:
 -  For each plaquette, the nearest corresponding off-boundary plaquette
    is found using: ``PlanarCode.virtual_plaquette_index``.
 -  A graph between plaquettes is built with weights given by:
-   ``PlanarPauli.distance``.
+   ``PlanarMWPMDecoder.distance``.
 -  A MWPM algorithm is used to match plaquettes into pairs.
 -  A recovery operator is constructed by applying the shortest path
    between matching plaquette pairs using: ``PlanarPauli.path``.
