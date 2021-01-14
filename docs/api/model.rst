@@ -25,6 +25,12 @@ model: abstract base classes
 .. autoclass:: qecsim.model.DecoderFTP
     :members:
 
+``qecsim.model.DecodeResult``
+-----------------------------
+.. autoclass:: qecsim.model.DecodeResult
+    :members:
+    :special-members: __init__
+
 ``qecsim.model.cli_description``
 --------------------------------
 .. autodecorator:: cli_description

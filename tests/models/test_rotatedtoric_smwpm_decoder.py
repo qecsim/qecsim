@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from qecsim import paulitools as pt
+from qecsim.model import DecodeResult
 from qecsim.models.generic import BiasedDepolarizingErrorModel, BitPhaseFlipErrorModel, DepolarizingErrorModel
 from qecsim.models.generic import BitFlipErrorModel
 from qecsim.models.rotatedtoric import RotatedToricCode, RotatedToricSMWPMDecoder
@@ -1492,7 +1493,9 @@ def test_rotated_toric_smwpm_decoder_decode_ftp_tparity(code, error, syndrome, s
     decoding = decoder.decode_ftp(code, len(syndrome), syndrome, step_measurement_errors=step_measurement_errors)
     print()
     print('decoding:', decoding)
-    if not isinstance(decoding, bool):
+    if isinstance(decoding, DecodeResult):
+        assert not decoding.success, 'Decode-result returned incorrectly indicating success'
+    else:
         recovery = decoding
         print()
         print('recovery:')
@@ -1757,7 +1760,9 @@ def test_rotated_toric_smwpm_decoder_decode_with_bias_ftp_tparity(code, error, s
                                   measurement_error_probability=q, step_measurement_errors=step_measurement_errors)
     print()
     print('decoding:', decoding)
-    if not isinstance(decoding, bool):
+    if isinstance(decoding, DecodeResult):
+        assert not decoding.success, 'Decode-result returned incorrectly indicating success'
+    else:
         recovery = decoding
         print()
         print('recovery:')

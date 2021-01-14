@@ -9,7 +9,7 @@ import numpy as np
 from qecsim import graphtools as gt
 from qecsim import paulitools as pt
 from qecsim.error import QecsimError
-from qecsim.model import Decoder, DecoderFTP, cli_description
+from qecsim.model import Decoder, DecoderFTP, DecodeResult, cli_description
 from qecsim.models.generic import BiasedDepolarizingErrorModel
 from qecsim.models.generic import BitPhaseFlipErrorModel
 
@@ -112,9 +112,12 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
         """
         See :meth:`qecsim.model.DecoderFTP.decode_ftp`
 
-        Note: The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
-        probability distribution for use in the decoding algorithm. Any provided error model must implement
-        :meth:`~qecsim.model.ErrorModel.probability_distribution`.
+        Note:
+
+        * The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
+          probability distribution for use in the decoding algorithm. Any provided error model must implement
+          :meth:`~qecsim.model.ErrorModel.probability_distribution`.
+        * If a time-like logical failure is detected then a false decode result is returned.
 
         :param code: Rotated toric code.
         :type code: RotatedToricCode
@@ -130,8 +133,8 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
         :type measurement_error_probability: float
         :param step_measurement_errors: list of measurement error bits applied to step-syndromes index by time-step.
         :type step_measurement_errors: list of numpy.array (1d)
-        :return: Recovery operation as binary symplectic vector, or boolean indicating recovery success.
-        :rtype: numpy.array (1d) or bool
+        :return: Recovery operation as binary symplectic vector, or decode result indicating recovery success.
+        :rtype: numpy.array (1d) or DecodeResult
         """
         # deduce bias (potentially overridden by eta)
         bias = self._bias(error_model)
@@ -191,9 +194,9 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
                 raise QecsimError('Failed to test t-parity. step_measurement_errors not provided.')
             # extract t-parity for measurement errors
             measurement_error_tps = self._measurement_error_tparities(code, step_measurement_errors[-1])
-            # return False if t-parity fails
+            # return false decode-result if t-parity fails
             if (recovery_x_tp, recovery_z_tp) != measurement_error_tps:
-                return False
+                return DecodeResult(False)
 
         # return recovery
         return recovery

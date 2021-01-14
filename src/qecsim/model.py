@@ -235,7 +235,8 @@ class Decoder(metaclass=abc.ABCMeta):
           error_probability and error, see :func:`qecsim.app.run_once`. Most implementations will ignore such
           parameters; however, if they are used, implementations should declare them explicitly and treat them as
           optional.
-        * This method may, alternatively, return a boolean indicating recovery success.
+        * This method typically returns a recovery operation but it may, alternatively, return :class:`DecodeResult`
+          indicating recovery success.
 
         :param code: Stabilizer code.
         :type code: StabilizerCode
@@ -243,8 +244,8 @@ class Decoder(metaclass=abc.ABCMeta):
         :type syndrome: numpy.array (1d)
         :param kwargs: Optional context parameters passed by a client.
         :type kwargs: dict
-        :return: Recovery operation as binary symplectic vector, or boolean indicating recovery success.
-        :rtype: numpy.array (1d) or bool
+        :return: Recovery operation as binary symplectic vector, or decode result indicating recovery success.
+        :rtype: numpy.array (1d) or DecodeResult
         """
 
     @property
@@ -283,7 +284,8 @@ class DecoderFTP(metaclass=abc.ABCMeta):
           error_probability, error, step_errors, measurement_error_probability and step_measurement_errors, see
           :func:`qecsim.app.run_once_ftp`. Most implementations will ignore such parameters; however, if they are used,
           implementations should declare them explicitly and treat them as optional.
-        * This method may, alternatively, return a boolean indicating recovery success.
+        * This method typically returns a recovery operation but it may, alternatively, return :class:`DecodeResult`
+          indicating recovery success.
 
         :param code: Stabilizer code.
         :type code: StabilizerCode
@@ -293,8 +295,8 @@ class DecoderFTP(metaclass=abc.ABCMeta):
         :type syndrome: numpy.array (2d)
         :param kwargs: Optional context parameters passed by a client.
         :type kwargs: dict
-        :return: Recovery operation as binary symplectic vector, or boolean indicating recovery success.
-        :rtype: numpy.array (1d) or bool
+        :return: Recovery operation as binary symplectic vector, or decode result indicating recovery success.
+        :rtype: numpy.array (1d) or DecodeResult
         """
 
     @property
@@ -305,3 +307,30 @@ class DecoderFTP(metaclass=abc.ABCMeta):
 
         :rtype: str
         """
+
+
+class DecodeResult:
+    """Represents the result of decoding.
+
+    Notes:
+
+    * Typically decoders return a recovery operation and delegate the evaluation
+      of success to the caller.
+    * Optionally, decoders may evaluate success themselves and return an
+      instance of this class to indicate success / failure.
+
+    See also :class:`Decoder` and :class:`DecoderFTP`.
+
+    """
+
+    def __init__(self, success):
+        """
+        Initialise new decode result.
+
+        :param success: If the decoding was successful.
+        :type success: bool
+        """
+        self.success = success
+
+    def __repr__(self):
+        return '{}({!r})'.format(type(self).__name__, self.success)

@@ -11,6 +11,7 @@ import time
 import numpy as np
 
 from qecsim import paulitools as pt
+from qecsim.model import DecodeResult
 
 logger = logging.getLogger(__name__)
 
@@ -72,10 +73,10 @@ def _run_once(mode, code, time_steps, error_model, decoder, error_probability, m
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('run: decoding={}'.format(decoding))
 
-    # check for boolean or recovery operation from decoder
-    if isinstance(decoding, bool):
-        # if decoder returns boolean, that defines success
-        success = decoding
+    # check for DecodeResult or recovery operation from decoder
+    if isinstance(decoding, DecodeResult):
+        # if decoder returns DecodeResult, success flag defines success
+        success = decoding.success
     else:
         # otherwise, treat decoder return value as recovery operation
         recovery = decoding

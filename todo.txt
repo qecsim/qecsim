@@ -56,7 +56,7 @@
 # DONE: refactoring: Move SMWPM decoder module functions to class methods.
 # DONE: refactoring: Move CMWPM decoder utilities to class.
 # DONE: refactoring: Make ErrorModel.probability_distribution optional to simplify non-IID noise.
-# TODO: refactoring: Allow decoders to return DecodeResult object.
+# DONE: refactoring: Allow decoders to return DecodeResult as alternative to recovery operation.
 # TODO: docs: rename acknowledgment section to citing.
 # TODO: docs: how to optimize CLI.
 # TODO: README.rst: add citing section, remove copyright/add license, fix spacing.
