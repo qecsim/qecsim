@@ -55,7 +55,7 @@
 # DONE: refactoring: Move distance methods from codes to decoders.
 # DONE: refactoring: Move SMWPM decoder module functions to class methods.
 # DONE: refactoring: Move CMWPM decoder utilities to class.
-# TODO: refactoring: Remove ErrorModel.probability_distribution to allow non-IID noise.
+# DONE: refactoring: Make ErrorModel.probability_distribution optional to simplify non-IID noise.
 # TODO: refactoring: Allow decoders to return DecodeResult object.
 # TODO: docs: rename acknowledgment section to citing.
 # TODO: docs: how to optimize CLI.

@@ -165,16 +165,25 @@ class ErrorModel(metaclass=abc.ABCMeta):
     implementation.
     """
 
-    @abc.abstractmethod
     def probability_distribution(self, probability):
         """
         Return the single-qubit probability distribution amongst Pauli I, X, Y and Z.
+
+        Notes:
+
+        * Implementing this method is **optional**. It is **not** invoked by any core modules. By default, it raises
+          NotImplementedError.
+        * Since this method is often useful for decoders, it is provided as a template and subclasses are encouraged to
+          implement it when appropriate, particularly for IID error models.
 
         :param probability: Overall probability of an error on a single qubit.
         :type probability: float
         :return: Tuple of probability distribution in the format (Pr(I), Pr(X), Pr(Y), Pr(Z)).
         :rtype: 4-tuple of float
+        :raises NotImplementedError: Unless implemented in a subclass.
         """
+        raise NotImplementedError("Attempt to invoke non-implemented optional method: {}.probability_distribution"
+                                  .format(type(self).__qualname__))
 
     @abc.abstractmethod
     def generate(self, code, probability, rng=None):

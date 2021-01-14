@@ -9,7 +9,8 @@ from qecsim.model import ErrorModel, cli_description
 
 class SimpleErrorModel(ErrorModel):
     """
-    Implements a simple error model that generates an error based on the number of qubits and probability distribution.
+    Implements a simple IID error model that generates an error based on the number of qubits and the probability
+    distribution.
 
     This class cannot be instantiated directly, see :class:`qecsim.models.generic.DepolarizingErrorModel` for an example
     implementation.
@@ -17,7 +18,10 @@ class SimpleErrorModel(ErrorModel):
 
     @abc.abstractmethod
     def probability_distribution(self, probability):
-        """See :meth:`qecsim.model.ErrorModel.probability_distribution`"""
+        """See :meth:`qecsim.model.ErrorModel.probability_distribution`
+
+        Note: Implementing this method is **required**. It is invoked by :meth:`generate`.
+        """
 
     def generate(self, code, probability, rng=None):
         """
@@ -25,8 +29,8 @@ class SimpleErrorModel(ErrorModel):
 
         Notes:
 
-        * This method delegates to :meth:`~qecsim.model.ErrorModel.probability_distribution` to find the probability of
-          I, X, Y, Z operators on each qubit.
+        * This method delegates to :meth:`probability_distribution` to find the probability of I, X, Y, Z operators on
+          each qubit, assuming an IID error model.
         """
         rng = np.random.default_rng() if rng is None else rng
         n_qubits = code.n_k_d[0]
