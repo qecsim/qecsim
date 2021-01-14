@@ -82,6 +82,10 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
         """
         See :meth:`qecsim.model.Decoder.decode`
 
+        Note: The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
+        probability distribution for use in the decoding algorithm. Any provided error model must implement
+        :meth:`~qecsim.model.ErrorModel.probability_distribution`.
+
         :param code: Rotated toric code.
         :type code: RotatedToricCode
         :param syndrome: Syndrome as binary vector.
@@ -107,6 +111,10 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
                    step_measurement_errors=None, **kwargs):
         """
         See :meth:`qecsim.model.DecoderFTP.decode_ftp`
+
+        Note: The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
+        probability distribution for use in the decoding algorithm. Any provided error model must implement
+        :meth:`~qecsim.model.ErrorModel.probability_distribution`.
 
         :param code: Rotated toric code.
         :type code: RotatedToricCode

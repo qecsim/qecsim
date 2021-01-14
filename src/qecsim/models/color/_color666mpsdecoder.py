@@ -245,10 +245,9 @@ class Color666MPSDecoder(Decoder):
         """
         See :meth:`qecsim.model.Decoder.decode`
 
-        Notes:
-
-        * The optional keyword parameters error_model and error_probability are used to determine the prior probability
-          distribution to use in the decoding algorithm.
+        Note: The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
+        probability distribution for use in the decoding algorithm. Any provided error model must implement
+        :meth:`~qecsim.model.ErrorModel.probability_distribution`.
 
         :param code: Color 666 code.
         :type code: Color666Code

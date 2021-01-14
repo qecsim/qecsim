@@ -186,6 +186,10 @@ class RotatedPlanarSMWPMDecoder(Decoder, DecoderFTP):
         """
         See :meth:`qecsim.model.Decoder.decode`
 
+        Note: The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
+        probability distribution for use in the decoding algorithm. Any provided error model must implement
+        :meth:`~qecsim.model.ErrorModel.probability_distribution`.
+
         :param code: Rotated planar code.
         :type code: RotatedPlanarCode
         :param syndrome: Syndrome as binary vector.
@@ -209,6 +213,10 @@ class RotatedPlanarSMWPMDecoder(Decoder, DecoderFTP):
                    measurement_error_probability=0.1, **kwargs):
         """
         See :meth:`qecsim.model.DecoderFTP.decode_ftp`
+
+        Note: The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
+        probability distribution for use in the decoding algorithm. Any provided error model must implement
+        :meth:`~qecsim.model.ErrorModel.probability_distribution`.
 
         :param code: Rotated planar code.
         :type code: RotatedPlanarCode
