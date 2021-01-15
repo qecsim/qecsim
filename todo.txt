@@ -61,8 +61,8 @@
 # DONE: update author with initial: setup.cfg and docs/conf.py.
 # DONE: README.rst: add license / citing section, fix spacing.
 # DONE: docs: Update citing with DOI link.
+# DONE: add EQUS acknowledgment.
 # TODO: docs: how to optimize CLI.
-# TODO: add EQUS acknowledgment.
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
 # TODO: finalize setup.cfg meta-data.
 # TODO: test upload to PyPI.

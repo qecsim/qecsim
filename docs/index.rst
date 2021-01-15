@@ -10,10 +10,10 @@ qecsim and its dependencies.
 .. table::
     :widths: 30, 70
 
-    +---------+-------------------------------------------------------------------------+
-    | |equs|_ | | Supported by the Australian Research Council Centre of Excellence for |
-    |         | | Engineered Quantum Systems (EQUS, CE170100009)                        |
-    +---------+-------------------------------------------------------------------------+
+    ======= ===================================================================
+    |equs|_ | Supported by the Australian Research Council Centre of Excellence
+            | for Engineered Quantum Systems (EQUS, CE170100009)
+    ======= ===================================================================
 
 .. |equs| image:: _static/equs_logo_inline_colour.png
     :width: 200
