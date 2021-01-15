@@ -62,7 +62,7 @@
 # DONE: README.rst: add license / citing section, fix spacing.
 # DONE: docs: Update citing with DOI link.
 # DONE: add EQUS acknowledgment.
-# TODO: docs: how to optimize CLI.
+# DONE: cli: Add module script to run with Python options such as optimize.
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
 # TODO: finalize setup.cfg meta-data.
 # TODO: test upload to PyPI.

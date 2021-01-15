@@ -9,7 +9,14 @@ components.
 Command-line
 ------------
 
-qecsim can be accessed via the command line:
+qecsim can be accessed via the command line in two ways:
+
+.. code-block:: bash
+
+    $ qecsim                    # console script
+    $ python3 -O -m qecsim      # module script with Python options such as optimize: -O
+
+The default command provides version and general help options:
 
 .. runblock:: console
 
