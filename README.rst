@@ -35,7 +35,9 @@ CLI
 
     $ qecsim --version
     qecsim, version 1.0b5
-    $ qecsim --help
+    $ qecsim --help                 # console script
+    ...
+    $ python -O -m qecsim --help    # module script with Python options e.g. -O
     ...
 
 |
