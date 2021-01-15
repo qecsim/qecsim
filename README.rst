@@ -17,7 +17,7 @@ Install and upgrade using `pip`_:
 
 .. code-block:: text
 
-    $ pip install -U qecsim   # TODO: COMING SOON
+    $ pip install -U qecsim         # TODO: COMING SOON
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
 
@@ -37,7 +37,7 @@ CLI
     qecsim, version 1.0b5
     $ qecsim --help                 # console script
     ...
-    $ python -O -m qecsim --help    # module script with Python options e.g. -O
+    $ python -O -m qecsim --help    # module script with Python options e.g. -O for optimize
     ...
 
 |

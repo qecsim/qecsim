@@ -14,7 +14,7 @@ qecsim can be accessed via the command line in two ways:
 .. code-block:: bash
 
     $ qecsim                    # console script
-    $ python3 -O -m qecsim      # module script with Python options such as optimize: -O
+    $ python3 -O -m qecsim      # module script with Python options e.g -O for optimize
 
 The default command provides version and general help options:
 
