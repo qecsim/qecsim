@@ -62,15 +62,15 @@
 # DONE: refactoring: Make ErrorModel.probability_distribution optional to simplify non-IID noise.
 # DONE: refactoring: Allow decoders to return DecodeResult as alternative to recovery operation.
 # DONE: docs: rename acknowledgment section to citing.
-# DONE: update author with initial: setup.cfg and docs/conf.py.
-# DONE: README.rst: add license / citing section, fix spacing.
+# DONE: setup.cfg and docs/conf.py: update author with initial.
+# DONE: README: add license / citing section, fix spacing.
 # DONE: docs: Update citing with DOI link.
 # DONE: add EQUS acknowledgment.
 # DONE: cli: Add module script to run with Python options such as optimize.
-# TODO: Tag 1.0b5
-# TODO: qecsimext: Update to qecsim 1.0b5
+# DONE: Tag 1.0b5
+# DONE: qecsimext: Update to latest qecsim and zip repo for download.
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
-# TODO: finalize setup.cfg meta-data.
+# TODO: setup.cfg: finalize meta-data.
 # TODO: test upload to PyPI.
 # TODO: host documentation on readthedocs (update setup.cfg project_urls, README.rst and doc).
 # TODO: set up continuous integration.
