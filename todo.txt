@@ -66,6 +66,5 @@
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
 # TODO: finalize setup.cfg meta-data.
 # TODO: test upload to PyPI.
-# TODO: create qecsimdev repo.
 # TODO: host documentation on readthedocs (update setup.cfg project_urls, README.rst and doc).
 # TODO: set up continuous integration.
