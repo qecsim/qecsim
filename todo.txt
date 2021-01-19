@@ -35,7 +35,7 @@
 # DONE: sort cli entries for doc strings
 # DONE: create qecsim@gmail.com account
 # DONE: set up issue tracker (update setup.cfg project_urls, README.rst and doc)
-# TODO: Tag 1.0b1
+# DONE: Tag 1.0b1
 # DONE: update qecsimext with latest qecsim and zip repo for download
 # DONE: test qecsim and qecsimext on windows
 # DONE: test qecsim and qecsimext on linux
@@ -69,6 +69,7 @@
 # DONE: cli: Add module script to run with Python options such as optimize.
 # DONE: Tag 1.0b5
 # DONE: qecsimext: Update to latest qecsim and zip repo for download.
+# TODO: refactoring: CLI remove restriction on max random-seed.
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
 # TODO: setup.cfg: finalize meta-data.
 # TODO: test upload to PyPI.
