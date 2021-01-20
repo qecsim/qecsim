@@ -32,6 +32,7 @@ Contents
     usage
     demos
     api
+    changes
     license
     citing
     links
