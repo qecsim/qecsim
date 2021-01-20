@@ -6,6 +6,7 @@
 
 Untagged
 
+- src: Remove CLI restriction on max random-seed (unnecessary since Numpy 1.17).
 - docs: Add change list.
 
 1.0b5
