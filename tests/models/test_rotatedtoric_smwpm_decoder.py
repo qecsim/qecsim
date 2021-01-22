@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from qecsim import paulitools as pt
-from qecsim.model import DecodeResult
 from qecsim.models.generic import BiasedDepolarizingErrorModel, BitPhaseFlipErrorModel, DepolarizingErrorModel
 from qecsim.models.generic import BitFlipErrorModel
 from qecsim.models.rotatedtoric import RotatedToricCode, RotatedToricSMWPMDecoder
@@ -31,8 +30,8 @@ def _code_error_syndrome(code, error_dicts, measurement_error_indices):
     :type code: RotatedToricCode
     :param error_dicts: List of error dicts, e.g. [{'X': [(0, 0)]}, {'Y': [(1, 1), (1, 2)]}, ...]
     :type error_dicts: list of dict
-    :param measurement_error_lists: List of measurement error indices, e.g. [[(1, 1)], [(1, 1), (2, 1), ...] ]
-    :type measurement_error_lists: list of list
+    :param measurement_error_indices: List of measurement error indices, e.g. [[(1, 1)], [(1, 1), (2, 1), ...] ]
+    :type measurement_error_indices: list of list
     :return: Code, Error, Periodic syndrome, Step errors, Step measurement errors
     :rtype: RotatedToricCode, np.array (1d), np.array (2d), list of np.array (1d), list of np.array (1d)
     """
@@ -58,6 +57,19 @@ def _code_error_syndrome(code, error_dicts, measurement_error_indices):
         syndrome.append(step_measurement_errors[t - 1] ^ step_syndromes[t] ^ step_measurement_errors[t])
     syndrome = np.array(syndrome)
     return code, error, syndrome, step_errors, step_measurement_errors
+
+
+def _validate_decoding(code, error, decoding):
+    print()
+    print('decoding:', decoding)
+    # decoding.success should be unspecified in general, or false if time-like logical failure detected
+    assert decoding.success is None or not decoding.success, 'decode result incorrectly indicates success'
+    recovery = decoding.recovery
+    print()
+    print('recovery:')
+    print(code.new_pauli(recovery))
+    assert np.all(pt.bsp(recovery ^ error, code.stabilizers.T) == 0), (
+        'recovery ^ error ({} ^ {}) does not commute with stabilizers.'.format(recovery, error))
 
 
 # @pytest.mark.perf
@@ -1275,14 +1287,8 @@ def test_rotated_toric_smwpm_decoder_decode(error_pauli):
     print()
     print('syndrome:')
     print(code.ascii_art(syndrome=syndrome))
-    recovery = decoder.decode(code, syndrome)
-    print()
-    print('recovery:')
-    print(code.new_pauli(recovery))
-    assert np.array_equal(pt.bsp(recovery, code.stabilizers.T), syndrome), (
-        'recovery {} does not give the same syndrome as the error {}'.format(recovery, error))
-    assert np.all(pt.bsp(recovery ^ error, code.stabilizers.T) == 0), (
-        'recovery ^ error ({} ^ {}) does not commute with stabilizers.'.format(recovery, error))
+    decoding = decoder.decode(code, syndrome)
+    _validate_decoding(code, error, decoding)
 
 
 @pytest.mark.parametrize('code, error, syndrome, step_errors, step_measurement_errors', [
@@ -1336,12 +1342,8 @@ def test_rotated_toric_smwpm_decoder_decode_ftp(code, error, syndrome, step_erro
     print()
     print('syndrome:')
     print(syndrome)
-    recovery = decoder.decode_ftp(code, len(syndrome), syndrome)
-    print()
-    print('recovery:')
-    print(code.new_pauli(recovery))
-    assert np.all(pt.bsp(recovery ^ error, code.stabilizers.T) == 0), (
-        'recovery ^ error ({} ^ {}) does not commute with stabilizers.'.format(recovery, error))
+    decoding = decoder.decode_ftp(code, len(syndrome), syndrome)
+    _validate_decoding(code, error, decoding)
 
 
 @pytest.mark.parametrize('time_steps, a_t, b_t, expected', [
@@ -1491,17 +1493,7 @@ def test_rotated_toric_smwpm_decoder_decode_ftp_tparity(code, error, syndrome, s
     print('syndrome:')
     print(syndrome)
     decoding = decoder.decode_ftp(code, len(syndrome), syndrome, step_measurement_errors=step_measurement_errors)
-    print()
-    print('decoding:', decoding)
-    if isinstance(decoding, DecodeResult):
-        assert not decoding.success, 'Decode-result returned incorrectly indicating success'
-    else:
-        recovery = decoding
-        print()
-        print('recovery:')
-        print(code.new_pauli(recovery))
-        assert np.all(pt.bsp(recovery ^ error, code.stabilizers.T) == 0), (
-            'recovery ^ error ({} ^ {}) does not commute with stabilizers.'.format(recovery, error))
+    _validate_decoding(code, error, decoding)
 
 
 @pytest.mark.parametrize('code, time_steps, a_node, b_node, expected', [
@@ -1659,12 +1651,8 @@ def test_rotated_toric_smwpm_decoder_decode_with_bias(error_pauli, bias, error_p
     print()
     print('syndrome:')
     print(code.ascii_art(syndrome=syndrome))
-    recovery = decoder.decode(code, syndrome, error_model=error_model, error_probability=error_probability)
-    print()
-    print('recovery:')
-    print(code.new_pauli(recovery))
-    assert np.all(pt.bsp(recovery ^ error, code.stabilizers.T) == 0), (
-        'recovery ^ error ({} ^ {}) does not commute with stabilizers.'.format(recovery, error))
+    decoding = decoder.decode(code, syndrome, error_model=error_model, error_probability=error_probability)
+    _validate_decoding(code, error, decoding)
 
 
 @pytest.mark.parametrize('code, error, syndrome, step_errors, step_measurement_errors, p, q, eta', [
@@ -1707,13 +1695,9 @@ def test_rotated_toric_smwpm_decoder_decode_with_bias_ftp(code, error, syndrome,
     print()
     print('syndrome:')
     print(syndrome)
-    recovery = decoder.decode_ftp(code, len(syndrome), syndrome, error_model=error_model, error_probability=p,
+    decoding = decoder.decode_ftp(code, len(syndrome), syndrome, error_model=error_model, error_probability=p,
                                   measurement_error_probability=q, step_measurement_errors=step_measurement_errors)
-    print()
-    print('recovery:')
-    print(code.new_pauli(recovery))
-    assert np.all(pt.bsp(recovery ^ error, code.stabilizers.T) == 0), (
-        'recovery ^ error ({} ^ {}) does not commute with stabilizers.'.format(recovery, error))
+    _validate_decoding(code, error, decoding)
 
 
 @pytest.mark.parametrize('code, error, syndrome, step_errors, step_measurement_errors, p, q, eta', [
@@ -1758,14 +1742,4 @@ def test_rotated_toric_smwpm_decoder_decode_with_bias_ftp_tparity(code, error, s
     print(syndrome)
     decoding = decoder.decode_ftp(code, len(syndrome), syndrome, error_model=error_model, error_probability=p,
                                   measurement_error_probability=q, step_measurement_errors=step_measurement_errors)
-    print()
-    print('decoding:', decoding)
-    if isinstance(decoding, DecodeResult):
-        assert not decoding.success, 'Decode-result returned incorrectly indicating success'
-    else:
-        recovery = decoding
-        print()
-        print('recovery:')
-        print(code.new_pauli(recovery))
-        assert np.all(pt.bsp(recovery ^ error, code.stabilizers.T) == 0), (
-            'recovery ^ error ({} ^ {}) does not commute with stabilizers.'.format(recovery, error))
+    _validate_decoding(code, error, decoding)

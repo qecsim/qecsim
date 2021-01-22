@@ -11,6 +11,7 @@ import time
 import numpy as np
 
 from qecsim import paulitools as pt
+from qecsim.error import QecsimError
 from qecsim.model import DecodeResult
 
 logger = logging.getLogger(__name__)
@@ -73,43 +74,45 @@ def _run_once(mode, code, time_steps, error_model, decoder, error_probability, m
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('run: decoding={}'.format(decoding))
 
-    # check for DecodeResult or recovery operation from decoder
-    if isinstance(decoding, DecodeResult):
-        # if decoder returns DecodeResult, success flag defines success
-        success = decoding.success
-    else:
-        # otherwise, treat decoder return value as recovery operation
-        recovery = decoding
+    # if decoding is not DecodeResult, convert to DecodeResult
+    if not isinstance(decoding, DecodeResult):
+        # decoding is recovery, so wrap in DecodeResult
+        decoding = DecodeResult(recovery=decoding)  # raises error if recovery is None
+    # extract outcomes from decoding
+    success = decoding.success
+    logical_commutations = decoding.logical_commutations
+    # if recovery specified, resolve success and logical_commutations
+    if decoding.recovery is not None:
         # recovered code
-        recovered = recovery ^ error
+        recovered = decoding.recovery ^ error
         # success checks
         commutes_with_stabilizers = np.all(pt.bsp(recovered, code.stabilizers.T) == 0)
         if not commutes_with_stabilizers:
-            log_data = {
+            log_data = {  # enough data to recreate issue
                 # models
-                'code': repr(code),
-                'error_model': repr(error_model),
-                'decoder': repr(decoder),
+                'code': repr(code), 'error_model': repr(error_model), 'decoder': repr(decoder),
                 # variables
-                'error': pt.pack(error),
-                'recovery': pt.pack(recovery),
+                'error': pt.pack(error), 'recovery': pt.pack(decoding.recovery),
                 # step variables
                 'step_errors': [pt.pack(v) for v in step_errors],
                 'step_measurement_errors': [pt.pack(v) for v in step_measurement_errors],
             }
             logger.warning('RECOVERY DOES NOT RETURN TO CODESPACE: {}'.format(json.dumps(log_data, sort_keys=True)))
-        commutes_with_logicals = np.all(pt.bsp(recovered, code.logicals.T) == 0)
-        success = commutes_with_stabilizers and commutes_with_logicals
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('run: commutes_with_stabilizers={}'.format(commutes_with_stabilizers))
-            logger.debug('run: commutes_with_logicals={}'.format(commutes_with_logicals))
+        resolved_logical_commutations = pt.bsp(recovered, code.logicals.T)
+        commutes_with_logicals = np.all(resolved_logical_commutations == 0)
+        resolved_success = commutes_with_stabilizers and commutes_with_logicals
+        # fill in unspecified outcomes
+        success = resolved_success if success is None else success
+        logical_commutations = resolved_logical_commutations if logical_commutations is None else logical_commutations
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('run: success={}'.format(success))
+        logger.debug('run: logical_commutations={}'.format(logical_commutations))
 
     data = {
         'error_weight': pt.bsf_wt(np.array(step_errors)),
-        'success': success
+        'success': bool(success),
+        'logical_commutations': logical_commutations,
     }
 
     return data
@@ -131,20 +134,15 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
           :meth:`qecsim.model.ErrorModel.generate`.
         * evaluate ``syndrome`` as ``error`` :math:`\odot` ``code.stabilizers``:math:`^T`.
         * resolve ``decoding`` by passing ``code`` and ``syndrome`` to :meth:`qecsim.model.Decoder.decode`.
-        * if ``decoding`` is boolean:
-
-            * define ``success`` as ``decoding``.
-
-        * else:
-
-            * define ``recovery`` as ``decoding``.
-            * assert that (``recovery`` :math:`\oplus` ``error``) :math:`\odot` ``code.stabilizers``:math:`^T = 0`, by
-              construction.
-            * define ``success`` as (``recovery`` :math:`\oplus` ``error``) :math:`\odot`
-              ``code.logicals``:math:`^T = 0`.
+        * define ``recovered`` as ``decoding`` :math:`\oplus` ``error``.
+        * verify ``recovered`` :math:`\odot` ``code.stabilizers``:math:`^T = 0`, by construction.
+        * define ``logical_commutations`` as ``recovered`` :math:`\odot` ``code.logicals``:math:`^T`.
+        * define ``success`` as ``logical_commutations``:math:`= 0`.
 
     * :math:`\oplus` denotes binary addition defined as addition modulo 2, or equivalently exclusive-or.
     * See :func:`qecsim.paulitools.bsp` for definition of :math:`\odot`.
+    * Optionally, :meth:`qecsim.model.Decoder.decode` may return :class:`~qecsim.model.DecodeResult` as ``decoding`` to
+      explicitly specify ``success`` and ``logical_commutations``, see :class:`qecsim.model.DecodeResult` for details.
     * In addition to ``code`` and ``syndrome``, the following keyword parameters are passed as context to
       :meth:`qecsim.model.Decoder.decode`: ``error_model``, ``error_probability``, ``error``. Furthermore, in order to
       enable decoders to handle ideal and fault-tolerant decoding consistently, the following keyword parameters and
@@ -156,7 +154,8 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
 
         {
             'error_weight': 2,  # number qubits acted on non-trivially by error
-            'success': True,    # recovery successful, i.e. (recovery ^ error) commutes with all logical operators
+            'success': False,  # from logical commutations or overridden by decode result
+            'logical_commutations': np.array([1, 0])  # from logical commutations or overridden by decode result
         }
 
     :param code: Stabilizer code.
@@ -169,7 +168,7 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
     :type error_probability: float
     :param rng: Random number generator for error generation. (default=None resolves to numpy.random.default_rng())
     :type rng: numpy.random.Generator
-    :return: error_weight and success flag.
+    :return: error_weight, success flag, and logical_commutations.
     :rtype: dict
     :raises ValueError: if error_probability is not in [0, 1].
     """
@@ -198,7 +197,7 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability, meas
 
     * The simulation is as follows:
 
-        * for each time step :math`t`:
+        * for each time step :math:`t`:
 
             * generate Pauli ``step_errors[t]`` by passing ``code`` and ``error_probability`` to
               :meth:`qecsim.model.ErrorModel.generate`.
@@ -210,30 +209,27 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability, meas
         * evaluate ``error`` as :math:`\bigoplus` ``step_errors``.
         * resolve ``decoding`` by passing ``code``, ``time_steps`` and ``syndrome`` to
           :meth:`qecsim.model.DecoderFTP.decode_ftp`.
-        * if ``decoding`` is boolean:
-
-            * define ``success`` as ``decoding``.
-
-        * else:
-
-            * define ``recovery`` as ``decoding``.
-            * assert that (``recovery`` :math:`\oplus` ``error``) :math:`\odot` ``code.stabilizers``:math:`^T = 0`, by
-              construction.
-            * define ``success`` as (``recovery`` :math:`\oplus` ``error``) :math:`\odot`
-              ``code.logicals``:math:`^T = 0`.
+        * define ``recovered`` as ``decoding`` :math:`\oplus` ``error``.
+        * verify ``recovered`` :math:`\odot` ``code.stabilizers``:math:`^T = 0`, by construction.
+        * define ``logical_commutations`` as ``recovered`` :math:`\odot` ``code.logicals``:math:`^T`.
+        * define ``success`` as ``logical_commutations``:math:`= 0`.
 
     * :math:`\oplus` denotes binary addition defined as addition modulo 2, or equivalently exclusive-or.
     * See :func:`qecsim.paulitools.bsp` for definition of :math:`\odot`.
     * In addition to ``code``, ``time_steps`` and ``syndrome``, the following keyword parameters are passed as context
       to :meth:`qecsim.model.DecoderFTP.decode_ftp`: ``error_model``, ``error_probability``, ``error``, ``step_errors``,
       ``measurement_error_probability`` and ``step_measurement_errors``. Most decoders will ignore these parameters.
+    * Optionally, :meth:`qecsim.model.DecoderFTP.decode_ftp` may return :class:`~qecsim.model.DecodeResult` as
+      ``decoding`` to explicitly specify ``success`` and ``logical_commutations``, see
+      :class:`qecsim.model.DecodeResult` for details.
     * The returned data is in the following format:
 
     ::
 
         {
-            'error_weight': 2,  # number qubits acted on non-trivially by all step errors
-            'success': True,    # recovery successful, i.e. (recovery ^ error) commutes with all logical operators
+            'error_weight': 2,  # number qubits acted on non-trivially by error
+            'success': False,  # from logical commutations or overridden by decode result
+            'logical_commutations': np.array([1, 0])  # from logical commutations or overridden by decode result
         }
 
     :param code: Stabilizer code.
@@ -251,7 +247,7 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability, meas
     :type measurement_error_probability: float
     :param rng: Random number generator for error generation. (default=None resolves to numpy.random.default_rng())
     :type rng: numpy.random.Generator
-    :return: error_weight and success flag.
+    :return: error_weight, success flag, and logical_commutations.
     :rtype: dict
     :raises ValueError: if time_steps is not >= 1.
     :raises ValueError: if error_probability is not in [0, 1].
@@ -305,6 +301,7 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
         'n_run': 0,
         'n_success': 0,
         'n_fail': 0,
+        'n_logical_commutations': None,
         'error_weight_total': 0,
         'error_weight_pvar': 0.0,
         'logical_failure_rate': 0.0,
@@ -330,6 +327,17 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
             runs_data['n_success'] += 1
         else:
             runs_data['n_fail'] += 1
+        # on first run, initialize n_logical_commutations to zeros array (unless incoming is None)
+        if runs_data['n_run'] == 1 and data['logical_commutations'] is not None:
+            runs_data['n_logical_commutations'] = np.zeros_like(data['logical_commutations'])
+        # increment logical_commutations count (unless both count and incoming are None)
+        if not (runs_data['n_logical_commutations'] is None and data['logical_commutations'] is None):
+            # try to sum arrays and raise error if any mismatch (e.g. if decoder inconsistently returns None or array).
+            try:
+                runs_data['n_logical_commutations'] += data['logical_commutations']
+            except (TypeError, ValueError) as ex:
+                raise QecsimError("Mismatch summing logical_commutations from current run '{}' and previous runs '{}'."
+                                  .format(data['logical_commutations'], runs_data['n_logical_commutations'])) from ex
         # append error weight
         error_weights.append(data['error_weight'])
 
@@ -339,6 +347,10 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
 
     # rate statistics
     _add_rate_statistics(runs_data)
+
+    # convert n_logical_commutations to tuple if not None
+    if runs_data['n_logical_commutations'] is not None:
+        runs_data['n_logical_commutations'] = tuple(runs_data['n_logical_commutations'].tolist())
 
     # record wall_time
     runs_data['wall_time'] = time.perf_counter() - wall_time_start
@@ -374,10 +386,11 @@ def run(code, error_model, decoder, error_probability, max_runs=None, max_failur
             'error_model': 'Depolarizing',          # given error_model.label
             'decoder': 'Naive',                     # given decoder.label
             'error_probability': 0.0,               # given error_probability
-            'measurement_error_probability': 0.0    # alwyas 0.0 for ideal simulation
+            'measurement_error_probability': 0.0    # always 0.0 for ideal simulation
             'n_run': 0,                             # count of runs
             'n_success': 0,                         # count of successful recovery
             'n_fail': 0,                            # count of failed recovery
+            'n_logical_commutations': (0, 0),       # counts of logical commutations
             'error_weight_total': 0,                # sum of error_weight over n_run runs
             'error_weight_pvar': 0.0,               # pvariance of error_weight over n_run runs
             'logical_failure_rate': 0.0,            # n_fail / n_run
@@ -441,6 +454,7 @@ def run_ftp(code, time_steps, error_model, decoder, error_probability,
             'n_run': 0,                             # count of runs
             'n_success': 0,                         # count of successful recovery
             'n_fail': 0,                            # count of failed recovery
+            'n_logical_commutations': (0, 0),       # counts of logical commutations
             'error_weight_total': 0,                # sum of error_weight over n_run runs
             'error_weight_pvar': 0.0,               # pvariance of error_weight over n_run runs
             'logical_failure_rate': 0.0,            # n_fail / n_run
@@ -521,6 +535,7 @@ def merge(*data_list):
     :return: Merged list of aggregated runs data.
     :rtype: list of dict
     """
+    # TODO: handle n_logical_commutations
     # define group keys, value keys and zero values
     grp_keys = ('code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
                 'measurement_error_probability')

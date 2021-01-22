@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from qecsim import app
+from qecsim.model import ErrorModel, Decoder, DecodeResult
 from qecsim.models.basic import FiveQubitCode
 from qecsim.models.basic import SteaneCode
 from qecsim.models.color import Color666Code
@@ -37,6 +38,30 @@ from qecsim.models.toric import ToricMWPMDecoder
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 
+class _FixedErrorModel(ErrorModel):
+    def __init__(self, error):
+        self.error = error
+
+    def generate(self, code, probability, rng=None):
+        return self.error
+
+    @property
+    def label(self):
+        return 'fixed'
+
+
+class _FixedDecoder(Decoder):
+    def __init__(self, decoding):
+        self.decoding = decoding
+
+    def decode(self, code, syndrome, **kwargs):
+        return self.decoding
+
+    @property
+    def label(self):
+        return 'fixed'
+
+
 @pytest.mark.parametrize('code, error_model, decoder', [
     # each code with each valid decoder
     (Color666Code(5), DepolarizingErrorModel(), Color666MPSDecoder(chi=8)),
@@ -64,8 +89,10 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 def test_run_once(code, error_model, decoder):
     error_probability = 0.15
     data = app.run_once(code, error_model, decoder, error_probability)  # no error raised
-    for key in ('error_weight', 'success'):
-        assert key in data, 'data={} does not contain key={}'.format(data, key)
+    expected_key_cls = {'error_weight': int, 'success': bool, 'logical_commutations': np.ndarray}
+    assert data.keys() == expected_key_cls.keys(), 'data={} has missing/extra keys'
+    for key, cls in expected_key_cls.items():
+        assert type(data[key]) == cls, 'data[{}]={} is not of type={}'.format(key, data[key], cls)
 
 
 def test_run_once_seeded():
@@ -75,7 +102,74 @@ def test_run_once_seeded():
     error_probability = 0.15
     data1 = app.run_once(code, error_model, decoder, error_probability, rng=np.random.default_rng(5))
     data2 = app.run_once(code, error_model, decoder, error_probability, rng=np.random.default_rng(5))
-    assert data1 == data2, 'Identically seeded runs are not the same. '
+    assert data1['error_weight'] == data2['error_weight']
+    assert data1['success'] == data2['success']
+    assert np.array_equal(data1['logical_commutations'], data2['logical_commutations'])
+
+
+@pytest.mark.parametrize('code, error, decoding, expected_data', [
+    # identity
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     {'success': True, 'logical_commutations': np.array([0, 0])}),
+    # logical X failure
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     PlanarCode(2, 2).new_pauli().logical_x().to_bsf(),
+     {'success': False, 'logical_commutations': np.array([0, 1])}),
+    # logical Z failure
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     PlanarCode(2, 2).new_pauli().logical_z().to_bsf(),
+     {'success': False, 'logical_commutations': np.array([1, 0])}),
+    # identity via decode-result
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
+     {'success': True, 'logical_commutations': np.array([0, 0])}),
+    # logical X failure via decode-result
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(recovery=PlanarCode(2, 2).new_pauli().logical_x().to_bsf()),
+     {'success': False, 'logical_commutations': np.array([0, 1])}),
+    # logical Z failure via decode-result
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(recovery=PlanarCode(2, 2).new_pauli().logical_z().to_bsf()),
+     {'success': False, 'logical_commutations': np.array([1, 0])}),
+    # identity but override success
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(success=False, recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
+     {'success': False, 'logical_commutations': np.array([0, 0])}),
+    # identity but override logical_commutations
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(logical_commutations=np.array([1, 1]), recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
+     {'success': True, 'logical_commutations': np.array([1, 1])}),
+    # identity but override success and logical_commutations
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(success=False, logical_commutations=np.array([1, 1]), recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
+     {'success': False, 'logical_commutations': np.array([1, 1])}),
+    # identity but override success (no recovery)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(success=False),
+     {'success': False, 'logical_commutations': None}),
+    # identity but override success and logical_commutations (no recovery)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(success=False, logical_commutations=np.array([1, 1])),
+     {'success': False, 'logical_commutations': np.array([1, 1])}),
+])
+def test_run_once_override_data(code, error, decoding, expected_data):
+    # test execution paths returning different data
+    data = app.run_once(code, _FixedErrorModel(error), _FixedDecoder(decoding), 0.0)
+    print(data)
+    assert data['success'] == expected_data['success']
+    assert np.array_equal(data['logical_commutations'], expected_data['logical_commutations'])
 
 
 @pytest.mark.parametrize('error_probability', [
@@ -96,8 +190,10 @@ def test_run_once_invalid_parameters(error_probability):
 ])
 def test_run_once_ftp(code, time_steps, error_model, decoder, error_probability, measurement_error_probability):
     data = app.run_once_ftp(code, time_steps, error_model, decoder, error_probability)
-    for key in ('error_weight', 'success'):
-        assert key in data, 'data={} does not contain key={}'.format(data, key)
+    expected_key_cls = {'error_weight': int, 'success': bool, 'logical_commutations': np.ndarray}
+    assert data.keys() == expected_key_cls.keys(), 'data={} has missing/extra keys'
+    for key, cls in expected_key_cls.items():
+        assert type(data[key]) == cls, 'data[{}]={} is not of type={}'.format(key, data[key], cls)
 
 
 def test_run_once_ftp_seeded():
@@ -108,7 +204,9 @@ def test_run_once_ftp_seeded():
     error_probability = 0.15
     data1 = app.run_once_ftp(code, time_steps, error_model, decoder, error_probability, rng=np.random.default_rng(5))
     data2 = app.run_once_ftp(code, time_steps, error_model, decoder, error_probability, rng=np.random.default_rng(5))
-    assert data1 == data2, 'Identically seeded runs are not the same. '
+    assert data1['error_weight'] == data2['error_weight']
+    assert data1['success'] == data2['success']
+    assert np.array_equal(data1['logical_commutations'], data2['logical_commutations'])
 
 
 @pytest.mark.parametrize('time_steps, error_probability, measurement_error_probability', [
@@ -134,17 +232,17 @@ def test_run(code, error_model, decoder):
     max_runs = 2
     data = app.run(code, error_model, decoder, error_probability, max_runs)  # no error raised
     expected_keys = {'code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
-                     'measurement_error_probability', 'n_run', 'n_success', 'n_fail', 'error_weight_total',
-                     'error_weight_pvar', 'logical_failure_rate', 'physical_error_rate', 'wall_time'}
-    assert not data.keys() < expected_keys, 'data={} is missing key(s)={}'.format(
-        data, expected_keys - data.keys())
-    assert not data.keys() > expected_keys, (
-        'data={} has unexpected key(s)={}'.format(data, data.keys() - expected_keys))
-    assert data['n_run'] == max_runs, ('n_run does not equal requested max_runs (data={}).'.format(data))
+                     'measurement_error_probability', 'n_run', 'n_success', 'n_fail', 'n_logical_commutations',
+                     'error_weight_total', 'error_weight_pvar', 'logical_failure_rate', 'physical_error_rate',
+                     'wall_time'}
+    assert data.keys() == expected_keys, 'data={} has missing/extra keys'
+    assert data['n_run'] == max_runs, 'n_run does not equal requested max_runs (data={}).'.format(data)
     assert data['n_success'] + data['n_fail'] == max_runs, (
         'n_success + n_fail does not equal requested max_runs (data={}).'.format(data))
     assert data['n_success'] >= 0, 'n_success is negative (data={}).'.format(data)
     assert data['n_fail'] >= 0, 'n_fail is negative (data={}).'.format(data)
+    assert data['n_fail'] <= sum(data['n_logical_commutations']), (
+        'n_fail exceeds n_logical_commutations (data={}).'.format(data))
     assert data['logical_failure_rate'] == data['n_fail'] / data['n_run']
 
 
@@ -161,8 +259,7 @@ def test_run_count(max_runs, max_failures):
     error_probability = 0.05
     data = app.run(code, error_model, decoder, error_probability,
                    max_runs=max_runs, max_failures=max_failures)  # no error raised
-    for key in ('n_run', 'n_fail'):
-        assert key in data, 'data={} does not contain key={}'.format(data, key)
+    assert {'n_run', 'n_fail'} <= data.keys(), 'data={} missing count keys'
     if max_runs is None and max_failures is None:
         assert data['n_run'] == 1, 'n_run does not equal 1 when max_runs and max_failures unspecified'
     if max_runs is not None:
@@ -184,6 +281,67 @@ def test_run_seeded():
     for data in (data1, data2):
         del data['wall_time']
     assert data1 == data2, 'Identically seeded runs are not the same. '
+
+
+@pytest.mark.parametrize('code, error, decoding, max_runs, expected_data', [
+    # identity
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     5,
+     {'n_fail': 0, 'n_logical_commutations': np.array([0, 0])}),
+    # logical X failure
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     PlanarCode(2, 2).new_pauli().logical_x().to_bsf(),
+     5,
+     {'n_fail': 5, 'n_logical_commutations': np.array([0, 5])}),
+    # logical Z failure
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     PlanarCode(2, 2).new_pauli().logical_z().to_bsf(),
+     8,
+     {'n_fail': 8, 'n_logical_commutations': np.array([8, 0])}),
+    # identity but override success
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(success=False, recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
+     7,
+     {'n_fail': 7, 'n_logical_commutations': np.array([0, 0])}),
+    # identity but override logical_commutations
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(logical_commutations=np.array([1, 1]), recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
+     3,
+     {'n_fail': 0, 'n_logical_commutations': np.array([3, 3])}),
+    # identity but override success and logical_commutations
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(success=False, logical_commutations=np.array([1, 1]), recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
+     4,
+     {'n_fail': 4, 'n_logical_commutations': np.array([4, 4])}),
+    # identity but override success (no recovery)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(success=False),
+     6,
+     {'n_fail': 6, 'n_logical_commutations': None}),
+    # identity but override success and logical_commutations (no recovery)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(success=False, logical_commutations=np.array([1, 1])),
+     2,
+     {'n_fail': 2, 'n_logical_commutations': np.array([2, 2])}),
+])
+def test_run_logical_commutations(code, error, decoding, max_runs, expected_data):
+    # test n_fail and n_logical_commutations when returning different data
+    data = app.run(code, _FixedErrorModel(error), _FixedDecoder(decoding), 0.0, max_runs=max_runs)
+    print(data)
+    assert data['n_fail'] == expected_data['n_fail']
+    assert np.array_equal(data['n_logical_commutations'], expected_data['n_logical_commutations'])
+
+
+# TODO: test invalid (inconsistent) logical_commutations
 
 
 @pytest.mark.parametrize('error_probability', [
@@ -222,12 +380,10 @@ def test_run_ftp(code, time_steps, error_model, decoder):
     max_runs = 2
     data = app.run_ftp(code, time_steps, error_model, decoder, error_probability, max_runs=max_runs)
     expected_keys = {'code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
-                     'measurement_error_probability', 'n_run', 'n_success', 'n_fail', 'error_weight_total',
-                     'error_weight_pvar', 'logical_failure_rate', 'physical_error_rate', 'wall_time'}
-    assert not data.keys() < expected_keys, 'data={} is missing key(s)={}'.format(
-        data, expected_keys - data.keys())
-    assert not data.keys() > expected_keys, (
-        'data={} has unexpected key(s)={}'.format(data, data.keys() - expected_keys))
+                     'measurement_error_probability', 'n_run', 'n_success', 'n_fail', 'n_logical_commutations',
+                     'error_weight_total', 'error_weight_pvar', 'logical_failure_rate', 'physical_error_rate',
+                     'wall_time'}
+    assert data.keys() == expected_keys, 'data={} has missing/extra keys'
     assert data['n_run'] == max_runs, ('n_run does not equal requested max_runs (data={}).'.format(data))
     assert data['n_success'] + data['n_fail'] == max_runs, (
         'n_success + n_fail does not equal requested max_runs (data={}).'.format(data))
@@ -250,8 +406,7 @@ def test_run_ftp_count(max_runs, max_failures):
     error_probability = 0.05
     data = app.run_ftp(code, time_steps, error_model, decoder, error_probability,
                        max_runs=max_runs, max_failures=max_failures)  # no error raised
-    for key in ('n_run', 'n_fail'):
-        assert key in data, 'data={} does not contain key={}'.format(data, key)
+    assert {'n_run', 'n_fail'} <= data.keys(), 'data={} missing count keys'
     if max_runs is None and max_failures is None:
         assert data['n_run'] == 1, 'n_run does not equal 1 when max_runs and max_failures unspecified'
     if max_runs is not None:

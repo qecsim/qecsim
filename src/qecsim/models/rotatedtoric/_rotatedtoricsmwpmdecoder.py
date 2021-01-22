@@ -117,7 +117,8 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
         * The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
           probability distribution for use in the decoding algorithm. Any provided error model must implement
           :meth:`~qecsim.model.ErrorModel.probability_distribution`.
-        * If a time-like logical failure is detected then a false decode result is returned.
+        * This method always returns a ``DecodeResult`` with a recovery operation and, additionally a false success flag
+          if a time-like logical failure is detected.
 
         :param code: Rotated toric code.
         :type code: RotatedToricCode
@@ -133,8 +134,8 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
         :type measurement_error_probability: float
         :param step_measurement_errors: list of measurement error bits applied to step-syndromes index by time-step.
         :type step_measurement_errors: list of numpy.array (1d)
-        :return: Recovery operation as binary symplectic vector, or decode result indicating recovery success.
-        :rtype: numpy.array (1d) or DecodeResult
+        :return: Decode result.
+        :rtype: DecodeResult
         """
         # deduce bias (potentially overridden by eta)
         bias = self._bias(error_model)
@@ -196,10 +197,10 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
             measurement_error_tps = self._measurement_error_tparities(code, step_measurement_errors[-1])
             # return false decode-result if t-parity fails
             if (recovery_x_tp, recovery_z_tp) != measurement_error_tps:
-                return DecodeResult(False)
+                return DecodeResult(success=False, recovery=recovery)
 
         # return recovery
-        return recovery
+        return DecodeResult(recovery=recovery)
 
     @property
     def label(self):
