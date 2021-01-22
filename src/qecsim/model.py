@@ -320,15 +320,16 @@ class DecodeResult:
     Notes:
 
     * ``success`` and/or ``logical_commutations``, if not None, are used by
-      :mod:`qecsim.app` to override the result of evaluation using ``recovery``.
+      :mod:`qecsim.app` to override the usual evaluation of success and logical
+      commutations.
     * ``recovery``, if not None, is used by :mod:`qecsim.app` to evaluate any
-      unspecified values for ``success`` and/or ``logical_commutations``.
+      values unspecified by ``success`` and/or ``logical_commutations``.
     * ``success`` and ``recovery`` must not both be None; this ensures that
-      :mod:`qecsim.app` can resolve a value for ``success``.
-    * ``logical_commutations``, as resolved by :mod:`qecsim.app`, must be
-      consistent across identically parameterized simulation runs, i.e. always
-      None or always equal length arrays; this ensures that :mod:`qecsim.app`
-      can combine run results.
+      :mod:`qecsim.app` can resolve a success value.
+    * Logical commutations, as resolved by :mod:`qecsim.app`, must be consistent
+      across identically parameterized simulation runs, i.e. always None or
+      always equal length arrays; this ensures that :mod:`qecsim.app` can
+      combine results from multiple runs.
 
     See also :class:`Decoder` and :class:`DecoderFTP`.
 
@@ -340,10 +341,10 @@ class DecodeResult:
 
         :param success: If the decoding was successful (default=None).
         :type success: bool
-        :param logical_commutations: Logical commutations as binary vector (default=None).
+        :param logical_commutations: Logical commutations as binary vector or None (default=None).
         :type logical_commutations: numpy.array (1d)
-        :return: Recovery operation as binary symplectic vector (default=None).
-        :rtype: numpy.array (1d)
+        :param recovery: Recovery operation as binary symplectic vector (default=None).
+        :type recovery: numpy.array (1d)
         :raises QecsimError: If both success and recovery are unspecified (i.e. None).
         """
         if success is None and recovery is None:
