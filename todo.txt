@@ -71,7 +71,7 @@
 # DONE: qecsimext: Update to latest qecsim and zip repo for download.
 # DONE: docs: Add change-log.
 # DONE: src: Remove CLI restriction on max random-seed.
-# TODO: src: Add n_logical_commutations to run and merge output.
+# DONE: src: Add n_logical_commutations to run and merge output.
 # TODO: src: Add n_custom to run and merge output.
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
 # TODO: setup.cfg: finalize meta-data.
