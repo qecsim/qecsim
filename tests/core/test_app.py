@@ -647,4 +647,45 @@ def test_merge(data, expected):
 
     assert actual == expected, 'Merged data=\n{}\ndoes not match expected\ndata=\n{}'.format(actual, expected)
 
-# TODO: test invalid merges
+
+@pytest.mark.parametrize('data', [
+    # inconsistent logical commutations (first: (5, 4), second: None)
+    ([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
+       "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
+       "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": (5, 4), "n_run": 10, "n_success": 2,
+       "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+     [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
+       "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
+       "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": None, "n_run": 5, "n_success": 0,
+       "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+     ),
+    # inconsistent logical commutations (first: None, second: (3, 2))
+    ([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
+       "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
+       "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": None, "n_run": 10, "n_success": 2,
+       "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+     [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
+       "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
+       "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": (3, 2), "n_run": 5, "n_success": 0,
+       "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+     ),
+    # inconsistent logical commutations (first: (5, 4), second: (3, 2, 1))
+    ([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
+       "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
+       "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": (5, 4), "n_run": 10, "n_success": 2,
+       "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+     [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
+       "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
+       "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": (3, 2, 1), "n_run": 5, "n_success": 0,
+       "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+     ),
+])
+def test_merge_invalid(data):
+    with pytest.raises(ValueError):
+        app.merge(*data)
