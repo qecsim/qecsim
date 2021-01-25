@@ -314,8 +314,9 @@ class DecodeResult:
 
     Typically decoders return a recovery operation and delegate the evaluation
     of success and logical commutations to :mod:`qecsim.app`. Optionally,
-    decoders may partially or completely override that behavior by returning
-    an instance of this class.
+    decoders may return an instance of this class to partially or completely
+    override the evaluation of success and logical commutations. Additionally,
+    decoders can provide custom values to be summed across runs.
 
     Notes:
 
@@ -326,16 +327,16 @@ class DecodeResult:
       values unspecified by ``success`` and/or ``logical_commutations``.
     * ``success`` and ``recovery`` must not both be None; this ensures that
       :mod:`qecsim.app` can resolve a success value.
-    * Logical commutations, as resolved by :mod:`qecsim.app`, must be consistent
-      across identically parameterized simulation runs, i.e. always None or
-      always equal length arrays; this ensures that :mod:`qecsim.app` can
-      combine results from multiple runs.
+    * Logical commutations, as resolved by :mod:`qecsim.app`, and custom values
+      must be consistent across identically parameterized simulation runs, i.e.
+      always None or always equal length arrays; this ensures that
+      :mod:`qecsim.app` can sum results across multiple runs.
 
     See also :class:`Decoder` and :class:`DecoderFTP`.
 
     """
 
-    def __init__(self, success=None, logical_commutations=None, recovery=None):
+    def __init__(self, success=None, logical_commutations=None, recovery=None, custom_values=None):
         """
         Initialise new decode result.
 
@@ -345,6 +346,8 @@ class DecodeResult:
         :type logical_commutations: numpy.array (1d)
         :param recovery: Recovery operation as binary symplectic vector (default=None).
         :type recovery: numpy.array (1d)
+        :param custom_values: Custom values as numeric vector or None (default=None).
+        :type custom_values: numpy.array (1d)
         :raises QecsimError: If both success and recovery are unspecified (i.e. None).
         """
         if success is None and recovery is None:
@@ -352,7 +355,8 @@ class DecodeResult:
         self.success = success
         self.logical_commutations = logical_commutations
         self.recovery = recovery
+        self.custom_values = custom_values
 
     def __repr__(self):
-        return '{}({!r}, {!r}, {!r})'.format(type(self).__name__, self.success, self.logical_commutations,
-                                             self.recovery)
+        return '{}({!r}, {!r}, {!r}, {!r})'.format(
+            type(self).__name__, self.success, self.logical_commutations, self.recovery, self.custom_values)

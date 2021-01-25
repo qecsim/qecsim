@@ -91,10 +91,11 @@ class _FixedDecoder(Decoder):
 def test_run_once(code, error_model, decoder):
     error_probability = 0.15
     data = app.run_once(code, error_model, decoder, error_probability)  # no error raised
-    expected_key_cls = {'error_weight': int, 'success': bool, 'logical_commutations': np.ndarray}
+    expected_key_cls = {'error_weight': int, 'success': bool, 'logical_commutations': np.ndarray,
+                        'custom_values': np.ndarray}
     assert data.keys() == expected_key_cls.keys(), 'data={} has missing/extra keys'
     for key, cls in expected_key_cls.items():
-        assert type(data[key]) == cls, 'data[{}]={} is not of type={}'.format(key, data[key], cls)
+        assert data[key] is None or type(data[key]) == cls, 'data[{}]={} is not of type={}'.format(key, data[key], cls)
 
 
 def test_run_once_seeded():
@@ -107,6 +108,7 @@ def test_run_once_seeded():
     assert data1['error_weight'] == data2['error_weight']
     assert data1['success'] == data2['success']
     assert np.array_equal(data1['logical_commutations'], data2['logical_commutations'])
+    assert np.array_equal(data1['custom_values'], data2['custom_values'])
 
 
 @pytest.mark.parametrize('code, error, decoding, expected_data', [
@@ -114,64 +116,75 @@ def test_run_once_seeded():
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      PlanarCode(2, 2).new_pauli().to_bsf(),
-     {'success': True, 'logical_commutations': np.array([0, 0])}),
+     {'success': True, 'logical_commutations': np.array([0, 0]), 'custom_values': None}),
     # logical X failure
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      PlanarCode(2, 2).new_pauli().logical_x().to_bsf(),
-     {'success': False, 'logical_commutations': np.array([0, 1])}),
+     {'success': False, 'logical_commutations': np.array([0, 1]), 'custom_values': None}),
     # logical Z failure
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      PlanarCode(2, 2).new_pauli().logical_z().to_bsf(),
-     {'success': False, 'logical_commutations': np.array([1, 0])}),
+     {'success': False, 'logical_commutations': np.array([1, 0]), 'custom_values': None}),
     # identity via decode-result
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
-     {'success': True, 'logical_commutations': np.array([0, 0])}),
+     {'success': True, 'logical_commutations': np.array([0, 0]), 'custom_values': None}),
     # logical X failure via decode-result
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(recovery=PlanarCode(2, 2).new_pauli().logical_x().to_bsf()),
-     {'success': False, 'logical_commutations': np.array([0, 1])}),
+     {'success': False, 'logical_commutations': np.array([0, 1]), 'custom_values': None}),
     # logical Z failure via decode-result
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(recovery=PlanarCode(2, 2).new_pauli().logical_z().to_bsf()),
-     {'success': False, 'logical_commutations': np.array([1, 0])}),
+     {'success': False, 'logical_commutations': np.array([1, 0]), 'custom_values': None}),
     # identity but override success
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(success=False, recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
-     {'success': False, 'logical_commutations': np.array([0, 0])}),
+     {'success': False, 'logical_commutations': np.array([0, 0]), 'custom_values': None}),
     # identity but override logical_commutations
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(logical_commutations=np.array([1, 1]), recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
-     {'success': True, 'logical_commutations': np.array([1, 1])}),
+     {'success': True, 'logical_commutations': np.array([1, 1]), 'custom_values': None}),
     # identity but override success and logical_commutations
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(success=False, logical_commutations=np.array([1, 1]), recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
-     {'success': False, 'logical_commutations': np.array([1, 1])}),
+     {'success': False, 'logical_commutations': np.array([1, 1]), 'custom_values': None}),
     # identity but override success (no recovery)
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(success=False),
-     {'success': False, 'logical_commutations': None}),
+     {'success': False, 'logical_commutations': None, 'custom_values': None}),
     # identity but override success and logical_commutations (no recovery)
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(success=False, logical_commutations=np.array([1, 1])),
-     {'success': False, 'logical_commutations': np.array([1, 1])}),
+     {'success': False, 'logical_commutations': np.array([1, 1]), 'custom_values': None}),
+    # identity via decode-result (with custom_values)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(recovery=PlanarCode(2, 2).new_pauli().to_bsf(), custom_values=np.array([1])),
+     {'success': True, 'logical_commutations': np.array([0, 0]), 'custom_values': np.array([1])}),
+    # identity via decode-result (with custom_values)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(recovery=PlanarCode(2, 2).new_pauli().to_bsf(), custom_values=np.array([0, 3])),
+     {'success': True, 'logical_commutations': np.array([0, 0]), 'custom_values': np.array([0, 3])}),
 ])
-def test_run_once_override_data(code, error, decoding, expected_data):
+def test_run_once_override(code, error, decoding, expected_data):
     # test execution paths returning different data
     data = app.run_once(code, _FixedErrorModel(error), _FixedDecoder(decoding), 0.0)
     print(data)
     assert data['success'] == expected_data['success']
     assert np.array_equal(data['logical_commutations'], expected_data['logical_commutations'])
+    assert np.array_equal(data['custom_values'], expected_data['custom_values'])
 
 
 @pytest.mark.parametrize('error_probability', [
@@ -192,10 +205,11 @@ def test_run_once_invalid_parameters(error_probability):
 ])
 def test_run_once_ftp(code, time_steps, error_model, decoder, error_probability, measurement_error_probability):
     data = app.run_once_ftp(code, time_steps, error_model, decoder, error_probability)
-    expected_key_cls = {'error_weight': int, 'success': bool, 'logical_commutations': np.ndarray}
+    expected_key_cls = {'error_weight': int, 'success': bool, 'logical_commutations': np.ndarray,
+                        'custom_values': np.ndarray}
     assert data.keys() == expected_key_cls.keys(), 'data={} has missing/extra keys'
     for key, cls in expected_key_cls.items():
-        assert type(data[key]) == cls, 'data[{}]={} is not of type={}'.format(key, data[key], cls)
+        assert data[key] is None or type(data[key]) == cls, 'data[{}]={} is not of type={}'.format(key, data[key], cls)
 
 
 def test_run_once_ftp_seeded():
@@ -209,6 +223,7 @@ def test_run_once_ftp_seeded():
     assert data1['error_weight'] == data2['error_weight']
     assert data1['success'] == data2['success']
     assert np.array_equal(data1['logical_commutations'], data2['logical_commutations'])
+    assert np.array_equal(data1['custom_values'], data2['custom_values'])
 
 
 @pytest.mark.parametrize('time_steps, error_probability, measurement_error_probability', [
@@ -235,8 +250,8 @@ def test_run(code, error_model, decoder):
     data = app.run(code, error_model, decoder, error_probability, max_runs)  # no error raised
     expected_keys = {'code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
                      'measurement_error_probability', 'n_run', 'n_success', 'n_fail', 'n_logical_commutations',
-                     'error_weight_total', 'error_weight_pvar', 'logical_failure_rate', 'physical_error_rate',
-                     'wall_time'}
+                     'custom_totals', 'error_weight_total', 'error_weight_pvar', 'logical_failure_rate',
+                     'physical_error_rate', 'wall_time'}
     assert data.keys() == expected_keys, 'data={} has missing/extra keys'
     assert data['n_run'] == max_runs, 'n_run does not equal requested max_runs (data={}).'.format(data)
     assert data['n_success'] + data['n_fail'] == max_runs, (
@@ -291,56 +306,75 @@ def test_run_seeded():
      PlanarCode(2, 2).new_pauli().to_bsf(),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      5,
-     {'n_fail': 0, 'n_logical_commutations': np.array([0, 0])}),
+     {'n_fail': 0, 'n_logical_commutations': (0, 0), 'custom_totals': None}),
     # logical X failure
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      PlanarCode(2, 2).new_pauli().logical_x().to_bsf(),
      5,
-     {'n_fail': 5, 'n_logical_commutations': np.array([0, 5])}),
+     {'n_fail': 5, 'n_logical_commutations': (0, 5), 'custom_totals': None}),
     # logical Z failure
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      PlanarCode(2, 2).new_pauli().logical_z().to_bsf(),
      8,
-     {'n_fail': 8, 'n_logical_commutations': np.array([8, 0])}),
+     {'n_fail': 8, 'n_logical_commutations': (8, 0), 'custom_totals': None}),
     # identity but override success
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(success=False, recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
      7,
-     {'n_fail': 7, 'n_logical_commutations': np.array([0, 0])}),
+     {'n_fail': 7, 'n_logical_commutations': (0, 0), 'custom_totals': None}),
     # identity but override logical_commutations
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(logical_commutations=np.array([1, 1]), recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
      3,
-     {'n_fail': 0, 'n_logical_commutations': np.array([3, 3])}),
+     {'n_fail': 0, 'n_logical_commutations': (3, 3), 'custom_totals': None}),
     # identity but override success and logical_commutations
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(success=False, logical_commutations=np.array([1, 1]), recovery=PlanarCode(2, 2).new_pauli().to_bsf()),
      4,
-     {'n_fail': 4, 'n_logical_commutations': np.array([4, 4])}),
+     {'n_fail': 4, 'n_logical_commutations': (4, 4), 'custom_totals': None}),
     # identity but override success (no recovery)
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(success=False),
      6,
-     {'n_fail': 6, 'n_logical_commutations': None}),
+     {'n_fail': 6, 'n_logical_commutations': None, 'custom_totals': None}),
     # identity but override success and logical_commutations (no recovery)
     (PlanarCode(2, 2),
      PlanarCode(2, 2).new_pauli().to_bsf(),
      DecodeResult(success=False, logical_commutations=np.array([1, 1])),
      2,
-     {'n_fail': 2, 'n_logical_commutations': np.array([2, 2])}),
+     {'n_fail': 2, 'n_logical_commutations': (2, 2), 'custom_totals': None}),
+    # identity via decode-result (with custom_values)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(recovery=PlanarCode(2, 2).new_pauli().to_bsf(), custom_values=np.array([1])),
+     3,
+     {'n_fail': 0, 'n_logical_commutations': (0, 0), 'custom_totals': (3,)}),
+    # identity via decode-result (with custom_values)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(recovery=PlanarCode(2, 2).new_pauli().to_bsf(), custom_values=np.array([1, 2])),
+     5,
+     {'n_fail': 0, 'n_logical_commutations': (0, 0), 'custom_totals': (5, 10)}),
+    # identity via decode-result (with custom_values)
+    (PlanarCode(2, 2),
+     PlanarCode(2, 2).new_pauli().to_bsf(),
+     DecodeResult(recovery=PlanarCode(2, 2).new_pauli().to_bsf(), custom_values=np.array([1.1, 2.2])),
+     2,
+     {'n_fail': 0, 'n_logical_commutations': (0, 0), 'custom_totals': (2.2, 4.4)}),
 ])
-def test_run_logical_commutations(code, error, decoding, max_runs, expected_data):
+def test_run_override(code, error, decoding, max_runs, expected_data):
     # test n_fail and n_logical_commutations when returning different data
     data = app.run(code, _FixedErrorModel(error), _FixedDecoder(decoding), 0.0, max_runs=max_runs)
     print(data)
     assert data['n_fail'] == expected_data['n_fail']
-    assert np.array_equal(data['n_logical_commutations'], expected_data['n_logical_commutations'])
+    assert data['n_logical_commutations'] == expected_data['n_logical_commutations']
+    assert data['custom_totals'] == expected_data['custom_totals']
 
 
 @pytest.mark.parametrize('decoding1, decoding2', [
@@ -349,7 +383,7 @@ def test_run_logical_commutations(code, error, decoding, max_runs, expected_data
     (DecodeResult(success=True, logical_commutations=np.array([1, 1, 0])),
      DecodeResult(success=True, logical_commutations=np.array([1, 0]))),
 ])
-def test_run_invalid_logical_commutations(decoding1, decoding2):
+def test_run_invalid_override(decoding1, decoding2):
     decodings = itertools.cycle((decoding1, decoding2))
 
     class _CycleDecoder(Decoder):
@@ -403,8 +437,8 @@ def test_run_ftp(code, time_steps, error_model, decoder):
     data = app.run_ftp(code, time_steps, error_model, decoder, error_probability, max_runs=max_runs)
     expected_keys = {'code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
                      'measurement_error_probability', 'n_run', 'n_success', 'n_fail', 'n_logical_commutations',
-                     'error_weight_total', 'error_weight_pvar', 'logical_failure_rate', 'physical_error_rate',
-                     'wall_time'}
+                     'custom_totals', 'error_weight_total', 'error_weight_pvar', 'logical_failure_rate',
+                     'physical_error_rate', 'wall_time'}
     assert data.keys() == expected_keys, 'data={} has missing/extra keys'
     assert data['n_run'] == max_runs, ('n_run does not equal requested max_runs (data={}).'.format(data))
     assert data['n_success'] + data['n_fail'] == max_runs, (
@@ -516,7 +550,7 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
        'error_weight_total': 427320, 'error_model': 'Bit-flip', 'n_success': 8310, 'n_fail': 1690,
        'code': 'Toric 15x15', 'wall_time': 591.4239950589836, 'logical_failure_rate': 0.169,
        'error_probability': 0.095, 'time_steps': 1, 'measurement_error_probability': 0.0,
-       "n_logical_commutations": None}]
+       'n_logical_commutations': None, 'custom_totals': None}]
      ),
     # multiple same-group data sets are merged (data sets from merge)
     (([{'n_k_d': (450, 2, 15), 'physical_error_rate': 0.09496, 'n_run': 10000, 'decoder': 'Toric MWPM',
@@ -532,7 +566,7 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
        'error_weight_total': 856288, 'physical_error_rate': 0.09514311111111111, 'decoder': 'Toric MWPM',
        'error_model': 'Bit-flip', 'n_run': 20000, 'n_success': 16590, 'logical_failure_rate': 0.1705,
        'wall_time': 1381.0899616722018, 'time_steps': 1, 'measurement_error_probability': 0.0,
-       "n_logical_commutations": None}]
+       'n_logical_commutations': None, 'custom_totals': None}]
      ),
     # multiple different-group data sets are not merged (data sets from merge)
     (([{'n_k_d': (450, 2, 15), 'physical_error_rate': 0.09496, 'n_run': 10000, 'decoder': 'Toric MWPM',
@@ -552,12 +586,12 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
        'error_weight_total': 856288, 'physical_error_rate': 0.09514311111111111, 'decoder': 'Toric MWPM',
        'error_model': 'Bit-flip', 'n_run': 20000, 'n_success': 16590, 'logical_failure_rate': 0.1705,
        'wall_time': 1381.0899616722018, 'time_steps': 1, 'measurement_error_probability': 0.0,
-       "n_logical_commutations": None},
+       'n_logical_commutations': None, 'custom_totals': None},
       {'logical_failure_rate': 0.1172, 'decoder': 'Toric MWPM', 'wall_time': 60594.737112408504,
        'n_k_d': (2450, 2, 35), 'n_success': 8828, 'code': 'Toric 35x35', 'n_run': 10000, 'n_fail': 1172,
        'error_weight_total': 2326883, 'physical_error_rate': 0.09497481632653061, 'error_probability': 0.095,
        'error_model': 'Bit-flip', 'time_steps': 1, 'measurement_error_probability': 0.0,
-       "n_logical_commutations": None}]
+       'n_logical_commutations': None, 'custom_totals': None}]
      ),
     # error_weight_pvar ignored, n_k_d in list form converted to tuple (data sets from run)
     (([{'code': 'Toric 3x3', 'decoder': 'Toric MWPM', 'error_model': 'Bit-flip', 'error_probability': 0.1,
@@ -572,7 +606,7 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{'code': 'Toric 3x3', 'decoder': 'Toric MWPM', 'error_model': 'Bit-flip', 'error_probability': 0.1,
        'error_weight_total': 398, 'logical_failure_rate': 0.285, 'n_fail': 57, 'n_k_d': (18, 2, 3), 'n_run': 200,
        'n_success': 143, 'physical_error_rate': 0.11055555555555556, 'wall_time': 0.5035656229993037,
-       'time_steps': 1, 'measurement_error_probability': 0.0, "n_logical_commutations": None}]
+       'time_steps': 1, 'measurement_error_probability': 0.0, 'n_logical_commutations': None, 'custom_totals': None}]
      ),
     # multiple same-group (including measurement_error_probability) data sets are merged
     (([{'error_probability': 0.2, 'code': 'Steane', 'n_run': 5, 'error_model': 'Phase-flip',
@@ -588,7 +622,8 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{'n_run': 10, 'time_steps': 2, 'measurement_error_probability': 0.01, 'error_model': 'Phase-flip',
        'physical_error_rate': 0.14285714285714285, 'decoder': 'Naive', 'n_fail': 2, 'n_k_d': (7, 1, 3),
        'wall_time': 0.04033649782650173, 'logical_failure_rate': 0.2, 'error_probability': 0.2,
-       'error_weight_total': 20, 'n_success': 8, 'code': 'Steane', "n_logical_commutations": None}]
+       'error_weight_total': 20, 'n_success': 8, 'code': 'Steane', 'n_logical_commutations': None,
+       'custom_totals': None}]
      ),
     # multiple different-group (including measurement_error_probability) data sets are not merged
     (([{'n_success': 5, 'physical_error_rate': 0.02857142857142857, 'wall_time': 0.019910499919205904,
@@ -605,29 +640,31 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{"code": "Steane", "decoder": "Naive", "error_model": "Phase-flip", "error_probability": 0.05,
        "error_weight_total": 2, "logical_failure_rate": 0.0, "time_steps": 2,
        "measurement_error_probability": 0.01, "n_fail": 0, "n_k_d": (7, 1, 3), "n_run": 5, "n_success": 5,
-       "physical_error_rate": 0.02857142857142857, "wall_time": 0.019910499919205904, "n_logical_commutations": None},
+       "physical_error_rate": 0.02857142857142857, "wall_time": 0.019910499919205904, 'n_logical_commutations': None,
+       "custom_totals": None},
       {"code": "Steane", "decoder": "Naive", "error_model": "Phase-flip", "error_probability": 0.05,
        "error_weight_total": 0, "logical_failure_rate": 0.0, "time_steps": 1,
        "measurement_error_probability": 0.0, "n_fail": 0, "n_k_d": (7, 1, 3), "n_run": 5, "n_success": 5,
-       "physical_error_rate": 0.0, "wall_time": 0.013491070130839944, "n_logical_commutations": None}]
+       "physical_error_rate": 0.0, "wall_time": 0.013491070130839944, "n_logical_commutations": None,
+       "custom_totals": None}]
      ),
-    # logical commutations
+    # logical commutations and custom
     (([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
         "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
         "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
-        "n_fail": 8, "n_k_d": [169, 1, 13], "n_logical_commutations": [5, 4], "n_run": 10, "n_success": 2,
-        "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+        "custom_totals": [2], "n_fail": 8, "n_k_d": [169, 1, 13], "n_logical_commutations": [5, 4], "n_run": 10,
+        "n_success": 2, "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
       [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
         "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
         "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
-        "n_fail": 5, "n_k_d": [169, 1, 13], "n_logical_commutations": [3, 2], "n_run": 5, "n_success": 0,
-        "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+        "custom_totals": [1], "n_fail": 5, "n_k_d": [169, 1, 13], "n_logical_commutations": [3, 2], "n_run": 5,
+        "n_success": 0, "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
       ),
      [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
        "error_model": "Depolarizing", "error_probability": 0.3,
        "error_weight_total": 775, "logical_failure_rate": 0.8666666666666667, "measurement_error_probability": 0.0,
-       "n_fail": 13, "n_k_d": (169, 1, 13), "n_logical_commutations": (8, 6), "n_run": 15, "n_success": 2,
-       "physical_error_rate": 0.3057199211045365, "time_steps": 1, "wall_time": 6.279633460000001}]
+       "custom_totals": (3,), "n_fail": 13, "n_k_d": (169, 1, 13), "n_logical_commutations": (8, 6), "n_run": 15,
+       "n_success": 2, "physical_error_rate": 0.3057199211045365, "time_steps": 1, "wall_time": 6.279633460000001}]
      ),
 ])
 def test_merge(data, expected):
@@ -653,37 +690,49 @@ def test_merge(data, expected):
     ([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
        "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
        "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
-       "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": (5, 4), "n_run": 10, "n_success": 2,
-       "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+       "custom_totals": None, "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": (5, 4), "n_run": 10,
+       "n_success": 2, "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
      [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
        "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
        "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
-       "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": None, "n_run": 5, "n_success": 0,
-       "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+       "custom_totals": None, "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": None, "n_run": 5,
+       "n_success": 0, "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
      ),
     # inconsistent logical commutations (first: None, second: (3, 2))
     ([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
        "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
        "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
-       "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": None, "n_run": 10, "n_success": 2,
-       "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+       "custom_totals": None, "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": None, "n_run": 10,
+       "n_success": 2, "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
      [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
        "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
        "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
-       "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": (3, 2), "n_run": 5, "n_success": 0,
-       "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+       "custom_totals": None, "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": (3, 2), "n_run": 5,
+       "n_success": 0, "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
      ),
     # inconsistent logical commutations (first: (5, 4), second: (3, 2, 1))
     ([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
        "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
        "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
-       "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": (5, 4), "n_run": 10, "n_success": 2,
-       "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+       "custom_totals": None, "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": (5, 4), "n_run": 10,
+       "n_success": 2, "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
      [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
        "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
        "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
-       "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": (3, 2, 1), "n_run": 5, "n_success": 0,
-       "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+       "custom_totals": None, "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": (3, 2, 1), "n_run": 5,
+       "n_success": 0, "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+     ),
+    # inconsistent custom (first: (2,), second: None)
+    ([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
+       "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
+       "custom_totals": (2,), "n_fail": 8, "n_k_d": (169, 1, 13), "n_logical_commutations": (5, 4), "n_run": 10,
+       "n_success": 2, "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+     [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
+       "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
+       "custom_totals": None, "n_fail": 5, "n_k_d": (169, 1, 13), "n_logical_commutations": None, "n_run": 5,
+       "n_success": 0, "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
      ),
 ])
 def test_merge_invalid(data):

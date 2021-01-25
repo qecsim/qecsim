@@ -81,6 +81,7 @@ def _run_once(mode, code, time_steps, error_model, decoder, error_probability, m
     # extract outcomes from decoding
     success = decoding.success
     logical_commutations = decoding.logical_commutations
+    custom_values = decoding.custom_values
     # if recovery specified, resolve success and logical_commutations
     if decoding.recovery is not None:
         # recovered code
@@ -107,12 +108,14 @@ def _run_once(mode, code, time_steps, error_model, decoder, error_probability, m
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('run: success={}'.format(success))
-        logger.debug('run: logical_commutations={}'.format(logical_commutations))
+        logger.debug('run: logical_commutations={!r}'.format(logical_commutations))
+        logger.debug('run: custom_values={!r}'.format(custom_values))
 
     data = {
         'error_weight': pt.bsf_wt(np.array(step_errors)),
         'success': bool(success),
         'logical_commutations': logical_commutations,
+        'custom_values': custom_values,
     }
 
     return data
@@ -153,9 +156,10 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
     ::
 
         {
-            'error_weight': 2,  # number qubits acted on non-trivially by error
-            'success': False,  # from logical commutations or overridden by decode result
-            'logical_commutations': np.array([1, 0])  # from logical commutations or overridden by decode result
+            'error_weight': 2,  # number of qubits acted on non-trivially by error
+            'success': False,  # evaluated or overridden by decode result
+            'logical_commutations': np.array([1, 0]),  # evaluated or overridden by decode result
+            'custom_values': np.array([1])  # None or overridden by decode result
         }
 
     :param code: Stabilizer code.
@@ -168,7 +172,7 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
     :type error_probability: float
     :param rng: Random number generator for error generation. (default=None resolves to numpy.random.default_rng())
     :type rng: numpy.random.Generator
-    :return: error_weight, success flag, and logical_commutations.
+    :return: error_weight, success flag, logical_commutations, and custom values.
     :rtype: dict
     :raises ValueError: if error_probability is not in [0, 1].
     """
@@ -227,9 +231,10 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability,
     ::
 
         {
-            'error_weight': 2,  # number qubits acted on non-trivially by error
-            'success': False,  # from logical commutations or overridden by decode result
-            'logical_commutations': np.array([1, 0])  # from logical commutations or overridden by decode result
+            'error_weight': 2,  # number of qubits acted on non-trivially by error
+            'success': False,  # evaluated or overridden by decode result
+            'logical_commutations': np.array([1, 0]),  # evaluated or overridden by decode result
+            'custom_values': np.array([1])  # None or overridden by decode result
         }
 
     :param code: Stabilizer code.
@@ -247,7 +252,7 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability,
     :type measurement_error_probability: float
     :param rng: Random number generator for error generation. (default=None resolves to numpy.random.default_rng())
     :type rng: numpy.random.Generator
-    :return: error_weight, success flag, and logical_commutations.
+    :return: error_weight, success flag, logical_commutations, and custom values.
     :rtype: dict
     :raises ValueError: if time_steps is not >= 1.
     :raises ValueError: if error_probability is not in [0, 1].
@@ -302,6 +307,7 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
         'n_success': 0,
         'n_fail': 0,
         'n_logical_commutations': None,
+        'custom_totals': None,
         'error_weight_total': 0,
         'error_weight_pvar': 0.0,
         'logical_failure_rate': 0.0,
@@ -314,8 +320,8 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
     logger.info('run: np.random.SeedSequence.entropy={}'.format(seed_sequence.entropy))
     rng = np.random.default_rng(seed_sequence)
 
-    array_sum_keys = ('n_logical_commutations',)  # list of array sum keys
-    array_val_keys = ('logical_commutations',)  # list of array value keys
+    array_sum_keys = ('n_logical_commutations', 'custom_totals',)  # list of array sum keys
+    array_val_keys = ('logical_commutations', 'custom_values',)  # list of array value keys
     error_weights = []  # list of error_weight from current run
 
     while ((max_runs is None or runs_data['n_run'] < max_runs)
@@ -396,7 +402,8 @@ def run(code, error_model, decoder, error_probability, max_runs=None, max_failur
             'n_run': 0,                             # count of runs
             'n_success': 0,                         # count of successful recovery
             'n_fail': 0,                            # count of failed recovery
-            'n_logical_commutations': (0, 0),       # counts of logical commutations
+            'n_logical_commutations': (0, 0),       # count of logical commutations (tuple)
+            'custom_totals': None,                  # sum of custom values (tuple)
             'error_weight_total': 0,                # sum of error_weight over n_run runs
             'error_weight_pvar': 0.0,               # pvariance of error_weight over n_run runs
             'logical_failure_rate': 0.0,            # n_fail / n_run
@@ -460,7 +467,8 @@ def run_ftp(code, time_steps, error_model, decoder, error_probability,
             'n_run': 0,                             # count of runs
             'n_success': 0,                         # count of successful recovery
             'n_fail': 0,                            # count of failed recovery
-            'n_logical_commutations': (0, 0),       # counts of logical commutations
+            'n_logical_commutations': (0, 0),       # count of logical commutations (tuple)
+            'custom_totals': None,                  # sum of custom values (tuple)
             'error_weight_total': 0,                # sum of error_weight over n_run runs
             'error_weight_pvar': 0.0,               # pvariance of error_weight over n_run runs
             'logical_failure_rate': 0.0,            # n_fail / n_run
@@ -533,7 +541,7 @@ def merge(*data_list):
     * Merged data is grouped by: `(code, n_k_d, error_model, decoder, error_probability, time_steps,
       measurement_error_probability)`.
     * The following scalar values are summed: `n_run`, `n_success`, `n_fail`, `error_weight_total`, `wall_time`.
-    * The following array values are summed: `n_logical_commutations`.
+    * The following array values are summed: `n_logical_commutations`, 'custom_totals'.
     * The following values are recalculated: `logical_failure_rate`, `physical_error_rate`.
     * The following values are *not* currently recalculated: `error_weight_pvar`.
 
@@ -548,7 +556,7 @@ def merge(*data_list):
                 'measurement_error_probability')
     scalar_val_keys = ('n_run', 'n_fail', 'n_success', 'error_weight_total', 'wall_time')
     scalar_zero_vals = (0, 0, 0, 0, 0.0)
-    array_val_keys = ('n_logical_commutations',)
+    array_val_keys = ('n_logical_commutations', 'custom_totals',)
     # map of groups to sums (use ordered dict to preserve order as much as possible).
     grps_to_scalar_sums = collections.OrderedDict()
     grps_to_array_sums = {}
@@ -558,7 +566,7 @@ def merge(*data_list):
         # support for 0.10 and 0.15 files:
         defaults_0_16 = {'time_steps': 1, 'measurement_error_probability': 0.0}
         # support for pre-1.0b6 files:
-        defaults_1_0b6 = {'n_logical_commutations': None}
+        defaults_1_0b6 = {'n_logical_commutations': None, 'custom_totals': None}
         runs_data = dict(itertools.chain(defaults_0_16.items(), defaults_1_0b6.items(), runs_data.items()))
         # extract group from data (note: force lists to tuples so group_id is hashable)
         group_id = tuple(tuple(v) if isinstance(v, list) else v for v in (runs_data[k] for k in grp_keys))
