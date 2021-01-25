@@ -1,3 +1,4 @@
+import itertools
 import logging
 import math
 import sys
@@ -6,6 +7,7 @@ import numpy as np
 import pytest
 
 from qecsim import app
+from qecsim.error import QecsimError
 from qecsim.model import ErrorModel, Decoder, DecodeResult
 from qecsim.models.basic import FiveQubitCode
 from qecsim.models.basic import SteaneCode
@@ -341,7 +343,27 @@ def test_run_logical_commutations(code, error, decoding, max_runs, expected_data
     assert np.array_equal(data['n_logical_commutations'], expected_data['n_logical_commutations'])
 
 
-# TODO: test invalid (inconsistent) logical_commutations
+@pytest.mark.parametrize('decoding1, decoding2', [
+    (DecodeResult(success=True, logical_commutations=None),
+     DecodeResult(success=True, logical_commutations=np.array([1, 0]))),
+    (DecodeResult(success=True, logical_commutations=np.array([1, 1, 0])),
+     DecodeResult(success=True, logical_commutations=np.array([1, 0]))),
+])
+def test_run_invalid_logical_commutations(decoding1, decoding2):
+    decodings = itertools.cycle((decoding1, decoding2))
+
+    class _CycleDecoder(Decoder):
+
+        def decode(self, code, syndrome, **kwargs):
+            return next(decodings)
+
+        @property
+        def label(self):
+            return 'Cycle'
+
+    # should raise error due to inconsistent logical_commutations
+    with pytest.raises(QecsimError):
+        app.run(FiveQubitCode(), BitFlipErrorModel(), _CycleDecoder(), 0.0, max_runs=5)
 
 
 @pytest.mark.parametrize('error_probability', [
