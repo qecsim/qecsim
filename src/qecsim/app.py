@@ -183,8 +183,8 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
     return _run_once('ideal', code, 1, error_model, decoder, error_probability, 0.0, rng)
 
 
-def run_once_ftp(code, time_steps, error_model, decoder, error_probability, measurement_error_probability=None,
-                 rng=None):
+def run_once_ftp(code, time_steps, error_model, decoder, error_probability,
+                 measurement_error_probability=None, rng=None):
     r"""
     Run a stabilizer code error-decode-recovery (fault-tolerant time-periodic) simulation and return run data.
 
@@ -314,30 +314,35 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
     logger.info('run: np.random.SeedSequence.entropy={}'.format(seed_sequence.entropy))
     rng = np.random.default_rng(seed_sequence)
 
+    array_sum_keys = ('n_logical_commutations',)  # list of array sum keys
+    array_val_keys = ('logical_commutations',)  # list of array value keys
     error_weights = []  # list of error_weight from current run
 
     while ((max_runs is None or runs_data['n_run'] < max_runs)
            and (max_failures is None or runs_data['n_fail'] < max_failures)):
         # run simulation
-        data = _run_once(mode, code, time_steps, error_model, decoder, error_probability, measurement_error_probability,
-                         rng)
+        data = _run_once(mode, code, time_steps, error_model, decoder, error_probability,
+                         measurement_error_probability, rng)
         # increment run counts
         runs_data['n_run'] += 1
         if data['success']:
             runs_data['n_success'] += 1
         else:
             runs_data['n_fail'] += 1
-        # on first run, initialize n_logical_commutations to zeros array (unless incoming is None)
-        if runs_data['n_run'] == 1 and data['logical_commutations'] is not None:
-            runs_data['n_logical_commutations'] = np.zeros_like(data['logical_commutations'])
-        # increment logical_commutations count (unless both count and incoming are None)
-        if not (runs_data['n_logical_commutations'] is None and data['logical_commutations'] is None):
-            # try to sum arrays and raise error if any mismatch (e.g. if decoder inconsistently returns None or array).
-            try:
-                runs_data['n_logical_commutations'] += data['logical_commutations']
-            except (TypeError, ValueError) as ex:
-                raise QecsimError("Mismatch summing logical_commutations from current run '{}' and previous runs '{}'."
-                                  .format(data['logical_commutations'], runs_data['n_logical_commutations'])) from ex
+        # sum arrays
+        for array_sum_key, array_val_key in zip(array_sum_keys, array_val_keys):
+            array_sum = runs_data[array_sum_key]  # extract sum
+            array_val = data[array_val_key]  # extract val
+            if runs_data['n_run'] == 1 and array_val is not None:  # first run, so initialize sum, if val not None
+                array_sum = np.zeros_like(array_val)
+            if array_sum is None and array_val is None:  # both None
+                array_sum = None
+            elif (array_sum is None or array_val is None) or (array_sum.shape != array_val.shape):  # mismatch
+                raise QecsimError(
+                    'Mismatch between {} values to sum: {}, {}'.format(array_val_key, array_sum, array_val))
+            else:  # match, so sum
+                array_sum = array_sum + array_val
+            runs_data[array_sum_key] = array_sum  # update runs_data
         # append error weight
         error_weights.append(data['error_weight'])
 
@@ -348,9 +353,10 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
     # rate statistics
     _add_rate_statistics(runs_data)
 
-    # convert n_logical_commutations to tuple if not None
-    if runs_data['n_logical_commutations'] is not None:
-        runs_data['n_logical_commutations'] = tuple(runs_data['n_logical_commutations'].tolist())
+    # convert sum arrays to tuples if not None
+    for array_sum_key in array_sum_keys:
+        if runs_data[array_sum_key] is not None:
+            runs_data[array_sum_key] = tuple(runs_data[array_sum_key].tolist())
 
     # record wall_time
     runs_data['wall_time'] = time.perf_counter() - wall_time_start
@@ -557,25 +563,25 @@ def merge(*data_list):
         # extract group from data (note: force lists to tuples so group_id is hashable)
         group_id = tuple(tuple(v) if isinstance(v, list) else v for v in (runs_data[k] for k in grp_keys))
         # scalars: e.g. (10, 6, 4, 256, 10.34)
-        scalar_values = tuple(runs_data[k] for k in scalar_val_keys)  # extract from data
+        scalar_vals = tuple(runs_data[k] for k in scalar_val_keys)  # extract from data
         scalar_sums = grps_to_scalar_sums.get(group_id, scalar_zero_vals)  # get sums (or zeros if not found)
-        scalar_sums = tuple(sum(x) for x in zip(scalar_values, scalar_sums))  # update sums
+        scalar_sums = tuple(sum(x) for x in zip(scalar_vals, scalar_sums))  # update sums
         grps_to_scalar_sums[group_id] = scalar_sums  # put sums
         # arrays: e.g. ((2, 5), (3, 8, 2), None)
         # arrays: extract from data as tuple of None and tuples
-        array_values = tuple(None if runs_data[k] is None else tuple(runs_data[k]) for k in array_val_keys)
+        array_vals = tuple(None if runs_data[k] is None else tuple(runs_data[k]) for k in array_val_keys)
         try:  # get sums and update
             array_sums = []
-            for s, v in zip(grps_to_array_sums[group_id], array_values):  # sum and value tuples in pairs
-                if s is None and v is None:  # Both None
+            for array_sum, array_val in zip(grps_to_array_sums[group_id], array_vals):  # sum and value tuples in pairs
+                if array_sum is None and array_val is None:  # Both None
                     array_sums.append(None)
-                elif (s is None or v is None) or (len(s) != len(v)):  # Mismatch
-                    raise ValueError('Mismatch between array values to sum: {}, {}'.format(s, v))
+                elif (array_sum is None or array_val is None) or (len(array_sum) != len(array_val)):  # Mismatch
+                    raise ValueError('Mismatch between array values to sum: {}, {}'.format(array_sum, array_val))
                 else:  # matching length, so sum
-                    array_sums.append(tuple(sum(x) for x in zip(s, v)))
+                    array_sums.append(tuple(sum(x) for x in zip(array_sum, array_val)))
             array_sums = tuple(array_sums)
         except KeyError:  # set sums from values if not found
-            array_sums = array_values
+            array_sums = array_vals
         grps_to_array_sums[group_id] = array_sums  # put sums
     # flatten grps_to_scalar_sums and grps_to_array_sums
     merged_data_list = [dict(zip(grp_keys + scalar_val_keys + array_val_keys,
