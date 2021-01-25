@@ -526,7 +526,8 @@ def merge(*data_list):
     * The runs data is in the format specified in :func:`run` and :func:`fun_ftp`.
     * Merged data is grouped by: `(code, n_k_d, error_model, decoder, error_probability, time_steps,
       measurement_error_probability)`.
-    * The following values are summed: `n_run`, `n_success`, `n_fail`, `error_weight_total`, `wall_time`.
+    * The following scalar values are summed: `n_run`, `n_success`, `n_fail`, `error_weight_total`, `wall_time`.
+    * The following array values are summed: `n_logical_commutations`.
     * The following values are recalculated: `logical_failure_rate`, `physical_error_rate`.
     * The following values are *not* currently recalculated: `error_weight_pvar`.
 
@@ -534,31 +535,52 @@ def merge(*data_list):
     :type data_list: list of dict
     :return: Merged list of aggregated runs data.
     :rtype: list of dict
+    :raises ValueError: if there is a mismatch between array values to be summed.
     """
-    # TODO: handle n_logical_commutations
     # define group keys, value keys and zero values
     grp_keys = ('code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
                 'measurement_error_probability')
-    val_keys = ('n_run', 'n_fail', 'n_success', 'error_weight_total', 'wall_time')
-    zero_vals = (0, 0, 0, 0, 0.0)
+    scalar_val_keys = ('n_run', 'n_fail', 'n_success', 'error_weight_total', 'wall_time')
+    scalar_zero_vals = (0, 0, 0, 0, 0.0)
+    array_val_keys = ('n_logical_commutations',)
     # map of groups to sums (use ordered dict to preserve order as much as possible).
-    grps_to_sums = collections.OrderedDict()
+    grps_to_scalar_sums = collections.OrderedDict()
+    grps_to_array_sums = {}
     # iterate through single list from given data lists
     for runs_data in itertools.chain(*data_list):
-        # support for 0.10 and 0.15 files: define defaults, create new data with defaults overwritten by data
+        # define defaults, create new data with defaults overwritten by data
+        # support for 0.10 and 0.15 files:
         defaults_0_16 = {'time_steps': 1, 'measurement_error_probability': 0.0}
-        runs_data = dict(itertools.chain(defaults_0_16.items(), runs_data.items()))
-        # extract group and values from data (note: force lists to tuples so group_id is hashable)
+        # support for pre-1.0b6 files:
+        defaults_1_0b6 = {'n_logical_commutations': None}
+        runs_data = dict(itertools.chain(defaults_0_16.items(), defaults_1_0b6.items(), runs_data.items()))
+        # extract group from data (note: force lists to tuples so group_id is hashable)
         group_id = tuple(tuple(v) if isinstance(v, list) else v for v in (runs_data[k] for k in grp_keys))
-        values = tuple(runs_data[k] for k in val_keys)
-        # get sums (or zeros if not found)
-        sums = grps_to_sums.get(group_id, zero_vals)
-        # add values to sums
-        sums = tuple(sum(x) for x in zip(values, sums))
-        # put summed_values
-        grps_to_sums[group_id] = sums
-    # flatten grps_to_sums
-    merged_data_list = [dict(zip(grp_keys + val_keys, group_id + sums)) for group_id, sums in grps_to_sums.items()]
+        # scalars: e.g. (10, 6, 4, 256, 10.34)
+        scalar_values = tuple(runs_data[k] for k in scalar_val_keys)  # extract from data
+        scalar_sums = grps_to_scalar_sums.get(group_id, scalar_zero_vals)  # get sums (or zeros if not found)
+        scalar_sums = tuple(sum(x) for x in zip(scalar_values, scalar_sums))  # update sums
+        grps_to_scalar_sums[group_id] = scalar_sums  # put sums
+        # arrays: e.g. ((2, 5), (3, 8, 2), None)
+        # arrays: extract from data as tuple of None and tuples
+        array_values = tuple(None if runs_data[k] is None else tuple(runs_data[k]) for k in array_val_keys)
+        try:  # get sums and update
+            array_sums = []
+            for s, v in zip(grps_to_array_sums[group_id], array_values):  # sum and value tuples in pairs
+                if s is None and v is None:  # Both None
+                    array_sums.append(None)
+                elif (s is None or v is None) or (len(s) != len(v)):  # Mismatch
+                    raise ValueError('Mismatch between array values to sum: {}, {}'.format(s, v))
+                else:  # matching length, so sum
+                    array_sums.append(tuple(sum(x) for x in zip(s, v)))
+            array_sums = tuple(array_sums)
+        except KeyError:  # set sums from values if not found
+            array_sums = array_values
+        grps_to_array_sums[group_id] = array_sums  # put sums
+    # flatten grps_to_scalar_sums and grps_to_array_sums
+    merged_data_list = [dict(zip(grp_keys + scalar_val_keys + array_val_keys,
+                                 group_id + scalar_sums + grps_to_array_sums[group_id]))
+                        for group_id, scalar_sums in grps_to_scalar_sums.items()]
     # add rate statistics
     for runs_data in merged_data_list:
         _add_rate_statistics(runs_data)

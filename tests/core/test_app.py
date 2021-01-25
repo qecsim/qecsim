@@ -515,7 +515,8 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{'n_k_d': (450, 2, 15), 'physical_error_rate': 0.09496, 'n_run': 10000, 'decoder': 'Toric MWPM',
        'error_weight_total': 427320, 'error_model': 'Bit-flip', 'n_success': 8310, 'n_fail': 1690,
        'code': 'Toric 15x15', 'wall_time': 591.4239950589836, 'logical_failure_rate': 0.169,
-       'error_probability': 0.095, 'time_steps': 1, 'measurement_error_probability': 0.0}]
+       'error_probability': 0.095, 'time_steps': 1, 'measurement_error_probability': 0.0,
+       "n_logical_commutations": None}]
      ),
     # multiple same-group data sets are merged (data sets from merge)
     (([{'n_k_d': (450, 2, 15), 'physical_error_rate': 0.09496, 'n_run': 10000, 'decoder': 'Toric MWPM',
@@ -530,7 +531,8 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{'error_probability': 0.095, 'code': 'Toric 15x15', 'n_k_d': (450, 2, 15), 'n_fail': 3410,
        'error_weight_total': 856288, 'physical_error_rate': 0.09514311111111111, 'decoder': 'Toric MWPM',
        'error_model': 'Bit-flip', 'n_run': 20000, 'n_success': 16590, 'logical_failure_rate': 0.1705,
-       'wall_time': 1381.0899616722018, 'time_steps': 1, 'measurement_error_probability': 0.0}]
+       'wall_time': 1381.0899616722018, 'time_steps': 1, 'measurement_error_probability': 0.0,
+       "n_logical_commutations": None}]
      ),
     # multiple different-group data sets are not merged (data sets from merge)
     (([{'n_k_d': (450, 2, 15), 'physical_error_rate': 0.09496, 'n_run': 10000, 'decoder': 'Toric MWPM',
@@ -549,11 +551,13 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{'error_probability': 0.095, 'code': 'Toric 15x15', 'n_k_d': (450, 2, 15), 'n_fail': 3410,
        'error_weight_total': 856288, 'physical_error_rate': 0.09514311111111111, 'decoder': 'Toric MWPM',
        'error_model': 'Bit-flip', 'n_run': 20000, 'n_success': 16590, 'logical_failure_rate': 0.1705,
-       'wall_time': 1381.0899616722018, 'time_steps': 1, 'measurement_error_probability': 0.0},
+       'wall_time': 1381.0899616722018, 'time_steps': 1, 'measurement_error_probability': 0.0,
+       "n_logical_commutations": None},
       {'logical_failure_rate': 0.1172, 'decoder': 'Toric MWPM', 'wall_time': 60594.737112408504,
        'n_k_d': (2450, 2, 35), 'n_success': 8828, 'code': 'Toric 35x35', 'n_run': 10000, 'n_fail': 1172,
        'error_weight_total': 2326883, 'physical_error_rate': 0.09497481632653061, 'error_probability': 0.095,
-       'error_model': 'Bit-flip', 'time_steps': 1, 'measurement_error_probability': 0.0}]
+       'error_model': 'Bit-flip', 'time_steps': 1, 'measurement_error_probability': 0.0,
+       "n_logical_commutations": None}]
      ),
     # error_weight_pvar ignored, n_k_d in list form converted to tuple (data sets from run)
     (([{'code': 'Toric 3x3', 'decoder': 'Toric MWPM', 'error_model': 'Bit-flip', 'error_probability': 0.1,
@@ -568,7 +572,7 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{'code': 'Toric 3x3', 'decoder': 'Toric MWPM', 'error_model': 'Bit-flip', 'error_probability': 0.1,
        'error_weight_total': 398, 'logical_failure_rate': 0.285, 'n_fail': 57, 'n_k_d': (18, 2, 3), 'n_run': 200,
        'n_success': 143, 'physical_error_rate': 0.11055555555555556, 'wall_time': 0.5035656229993037,
-       'time_steps': 1, 'measurement_error_probability': 0.0}]
+       'time_steps': 1, 'measurement_error_probability': 0.0, "n_logical_commutations": None}]
      ),
     # multiple same-group (including measurement_error_probability) data sets are merged
     (([{'error_probability': 0.2, 'code': 'Steane', 'n_run': 5, 'error_model': 'Phase-flip',
@@ -584,7 +588,7 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{'n_run': 10, 'time_steps': 2, 'measurement_error_probability': 0.01, 'error_model': 'Phase-flip',
        'physical_error_rate': 0.14285714285714285, 'decoder': 'Naive', 'n_fail': 2, 'n_k_d': (7, 1, 3),
        'wall_time': 0.04033649782650173, 'logical_failure_rate': 0.2, 'error_probability': 0.2,
-       'error_weight_total': 20, 'n_success': 8, 'code': 'Steane'}]
+       'error_weight_total': 20, 'n_success': 8, 'code': 'Steane', "n_logical_commutations": None}]
      ),
     # multiple different-group (including measurement_error_probability) data sets are not merged
     (([{'n_success': 5, 'physical_error_rate': 0.02857142857142857, 'wall_time': 0.019910499919205904,
@@ -601,12 +605,30 @@ def test_run_ftp_physical_error_rate(code, time_steps, error_model, decoder, err
      [{"code": "Steane", "decoder": "Naive", "error_model": "Phase-flip", "error_probability": 0.05,
        "error_weight_total": 2, "logical_failure_rate": 0.0, "time_steps": 2,
        "measurement_error_probability": 0.01, "n_fail": 0, "n_k_d": (7, 1, 3), "n_run": 5, "n_success": 5,
-       "physical_error_rate": 0.02857142857142857, "wall_time": 0.019910499919205904},
+       "physical_error_rate": 0.02857142857142857, "wall_time": 0.019910499919205904, "n_logical_commutations": None},
       {"code": "Steane", "decoder": "Naive", "error_model": "Phase-flip", "error_probability": 0.05,
        "error_weight_total": 0, "logical_failure_rate": 0.0, "time_steps": 1,
        "measurement_error_probability": 0.0, "n_fail": 0, "n_k_d": (7, 1, 3), "n_run": 5, "n_success": 5,
-       "physical_error_rate": 0.0, "wall_time": 0.013491070130839944}]
-     )
+       "physical_error_rate": 0.0, "wall_time": 0.013491070130839944, "n_logical_commutations": None}]
+     ),
+    # logical commutations
+    (([{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+        "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 48.36000000000001,
+        "error_weight_total": 508, "logical_failure_rate": 0.8, "measurement_error_probability": 0.0,
+        "n_fail": 8, "n_k_d": [169, 1, 13], "n_logical_commutations": [5, 4], "n_run": 10, "n_success": 2,
+        "physical_error_rate": 0.30059171597633133, "time_steps": 1, "wall_time": 4.250106001000001}],
+      [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+        "error_model": "Depolarizing", "error_probability": 0.3, "error_weight_pvar": 65.04,
+        "error_weight_total": 267, "logical_failure_rate": 1.0, "measurement_error_probability": 0.0,
+        "n_fail": 5, "n_k_d": [169, 1, 13], "n_logical_commutations": [3, 2], "n_run": 5, "n_success": 0,
+        "physical_error_rate": 0.31597633136094677, "time_steps": 1, "wall_time": 2.029527459}],
+      ),
+     [{"code": "Rotated planar 13x13", "decoder": "Rotated planar RMPS (chi=16, mode=c)",
+       "error_model": "Depolarizing", "error_probability": 0.3,
+       "error_weight_total": 775, "logical_failure_rate": 0.8666666666666667, "measurement_error_probability": 0.0,
+       "n_fail": 13, "n_k_d": (169, 1, 13), "n_logical_commutations": (8, 6), "n_run": 15, "n_success": 2,
+       "physical_error_rate": 0.3057199211045365, "time_steps": 1, "wall_time": 6.279633460000001}]
+     ),
 ])
 def test_merge(data, expected):
     actual = app.merge(*data)
