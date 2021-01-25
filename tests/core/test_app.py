@@ -646,3 +646,5 @@ def test_merge(data, expected):
     print()
 
     assert actual == expected, 'Merged data=\n{}\ndoes not match expected\ndata=\n{}'.format(actual, expected)
+
+# TODO: test invalid merges
