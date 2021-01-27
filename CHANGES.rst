@@ -12,7 +12,7 @@ Untagged
   success, logical commutations and custom values via ``model.DecodeResult``.
 - src: Update ``models.rotatedtoric.RotatedToricSMWPMDecoder`` to return
   ``model.DecodeResult`` with custom values for fault-tolerant decoding.
-- docs: Add change list.
+- docs: Add change log.
 
 1.0b5
 ~~~~~
