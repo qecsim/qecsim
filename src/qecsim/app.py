@@ -144,8 +144,9 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
 
     * :math:`\oplus` denotes binary addition defined as addition modulo 2, or equivalently exclusive-or.
     * See :func:`qecsim.paulitools.bsp` for definition of :math:`\odot`.
-    * Optionally, :meth:`qecsim.model.Decoder.decode` may return :class:`~qecsim.model.DecodeResult` as ``decoding`` to
-      explicitly specify ``success`` and ``logical_commutations``, see :class:`qecsim.model.DecodeResult` for details.
+    * Optionally, :meth:`qecsim.model.Decoder.decode` may return :class:`~qecsim.model.DecodeResult` as
+      ``decoding`` to explicitly specify ``success``, ``logical_commutations`` and ``custom_values``, see
+      :class:`qecsim.model.DecodeResult` for details.
     * In addition to ``code`` and ``syndrome``, the following keyword parameters are passed as context to
       :meth:`qecsim.model.Decoder.decode`: ``error_model``, ``error_probability``, ``error``. Furthermore, in order to
       enable decoders to handle ideal and fault-tolerant decoding consistently, the following keyword parameters and
@@ -220,12 +221,12 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability,
 
     * :math:`\oplus` denotes binary addition defined as addition modulo 2, or equivalently exclusive-or.
     * See :func:`qecsim.paulitools.bsp` for definition of :math:`\odot`.
+    * Optionally, :meth:`qecsim.model.DecoderFTP.decode_ftp` may return :class:`~qecsim.model.DecodeResult` as
+      ``decoding`` to explicitly specify ``success``, ``logical_commutations`` and ``custom_values``, see
+      :class:`qecsim.model.DecodeResult` for details.
     * In addition to ``code``, ``time_steps`` and ``syndrome``, the following keyword parameters are passed as context
       to :meth:`qecsim.model.DecoderFTP.decode_ftp`: ``error_model``, ``error_probability``, ``error``, ``step_errors``,
       ``measurement_error_probability`` and ``step_measurement_errors``. Most decoders will ignore these parameters.
-    * Optionally, :meth:`qecsim.model.DecoderFTP.decode_ftp` may return :class:`~qecsim.model.DecodeResult` as
-      ``decoding`` to explicitly specify ``success`` and ``logical_commutations``, see
-      :class:`qecsim.model.DecodeResult` for details.
     * The returned data is in the following format:
 
     ::
@@ -541,7 +542,7 @@ def merge(*data_list):
     * Merged data is grouped by: `(code, n_k_d, error_model, decoder, error_probability, time_steps,
       measurement_error_probability)`.
     * The following scalar values are summed: `n_run`, `n_success`, `n_fail`, `error_weight_total`, `wall_time`.
-    * The following array values are summed: `n_logical_commutations`, 'custom_totals'.
+    * The following array values are summed: `n_logical_commutations`, `custom_totals`.
     * The following values are recalculated: `logical_failure_rate`, `physical_error_rate`.
     * The following values are *not* currently recalculated: `error_weight_pvar`.
 
