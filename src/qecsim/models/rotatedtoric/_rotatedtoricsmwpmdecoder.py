@@ -102,7 +102,10 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
         syndrome = np.expand_dims(syndrome, axis=0)  # convert syndrome to 2d
         kwargs['measurement_error_probability'] = 0.0
         kwargs['step_measurement_errors'] = None
-        return self.decode_ftp(code, time_steps, syndrome, error_model, error_probability, **kwargs)
+        decoding = self.decode_ftp(code, time_steps, syndrome, error_model, error_probability, **kwargs)
+        assert decoding.success is None and np.all(decoding.custom_values == 0), (
+            'Unexpected time-like logical failure in non-FT decoding')
+        return decoding.recovery
 
     def decode_ftp(self, code, time_steps, syndrome,
                    error_model=BitPhaseFlipErrorModel(),  # noqa: B008
@@ -117,8 +120,18 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
         * The optional keyword parameters ``error_model`` and ``error_probability`` are used to determine the prior
           probability distribution for use in the decoding algorithm. Any provided error model must implement
           :meth:`~qecsim.model.ErrorModel.probability_distribution`.
-        * This method always returns a ``DecodeResult`` with a recovery operation and, additionally a false success flag
-          if a time-like logical failure is detected.
+        * This method always returns a ``DecodeResult`` with the following parameters::
+
+            DecodeResult(
+                success=None,  # None indicates to be evaluated by app
+                               # False indicates time-like logical failure (overrides evaluation by app)
+                logical_commutations=None,  # None indicates to be evaluated by app
+                recovery=np.array(...),  # recovery operation (used by app to evaluate success and logical_commutations)
+                custom_values=np.array([0, 0]),  # [0, 0] no time-like logical failure
+                                                 # [1, 0] time-like logical failure through X plaquettes
+                                                 # [0, 1] time-like logical failure through Z plaquettes
+                                                 # [1, 1] time-like logical failure through both X and Z plaquettes
+            )
 
         :param code: Rotated toric code.
         :type code: RotatedToricCode
@@ -195,12 +208,14 @@ class RotatedToricSMWPMDecoder(Decoder, DecoderFTP):
                 raise QecsimError('Failed to test t-parity. step_measurement_errors not provided.')
             # extract t-parity for measurement errors
             measurement_error_tps = self._measurement_error_tparities(code, step_measurement_errors[-1])
-            # return false decode-result if t-parity fails
-            if (recovery_x_tp, recovery_z_tp) != measurement_error_tps:
-                return DecodeResult(success=False, recovery=recovery)
+            # total t-parity
+            total_tps = np.array((recovery_x_tp, recovery_z_tp)) ^ measurement_error_tps
+            # return false decode-result if t-parity fails, with time-parity as custom_values
+            if np.any(total_tps != 0):
+                return DecodeResult(success=False, recovery=recovery, custom_values=total_tps)
 
-        # return recovery
-        return DecodeResult(recovery=recovery)
+        # return recovery with zeros time parity custom values
+        return DecodeResult(recovery=recovery, custom_values=np.array((0, 0)))
 
     @property
     def label(self):

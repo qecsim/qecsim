@@ -10,6 +10,8 @@ Untagged
 - src: Extend ``app`` output with logical commutations and custom values.
 - src: Improve decoder flexibility: decoders may partially or completely specify
   success, logical commutations and custom values via ``model.DecodeResult``.
+- src: Update ``models.rotatedtoric.RotatedToricSMWPMDecoder`` to return
+  ``model.DecodeResult`` with custom values for fault-tolerant decoding.
 - docs: Add change list.
 
 1.0b5

@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from qecsim import paulitools as pt
+from qecsim.model import DecodeResult
 from qecsim.models.generic import BiasedDepolarizingErrorModel, BitPhaseFlipErrorModel, DepolarizingErrorModel
 from qecsim.models.generic import BitFlipErrorModel
 from qecsim.models.rotatedtoric import RotatedToricCode, RotatedToricSMWPMDecoder
@@ -62,9 +63,22 @@ def _code_error_syndrome(code, error_dicts, measurement_error_indices):
 def _validate_decoding(code, error, decoding):
     print()
     print('decoding:', decoding)
-    # decoding.success should be unspecified in general, or false if time-like logical failure detected
-    assert decoding.success is None or not decoding.success, 'decode result incorrectly indicates success'
-    recovery = decoding.recovery
+    if isinstance(decoding, DecodeResult):
+        # decoding.success should be unspecified in general, or false if time-like logical failure detected
+        assert decoding.success is None or not decoding.success, 'decoding.success should be None or False'
+        assert tuple(decoding.custom_values.tolist()) in {(0, 0), (0, 1), (1, 0), (1, 1)}, (
+            'decoding.custom_values should be [0, 0], [0, 1], [1, 0], or [1, 1]')
+        if decoding.success is None:  # success=None (evaluation delegated to app)
+            # custom_values=[0, 0] (i.e. time-like logical failure not detected)
+            assert np.all(decoding.custom_values == 0), (
+                'decoding.success specified but decoding.custom_values non-zero')
+        elif not decoding.success:  # success=False
+            # custom_values non-zero (i.e. time-like logical failure(s) detected)
+            assert np.any(decoding.custom_values == 1), (
+                'decoding.success False but decoding.custom_values all zero')
+        recovery = decoding.recovery
+    else:
+        recovery = decoding
     print()
     print('recovery:')
     print(code.new_pauli(recovery))
@@ -1441,9 +1455,8 @@ def test_rotated_toric_smwpm_decoder_measurement_error_tparities():
     assert measurement_error_tps == expected
 
 
-@pytest.mark.parametrize('code, error, syndrome, step_errors, step_measurement_errors', [
-
-    _code_error_syndrome(  # 2 time-steps, Y in bulk, 1 measurement error
+@pytest.mark.parametrize('code, error, syndrome, step_errors, step_measurement_errors, expected_custom_values', [
+    (*_code_error_syndrome(  # 2 time-steps, Y in bulk, 1 measurement error
         RotatedToricCode(6, 6),  # code
         [  # step_errors
             {'Y': [(2, 2)]},
@@ -1452,8 +1465,8 @@ def test_rotated_toric_smwpm_decoder_measurement_error_tparities():
         [  # step_measurement_errors
             [(2, 2)],
             [],
-        ]),
-    _code_error_syndrome(  # 2 time-steps, Y in bulk, 2 measurement errors
+        ]), (0, 0)),
+    (*_code_error_syndrome(  # 2 time-steps, Y in bulk, 2 measurement errors
         RotatedToricCode(6, 6),  # code
         [  # step_errors
             {'Y': [(2, 2)]},
@@ -1462,8 +1475,8 @@ def test_rotated_toric_smwpm_decoder_measurement_error_tparities():
         [  # step_measurement_errors
             [(2, 2)],
             [(0, 0)],
-        ]),
-    _code_error_syndrome(  # 2 time-steps, 2 Y in bulk, 1 measurement error
+        ]), (0, 1)),
+    (*_code_error_syndrome(  # 2 time-steps, 2 Y in bulk, 1 measurement error
         RotatedToricCode(6, 6),  # code
         [  # step_errors
             {'Y': [(1, 1), (2, 2)]},
@@ -1472,8 +1485,8 @@ def test_rotated_toric_smwpm_decoder_measurement_error_tparities():
         [  # step_measurement_errors
             [(2, 2)],
             [],
-        ]),
-    _code_error_syndrome(  # 2 time-steps, 2 Y in bulk, 2 measurement errors
+        ]), (0, 0)),
+    (*_code_error_syndrome(  # 2 time-steps, 2 Y in bulk, 2 measurement errors
         RotatedToricCode(6, 6),  # code
         [  # step_errors
             {'Y': [(1, 1), (2, 2)]},
@@ -1482,9 +1495,40 @@ def test_rotated_toric_smwpm_decoder_measurement_error_tparities():
         [  # step_measurement_errors
             [(2, 2)],
             [(2, 3)],
-        ]),
+        ]), (1, 0)),
+    (*_code_error_syndrome(  # 2 time-steps, 2 measurement errors on X-plaquettes
+        RotatedToricCode(6, 6),  # code
+        [  # step_errors
+            {},
+            {},
+        ],
+        [  # step_measurement_errors
+            [(1, 2)],
+            [(1, 2)],
+        ]), (1, 0)),
+    (*_code_error_syndrome(  # 2 time-steps, 2 measurement errors on Z-plaquettes
+        RotatedToricCode(6, 6),  # code
+        [  # step_errors
+            {},
+            {},
+        ],
+        [  # step_measurement_errors
+            [(1, 1)],
+            [(1, 1)],
+        ]), (0, 1)),
+    (*_code_error_syndrome(  # 2 time-steps, 2 measurement errors on both X and Z-plaquettes
+        RotatedToricCode(6, 6),  # code
+        [  # step_errors
+            {},
+            {},
+        ],
+        [  # step_measurement_errors
+            [(1, 1), (1, 2)],
+            [(1, 1), (1, 2)],
+        ]), (1, 1)),
 ])
-def test_rotated_toric_smwpm_decoder_decode_ftp_tparity(code, error, syndrome, step_errors, step_measurement_errors):
+def test_rotated_toric_smwpm_decoder_decode_ftp_tparity(code, error, syndrome, step_errors, step_measurement_errors,
+                                                        expected_custom_values):
     print()
     print('error:')
     print(error)
@@ -1494,6 +1538,7 @@ def test_rotated_toric_smwpm_decoder_decode_ftp_tparity(code, error, syndrome, s
     print(syndrome)
     decoding = decoder.decode_ftp(code, len(syndrome), syndrome, step_measurement_errors=step_measurement_errors)
     _validate_decoding(code, error, decoding)
+    assert np.array_equal(decoding.custom_values, expected_custom_values)
 
 
 @pytest.mark.parametrize('code, time_steps, a_node, b_node, expected', [
