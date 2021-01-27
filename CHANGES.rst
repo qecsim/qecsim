@@ -7,8 +7,9 @@
 Untagged
 
 - src: Remove CLI restriction on max random-seed (unnecessary since Numpy 1.17).
-- src: Extend ``app`` output with logical commutations and custom values,
-  including possibility to override via ``model.DecodeResult``.
+- src: Extend ``app`` output with logical commutations and custom values.
+- src: Improve decoder flexibility: decoders may partially or completely specify
+  success, logical commutations and custom values via ``model.DecodeResult``.
 - docs: Add change list.
 
 1.0b5
