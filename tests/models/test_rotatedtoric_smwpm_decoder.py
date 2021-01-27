@@ -71,10 +71,10 @@ def _validate_decoding(code, error, decoding):
         if decoding.success is None:  # success=None (evaluation delegated to app)
             # custom_values=[0, 0] (i.e. time-like logical failure not detected)
             assert np.all(decoding.custom_values == 0), (
-                'decoding.success specified but decoding.custom_values non-zero')
+                'decoding.success unspecified but decoding.custom_values non-zero')
         elif not decoding.success:  # success=False
             # custom_values non-zero (i.e. time-like logical failure(s) detected)
-            assert np.any(decoding.custom_values == 1), (
+            assert not np.all(decoding.custom_values == 0), (
                 'decoding.success False but decoding.custom_values all zero')
         recovery = decoding.recovery
     else:
