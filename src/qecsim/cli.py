@@ -210,7 +210,7 @@ def cli():
               help='Maximum number of runs for each probability.  [default: 1 if max-failures unspecified]')
 @click.option('--output', '-o', default='-', type=click.Path(allow_dash=True), metavar='FILENAME',
               help='Output file. (Writes to log if file exists).')
-@click.option('--random-seed', '-s', type=click.IntRange(min=0, max=2 ** 32 - 1), metavar='INT',
+@click.option('--random-seed', '-s', type=click.IntRange(min=0), metavar='INT',
               help='Random seed for qubit error generation. (Re-applied for each probability).')
 def run(code, error_model, decoder, error_probabilities, max_failures, max_runs, output, random_seed):
     """
@@ -281,7 +281,7 @@ def run(code, error_model, decoder, error_probabilities, max_failures, max_runs,
               help='Measurement error probability [default: 0.0 if TIME_STEPS == 1 else ERROR_PROBABILITY].')
 @click.option('--output', '-o', default='-', type=click.Path(allow_dash=True), metavar='FILENAME',
               help='Output file. (Writes to log if file exists).')
-@click.option('--random-seed', '-s', type=click.IntRange(min=0, max=2 ** 32 - 1), metavar='INT',
+@click.option('--random-seed', '-s', type=click.IntRange(min=0), metavar='INT',
               help='Random seed for qubit error generation. (Re-applied for each probability).')
 def run_ftp(code, time_steps, error_model, decoder, error_probabilities, max_failures, max_runs,
             measurement_error_probability, output, random_seed):

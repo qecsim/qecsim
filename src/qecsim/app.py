@@ -11,6 +11,7 @@ import time
 import numpy as np
 
 from qecsim import paulitools as pt
+from qecsim.error import QecsimError
 from qecsim.model import DecodeResult
 
 logger = logging.getLogger(__name__)
@@ -73,43 +74,48 @@ def _run_once(mode, code, time_steps, error_model, decoder, error_probability, m
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('run: decoding={}'.format(decoding))
 
-    # check for DecodeResult or recovery operation from decoder
-    if isinstance(decoding, DecodeResult):
-        # if decoder returns DecodeResult, success flag defines success
-        success = decoding.success
-    else:
-        # otherwise, treat decoder return value as recovery operation
-        recovery = decoding
+    # if decoding is not DecodeResult, convert to DecodeResult
+    if not isinstance(decoding, DecodeResult):
+        # decoding is recovery, so wrap in DecodeResult
+        decoding = DecodeResult(recovery=decoding)  # raises error if recovery is None
+    # extract outcomes from decoding
+    success = decoding.success
+    logical_commutations = decoding.logical_commutations
+    custom_values = decoding.custom_values
+    # if recovery specified, resolve success and logical_commutations
+    if decoding.recovery is not None:
         # recovered code
-        recovered = recovery ^ error
+        recovered = decoding.recovery ^ error
         # success checks
         commutes_with_stabilizers = np.all(pt.bsp(recovered, code.stabilizers.T) == 0)
         if not commutes_with_stabilizers:
-            log_data = {
+            log_data = {  # enough data to recreate issue
                 # models
-                'code': repr(code),
-                'error_model': repr(error_model),
-                'decoder': repr(decoder),
+                'code': repr(code), 'error_model': repr(error_model), 'decoder': repr(decoder),
                 # variables
-                'error': pt.pack(error),
-                'recovery': pt.pack(recovery),
+                'error': pt.pack(error), 'recovery': pt.pack(decoding.recovery),
                 # step variables
                 'step_errors': [pt.pack(v) for v in step_errors],
                 'step_measurement_errors': [pt.pack(v) for v in step_measurement_errors],
             }
             logger.warning('RECOVERY DOES NOT RETURN TO CODESPACE: {}'.format(json.dumps(log_data, sort_keys=True)))
-        commutes_with_logicals = np.all(pt.bsp(recovered, code.logicals.T) == 0)
-        success = commutes_with_stabilizers and commutes_with_logicals
-        if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('run: commutes_with_stabilizers={}'.format(commutes_with_stabilizers))
-            logger.debug('run: commutes_with_logicals={}'.format(commutes_with_logicals))
+        resolved_logical_commutations = pt.bsp(recovered, code.logicals.T)
+        commutes_with_logicals = np.all(resolved_logical_commutations == 0)
+        resolved_success = commutes_with_stabilizers and commutes_with_logicals
+        # fill in unspecified outcomes
+        success = resolved_success if success is None else success
+        logical_commutations = resolved_logical_commutations if logical_commutations is None else logical_commutations
 
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug('run: success={}'.format(success))
+        logger.debug('run: logical_commutations={!r}'.format(logical_commutations))
+        logger.debug('run: custom_values={!r}'.format(custom_values))
 
     data = {
         'error_weight': pt.bsf_wt(np.array(step_errors)),
-        'success': success
+        'success': bool(success),
+        'logical_commutations': logical_commutations,
+        'custom_values': custom_values,
     }
 
     return data
@@ -131,20 +137,16 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
           :meth:`qecsim.model.ErrorModel.generate`.
         * evaluate ``syndrome`` as ``error`` :math:`\odot` ``code.stabilizers``:math:`^T`.
         * resolve ``decoding`` by passing ``code`` and ``syndrome`` to :meth:`qecsim.model.Decoder.decode`.
-        * if ``decoding`` is boolean:
-
-            * define ``success`` as ``decoding``.
-
-        * else:
-
-            * define ``recovery`` as ``decoding``.
-            * assert that (``recovery`` :math:`\oplus` ``error``) :math:`\odot` ``code.stabilizers``:math:`^T = 0`, by
-              construction.
-            * define ``success`` as (``recovery`` :math:`\oplus` ``error``) :math:`\odot`
-              ``code.logicals``:math:`^T = 0`.
+        * define ``recovered`` as ``decoding`` :math:`\oplus` ``error``.
+        * verify ``recovered`` :math:`\odot` ``code.stabilizers``:math:`^T = 0`, by construction.
+        * define ``logical_commutations`` as ``recovered`` :math:`\odot` ``code.logicals``:math:`^T`.
+        * define ``success`` as ``logical_commutations``:math:`= 0`.
 
     * :math:`\oplus` denotes binary addition defined as addition modulo 2, or equivalently exclusive-or.
     * See :func:`qecsim.paulitools.bsp` for definition of :math:`\odot`.
+    * Optionally, :meth:`qecsim.model.Decoder.decode` may return :class:`~qecsim.model.DecodeResult` as
+      ``decoding`` to explicitly specify ``success``, ``logical_commutations`` and ``custom_values``, see
+      :class:`qecsim.model.DecodeResult` for details.
     * In addition to ``code`` and ``syndrome``, the following keyword parameters are passed as context to
       :meth:`qecsim.model.Decoder.decode`: ``error_model``, ``error_probability``, ``error``. Furthermore, in order to
       enable decoders to handle ideal and fault-tolerant decoding consistently, the following keyword parameters and
@@ -155,8 +157,10 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
     ::
 
         {
-            'error_weight': 2,  # number qubits acted on non-trivially by error
-            'success': True,    # recovery successful, i.e. (recovery ^ error) commutes with all logical operators
+            'error_weight': 2,  # number of qubits acted on non-trivially by error
+            'success': False,  # evaluated or overridden by decode result
+            'logical_commutations': np.array([1, 0]),  # evaluated or overridden by decode result
+            'custom_values': np.array([1])  # None or overridden by decode result
         }
 
     :param code: Stabilizer code.
@@ -169,7 +173,7 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
     :type error_probability: float
     :param rng: Random number generator for error generation. (default=None resolves to numpy.random.default_rng())
     :type rng: numpy.random.Generator
-    :return: error_weight and success flag.
+    :return: error_weight, success flag, logical_commutations, and custom values.
     :rtype: dict
     :raises ValueError: if error_probability is not in [0, 1].
     """
@@ -184,8 +188,8 @@ def run_once(code, error_model, decoder, error_probability, rng=None):
     return _run_once('ideal', code, 1, error_model, decoder, error_probability, 0.0, rng)
 
 
-def run_once_ftp(code, time_steps, error_model, decoder, error_probability, measurement_error_probability=None,
-                 rng=None):
+def run_once_ftp(code, time_steps, error_model, decoder, error_probability,
+                 measurement_error_probability=None, rng=None):
     r"""
     Run a stabilizer code error-decode-recovery (fault-tolerant time-periodic) simulation and return run data.
 
@@ -198,7 +202,7 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability, meas
 
     * The simulation is as follows:
 
-        * for each time step :math`t`:
+        * for each time step :math:`t`:
 
             * generate Pauli ``step_errors[t]`` by passing ``code`` and ``error_probability`` to
               :meth:`qecsim.model.ErrorModel.generate`.
@@ -210,20 +214,16 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability, meas
         * evaluate ``error`` as :math:`\bigoplus` ``step_errors``.
         * resolve ``decoding`` by passing ``code``, ``time_steps`` and ``syndrome`` to
           :meth:`qecsim.model.DecoderFTP.decode_ftp`.
-        * if ``decoding`` is boolean:
-
-            * define ``success`` as ``decoding``.
-
-        * else:
-
-            * define ``recovery`` as ``decoding``.
-            * assert that (``recovery`` :math:`\oplus` ``error``) :math:`\odot` ``code.stabilizers``:math:`^T = 0`, by
-              construction.
-            * define ``success`` as (``recovery`` :math:`\oplus` ``error``) :math:`\odot`
-              ``code.logicals``:math:`^T = 0`.
+        * define ``recovered`` as ``decoding`` :math:`\oplus` ``error``.
+        * verify ``recovered`` :math:`\odot` ``code.stabilizers``:math:`^T = 0`, by construction.
+        * define ``logical_commutations`` as ``recovered`` :math:`\odot` ``code.logicals``:math:`^T`.
+        * define ``success`` as ``logical_commutations``:math:`= 0`.
 
     * :math:`\oplus` denotes binary addition defined as addition modulo 2, or equivalently exclusive-or.
     * See :func:`qecsim.paulitools.bsp` for definition of :math:`\odot`.
+    * Optionally, :meth:`qecsim.model.DecoderFTP.decode_ftp` may return :class:`~qecsim.model.DecodeResult` as
+      ``decoding`` to explicitly specify ``success``, ``logical_commutations`` and ``custom_values``, see
+      :class:`qecsim.model.DecodeResult` for details.
     * In addition to ``code``, ``time_steps`` and ``syndrome``, the following keyword parameters are passed as context
       to :meth:`qecsim.model.DecoderFTP.decode_ftp`: ``error_model``, ``error_probability``, ``error``, ``step_errors``,
       ``measurement_error_probability`` and ``step_measurement_errors``. Most decoders will ignore these parameters.
@@ -232,8 +232,10 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability, meas
     ::
 
         {
-            'error_weight': 2,  # number qubits acted on non-trivially by all step errors
-            'success': True,    # recovery successful, i.e. (recovery ^ error) commutes with all logical operators
+            'error_weight': 2,  # number of qubits acted on non-trivially by error
+            'success': False,  # evaluated or overridden by decode result
+            'logical_commutations': np.array([1, 0]),  # evaluated or overridden by decode result
+            'custom_values': np.array([1])  # None or overridden by decode result
         }
 
     :param code: Stabilizer code.
@@ -251,7 +253,7 @@ def run_once_ftp(code, time_steps, error_model, decoder, error_probability, meas
     :type measurement_error_probability: float
     :param rng: Random number generator for error generation. (default=None resolves to numpy.random.default_rng())
     :type rng: numpy.random.Generator
-    :return: error_weight and success flag.
+    :return: error_weight, success flag, logical_commutations, and custom values.
     :rtype: dict
     :raises ValueError: if time_steps is not >= 1.
     :raises ValueError: if error_probability is not in [0, 1].
@@ -305,6 +307,8 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
         'n_run': 0,
         'n_success': 0,
         'n_fail': 0,
+        'n_logical_commutations': None,
+        'custom_totals': None,
         'error_weight_total': 0,
         'error_weight_pvar': 0.0,
         'logical_failure_rate': 0.0,
@@ -317,19 +321,35 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
     logger.info('run: np.random.SeedSequence.entropy={}'.format(seed_sequence.entropy))
     rng = np.random.default_rng(seed_sequence)
 
+    array_sum_keys = ('n_logical_commutations', 'custom_totals',)  # list of array sum keys
+    array_val_keys = ('logical_commutations', 'custom_values',)  # list of array value keys
     error_weights = []  # list of error_weight from current run
 
     while ((max_runs is None or runs_data['n_run'] < max_runs)
            and (max_failures is None or runs_data['n_fail'] < max_failures)):
         # run simulation
-        data = _run_once(mode, code, time_steps, error_model, decoder, error_probability, measurement_error_probability,
-                         rng)
+        data = _run_once(mode, code, time_steps, error_model, decoder, error_probability,
+                         measurement_error_probability, rng)
         # increment run counts
         runs_data['n_run'] += 1
         if data['success']:
             runs_data['n_success'] += 1
         else:
             runs_data['n_fail'] += 1
+        # sum arrays
+        for array_sum_key, array_val_key in zip(array_sum_keys, array_val_keys):
+            array_sum = runs_data[array_sum_key]  # extract sum
+            array_val = data[array_val_key]  # extract val
+            if runs_data['n_run'] == 1 and array_val is not None:  # first run, so initialize sum, if val not None
+                array_sum = np.zeros_like(array_val)
+            if array_sum is None and array_val is None:  # both None
+                array_sum = None
+            elif (array_sum is None or array_val is None) or (array_sum.shape != array_val.shape):  # mismatch
+                raise QecsimError(
+                    'Mismatch between {} values to sum: {}, {}'.format(array_val_key, array_sum, array_val))
+            else:  # match, so sum
+                array_sum = array_sum + array_val
+            runs_data[array_sum_key] = array_sum  # update runs_data
         # append error weight
         error_weights.append(data['error_weight'])
 
@@ -339,6 +359,11 @@ def _run(mode, code, time_steps, error_model, decoder, error_probability, measur
 
     # rate statistics
     _add_rate_statistics(runs_data)
+
+    # convert sum arrays to tuples if not None
+    for array_sum_key in array_sum_keys:
+        if runs_data[array_sum_key] is not None:
+            runs_data[array_sum_key] = tuple(runs_data[array_sum_key].tolist())
 
     # record wall_time
     runs_data['wall_time'] = time.perf_counter() - wall_time_start
@@ -374,10 +399,12 @@ def run(code, error_model, decoder, error_probability, max_runs=None, max_failur
             'error_model': 'Depolarizing',          # given error_model.label
             'decoder': 'Naive',                     # given decoder.label
             'error_probability': 0.0,               # given error_probability
-            'measurement_error_probability': 0.0    # alwyas 0.0 for ideal simulation
+            'measurement_error_probability': 0.0    # always 0.0 for ideal simulation
             'n_run': 0,                             # count of runs
             'n_success': 0,                         # count of successful recovery
             'n_fail': 0,                            # count of failed recovery
+            'n_logical_commutations': (0, 0),       # count of logical commutations (tuple)
+            'custom_totals': None,                  # sum of custom values (tuple)
             'error_weight_total': 0,                # sum of error_weight over n_run runs
             'error_weight_pvar': 0.0,               # pvariance of error_weight over n_run runs
             'logical_failure_rate': 0.0,            # n_fail / n_run
@@ -441,6 +468,8 @@ def run_ftp(code, time_steps, error_model, decoder, error_probability,
             'n_run': 0,                             # count of runs
             'n_success': 0,                         # count of successful recovery
             'n_fail': 0,                            # count of failed recovery
+            'n_logical_commutations': (0, 0),       # count of logical commutations (tuple)
+            'custom_totals': None,                  # sum of custom values (tuple)
             'error_weight_total': 0,                # sum of error_weight over n_run runs
             'error_weight_pvar': 0.0,               # pvariance of error_weight over n_run runs
             'logical_failure_rate': 0.0,            # n_fail / n_run
@@ -512,7 +541,8 @@ def merge(*data_list):
     * The runs data is in the format specified in :func:`run` and :func:`fun_ftp`.
     * Merged data is grouped by: `(code, n_k_d, error_model, decoder, error_probability, time_steps,
       measurement_error_probability)`.
-    * The following values are summed: `n_run`, `n_success`, `n_fail`, `error_weight_total`, `wall_time`.
+    * The following scalar values are summed: `n_run`, `n_success`, `n_fail`, `error_weight_total`, `wall_time`.
+    * The following array values are summed: `n_logical_commutations`, `custom_totals`.
     * The following values are recalculated: `logical_failure_rate`, `physical_error_rate`.
     * The following values are *not* currently recalculated: `error_weight_pvar`.
 
@@ -520,30 +550,52 @@ def merge(*data_list):
     :type data_list: list of dict
     :return: Merged list of aggregated runs data.
     :rtype: list of dict
+    :raises ValueError: if there is a mismatch between array values to be summed.
     """
     # define group keys, value keys and zero values
     grp_keys = ('code', 'n_k_d', 'error_model', 'decoder', 'error_probability', 'time_steps',
                 'measurement_error_probability')
-    val_keys = ('n_run', 'n_fail', 'n_success', 'error_weight_total', 'wall_time')
-    zero_vals = (0, 0, 0, 0, 0.0)
+    scalar_val_keys = ('n_run', 'n_fail', 'n_success', 'error_weight_total', 'wall_time')
+    scalar_zero_vals = (0, 0, 0, 0, 0.0)
+    array_val_keys = ('n_logical_commutations', 'custom_totals',)
     # map of groups to sums (use ordered dict to preserve order as much as possible).
-    grps_to_sums = collections.OrderedDict()
+    grps_to_scalar_sums = collections.OrderedDict()
+    grps_to_array_sums = {}
     # iterate through single list from given data lists
     for runs_data in itertools.chain(*data_list):
-        # support for 0.10 and 0.15 files: define defaults, create new data with defaults overwritten by data
+        # define defaults, create new data with defaults overwritten by data
+        # support for 0.10 and 0.15 files:
         defaults_0_16 = {'time_steps': 1, 'measurement_error_probability': 0.0}
-        runs_data = dict(itertools.chain(defaults_0_16.items(), runs_data.items()))
-        # extract group and values from data (note: force lists to tuples so group_id is hashable)
+        # support for pre-1.0b6 files:
+        defaults_1_0b6 = {'n_logical_commutations': None, 'custom_totals': None}
+        runs_data = dict(itertools.chain(defaults_0_16.items(), defaults_1_0b6.items(), runs_data.items()))
+        # extract group from data (note: force lists to tuples so group_id is hashable)
         group_id = tuple(tuple(v) if isinstance(v, list) else v for v in (runs_data[k] for k in grp_keys))
-        values = tuple(runs_data[k] for k in val_keys)
-        # get sums (or zeros if not found)
-        sums = grps_to_sums.get(group_id, zero_vals)
-        # add values to sums
-        sums = tuple(sum(x) for x in zip(values, sums))
-        # put summed_values
-        grps_to_sums[group_id] = sums
-    # flatten grps_to_sums
-    merged_data_list = [dict(zip(grp_keys + val_keys, group_id + sums)) for group_id, sums in grps_to_sums.items()]
+        # scalars: e.g. (10, 6, 4, 256, 10.34)
+        scalar_vals = tuple(runs_data[k] for k in scalar_val_keys)  # extract from data
+        scalar_sums = grps_to_scalar_sums.get(group_id, scalar_zero_vals)  # get sums (or zeros if not found)
+        scalar_sums = tuple(sum(x) for x in zip(scalar_vals, scalar_sums))  # update sums
+        grps_to_scalar_sums[group_id] = scalar_sums  # put sums
+        # arrays: e.g. ((2, 5), (3, 8, 2), None)
+        # arrays: extract from data as tuple of None and tuples
+        array_vals = tuple(None if runs_data[k] is None else tuple(runs_data[k]) for k in array_val_keys)
+        try:  # get sums and update
+            array_sums = []
+            for array_sum, array_val in zip(grps_to_array_sums[group_id], array_vals):  # sum and value tuples in pairs
+                if array_sum is None and array_val is None:  # Both None
+                    array_sums.append(None)
+                elif (array_sum is None or array_val is None) or (len(array_sum) != len(array_val)):  # Mismatch
+                    raise ValueError('Mismatch between array values to sum: {}, {}'.format(array_sum, array_val))
+                else:  # matching length, so sum
+                    array_sums.append(tuple(sum(x) for x in zip(array_sum, array_val)))
+            array_sums = tuple(array_sums)
+        except KeyError:  # set sums from values if not found
+            array_sums = array_vals
+        grps_to_array_sums[group_id] = array_sums  # put sums
+    # flatten grps_to_scalar_sums and grps_to_array_sums
+    merged_data_list = [dict(zip(grp_keys + scalar_val_keys + array_val_keys,
+                                 group_id + scalar_sums + grps_to_array_sums[group_id]))
+                        for group_id, scalar_sums in grps_to_scalar_sums.items()]
     # add rate statistics
     for runs_data in merged_data_list:
         _add_rate_statistics(runs_data)

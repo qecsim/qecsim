@@ -38,6 +38,8 @@ def test_cli_invalid_arguments(arguments):
     ['-r9', 'five_qubit', 'generic.depolarizing', 'generic.naive', '0.1'],  # max_runs
     ['-f2', '-r9', 'toric(3,3)', 'generic.bit_flip', 'toric.mwpm', '0.1'],  # max_failures, max_runs
     ['-s5', 'toric(3,3)', 'generic.bit_flip', 'toric.mwpm', '0.1'],  # random_seed
+    # no maximum random_seed
+    ['-s174975946453286449385846588109544149806', 'toric(3,3)', 'generic.bit_flip', 'toric.mwpm', '0.1'],
     ['-otmp_data.json', 'toric(3,3)', 'generic.bit_flip', 'toric.mwpm', '0.1'],  # output_file
 ])
 def test_cli_run(arguments):
@@ -62,7 +64,6 @@ def test_cli_run(arguments):
     ['-r1.1', 'five_qubit', 'generic.depolarizing', 'generic.naive', '0.1'],  # invalid max_runs
     ['-f1.1', 'five_qubit', 'generic.depolarizing', 'generic.naive', '0.1'],  # invalid max_failures
     ['-s-1', 'five_qubit', 'generic.depolarizing', 'generic.naive', '0.1'],  # invalid random_seed min
-    ['-s4294967296', 'five_qubit', 'generic.depolarizing', 'generic.naive', '0.1'],  # invalid random_seed max
     ['five_qubit', 'generic.depolarizing', 'generic.naive', '1.1'],  # invalid error_probability
     ['five_qubit(-1)', 'generic.depolarizing', 'generic.naive', '0.1'],  # bad code args
     ['five_qubit', 'generic.depolarizing(-1)', 'generic.naive', '0.1'],  # bad error_model args
@@ -133,6 +134,8 @@ def test_cli_run_all_models(arguments):
     # max_failures, max_runs
     ['-f2', '-r9', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],
     ['-s5', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],  # random_seed
+    ['-s174975946453286449385846588109544149806', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip',
+     'rotated_planar.smwpm', '0.05'],  # no maximum random_seed
     # measurement_error_probability
     ['-m0.01', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],
     # output_file
@@ -153,23 +156,24 @@ def test_cli_run_ftp(arguments):
     ['rotated_planar(3,3)', '3'],  # missing error_model
     ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip'],  # missing decoder
     ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm'],  # missing error_probability
-    ['blah', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm'],  # unknown code
-    ['rotated_planar(3,3)', 'a', 'generic.bit_phase_flip', 'rotated_planar.smwpm'],  # invalid time_steps
-    ['rotated_planar(3,3)', '0', 'generic.bit_phase_flip', 'rotated_planar.smwpm'],  # invalid time_steps
-    ['rotated_planar(3,3)', '0.0', 'generic.bit_phase_flip', 'rotated_planar.smwpm'],  # invalid time_steps
+    ['blah', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],  # unknown code
+    ['rotated_planar(3,3)', 'a', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],  # invalid time_steps
+    ['rotated_planar(3,3)', '0', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],  # invalid time_steps
+    ['rotated_planar(3,3)', '0.0', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],  # invalid time_steps
     ['rotated_planar(3,3)', '3', 'blah', 'rotated_planar.smwpm', '0.05'],  # unknown error_model
     ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'blah', '0.05'],  # unknown decoder
     ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm(', '0.05'],  # invalid constructor
     # invalid constructor args
     ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm(f o o)', '0.05'],
-    ['-r1.1', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'blah', '0.05'],  # invalid max_runs
-    ['-f1.1', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'blah', '0.05'],  # invalid max_failures
-    ['-s-1', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'blah', '0.05'],  # invalid random_seed min
-    ['-s4294967296', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'blah', '0.05'],  # invalid random_seed max
+    ['-r1.1', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],  # invalid max_runs
+    # invalid max_failures
+    ['-f1.1', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],
+    # invalid random_seed min
+    ['-s-1', 'rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],
     ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '1.1'],  # invalid error_probability
-    ['rotated_planar(-1)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.1'],  # bad code args
-    ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip(-1)', 'rotated_planar.smwpm', '0.1'],  # bad error_model args
-    ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm(-1)', '0.1'],  # bad decoder args
+    ['rotated_planar(-1)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm', '0.05'],  # bad code args
+    ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip(-1)', 'rotated_planar.smwpm', '0.05'],  # bad error_model args
+    ['rotated_planar(3,3)', '3', 'generic.bit_phase_flip', 'rotated_planar.smwpm(-1)', '0.05'],  # bad decoder args
 ])
 def test_cli_run_ftp_invalid_arguments(arguments):
     runner = CliRunner()

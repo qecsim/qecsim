@@ -1,7 +1,8 @@
+import numpy as np
 import pytest
 
 from qecsim.error import QecsimError
-from qecsim.model import ErrorModel
+from qecsim.model import ErrorModel, DecodeResult
 from qecsim.models.basic import BasicCode
 
 
@@ -43,3 +44,19 @@ def test_error_model_probability_distribution_notimplemented():
 
     with pytest.raises(NotImplementedError):
         MyErrorModel().probability_distribution(0.1)  # raises expected error
+
+
+def test_decode_result():
+    # valid options no error raised
+    DecodeResult(success=True)
+    DecodeResult(success=True, logical_commutations=np.array([0, 0]))
+    DecodeResult(recovery=np.array([0, 0, 0, 0]))
+    DecodeResult(success=True, recovery=np.array([0, 0, 0, 0]))
+    DecodeResult(logical_commutations=np.array([0, 0]), recovery=np.array([0, 0, 0, 0]))
+    DecodeResult(success=True, logical_commutations=np.array([0, 0]), recovery=np.array([0, 0, 0, 0]))
+    with pytest.raises(QecsimError):
+        # at least one of success and recovery must be specified
+        DecodeResult()  # raises expected error
+    with pytest.raises(QecsimError):
+        # at least one of success and recovery must be specified
+        DecodeResult(logical_commutations=np.array([0, 0]))  # raises expected error

@@ -52,15 +52,15 @@
 # DONE: reformat all code
 # DONE: set up tox for lint (flake8)
 # DONE: Tag 1.0b3
-# DONE: refactoring: MPS decoders to use separate H and V node value methods for extensibility.
+# DONE: src: MPS decoders to use separate H and V node value methods for extensibility.
 # DONE: document pandoc requirement in tox.ini
 # DONE: Tag 1.0b4
 # DONE: tests: Mark performance tests to exclude in general testing.
-# DONE: refactoring: Move distance methods from codes to decoders.
-# DONE: refactoring: Move SMWPM decoder module functions to class methods.
-# DONE: refactoring: Move CMWPM decoder utilities to class.
-# DONE: refactoring: Make ErrorModel.probability_distribution optional to simplify non-IID noise.
-# DONE: refactoring: Allow decoders to return DecodeResult as alternative to recovery operation.
+# DONE: src: Move distance methods from codes to decoders.
+# DONE: src: Move SMWPM decoder module functions to class methods.
+# DONE: src: Move CMWPM decoder utilities to class.
+# DONE: src: Make ErrorModel.probability_distribution optional to simplify non-IID noise.
+# DONE: src: Allow decoders to return DecodeResult as alternative to recovery operation.
 # DONE: docs: rename acknowledgment section to citing.
 # DONE: setup.cfg and docs/conf.py: update author with initial.
 # DONE: README: add license / citing section, fix spacing.
@@ -69,9 +69,12 @@
 # DONE: cli: Add module script to run with Python options such as optimize.
 # DONE: Tag 1.0b5
 # DONE: qecsimext: Update to latest qecsim and zip repo for download.
-# TODO: docs: Add change-log.
-# TODO: refactoring: CLI remove restriction on max random-seed.
-# TODO: feature: Add n_logical_commutations to run and merge output.
+# DONE: docs: Add change-log.
+# DONE: src: Remove CLI restriction on max random-seed.
+# DONE: src: Add logical_commutations to run and merge output.
+# DONE: src: Add custom_values to run and merge output.
+# DONE: src: Update RotatedToricSMWPMDecoder to return DecodeResult with custom values.
+# TODO: Tag 1.0b6
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
 # TODO: setup.cfg: finalize meta-data.
 # TODO: test upload to PyPI.

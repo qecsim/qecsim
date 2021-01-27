@@ -236,7 +236,7 @@ class Decoder(metaclass=abc.ABCMeta):
           parameters; however, if they are used, implementations should declare them explicitly and treat them as
           optional.
         * This method typically returns a recovery operation but it may, alternatively, return :class:`DecodeResult`
-          indicating recovery success.
+          to indicate success/failure more explicitly.
 
         :param code: Stabilizer code.
         :type code: StabilizerCode
@@ -285,7 +285,7 @@ class DecoderFTP(metaclass=abc.ABCMeta):
           :func:`qecsim.app.run_once_ftp`. Most implementations will ignore such parameters; however, if they are used,
           implementations should declare them explicitly and treat them as optional.
         * This method typically returns a recovery operation but it may, alternatively, return :class:`DecodeResult`
-          indicating recovery success.
+          to indicate success/failure more explicitly.
 
         :param code: Stabilizer code.
         :type code: StabilizerCode
@@ -312,25 +312,51 @@ class DecoderFTP(metaclass=abc.ABCMeta):
 class DecodeResult:
     """Represents the result of decoding.
 
+    Typically decoders return a recovery operation and delegate the evaluation
+    of success and logical commutations to :mod:`qecsim.app`. Optionally,
+    decoders may return an instance of this class to partially or completely
+    override the evaluation of success and logical commutations. Additionally,
+    decoders can provide custom values to be summed across runs.
+
     Notes:
 
-    * Typically decoders return a recovery operation and delegate the evaluation
-      of success to the caller.
-    * Optionally, decoders may evaluate success themselves and return an
-      instance of this class to indicate success / failure.
+    * ``success`` and/or ``logical_commutations``, if not None, are used by
+      :mod:`qecsim.app` to override the usual evaluation of success and logical
+      commutations.
+    * ``recovery``, if not None, is used by :mod:`qecsim.app` to evaluate any
+      values unspecified by ``success`` and/or ``logical_commutations``.
+    * ``success`` and ``recovery`` must not both be None; this ensures that
+      :mod:`qecsim.app` can resolve a success value.
+    * Logical commutations, as resolved by :mod:`qecsim.app`, and custom values
+      must be consistent across identically parameterized simulation runs, i.e.
+      always None or always equal length arrays; this ensures that
+      :mod:`qecsim.app` can sum results across multiple runs.
 
     See also :class:`Decoder` and :class:`DecoderFTP`.
 
     """
 
-    def __init__(self, success):
+    def __init__(self, success=None, logical_commutations=None, recovery=None, custom_values=None):
         """
         Initialise new decode result.
 
-        :param success: If the decoding was successful.
+        :param success: If the decoding was successful (default=None).
         :type success: bool
+        :param logical_commutations: Logical commutations as binary vector or None (default=None).
+        :type logical_commutations: numpy.array (1d)
+        :param recovery: Recovery operation as binary symplectic vector (default=None).
+        :type recovery: numpy.array (1d)
+        :param custom_values: Custom values as numeric vector or None (default=None).
+        :type custom_values: numpy.array (1d)
+        :raises QecsimError: If both success and recovery are unspecified (i.e. None).
         """
+        if success is None and recovery is None:
+            raise QecsimError('At least one of success or recovery must be specified.')
         self.success = success
+        self.logical_commutations = logical_commutations
+        self.recovery = recovery
+        self.custom_values = custom_values
 
     def __repr__(self):
-        return '{}({!r})'.format(type(self).__name__, self.success)
+        return '{}({!r}, {!r}, {!r}, {!r})'.format(
+            type(self).__name__, self.success, self.logical_commutations, self.recovery, self.custom_values)
