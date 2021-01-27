@@ -20,7 +20,6 @@ class PlanarCode(StabilizerCode):
 
     * Get size: :meth:`size`.
     * Find shortest translation between plaquettes: :meth:`translation`.
-    * Find shortest distance between plaquettes: :meth:`distance`.
     * Resolve a syndrome to plaquettes: :meth:`syndrome_to_plaquette_indices`.
     * Construct a Pauli operator on the lattice: :meth:`new_pauli`.
 
