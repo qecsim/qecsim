@@ -4,7 +4,7 @@
 1.0b6
 ~~~~~
 
-Untagged
+Tagged 2021-01-27
 
 - src: Remove CLI restriction on max random-seed (unnecessary since Numpy 1.17).
 - src: Extend ``app`` output with logical commutations and custom values.

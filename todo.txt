@@ -74,7 +74,7 @@
 # DONE: src: Add logical_commutations to run and merge output.
 # DONE: src: Add custom_values to run and merge output.
 # DONE: src: Update RotatedToricSMWPMDecoder to return DecodeResult with custom values.
-# TODO: Tag 1.0b6
+# DONE: Tag 1.0b6
 # TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
 # TODO: setup.cfg: finalize meta-data.
 # TODO: test upload to PyPI.
