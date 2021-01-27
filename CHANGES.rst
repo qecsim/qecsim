@@ -12,6 +12,8 @@ Tagged 2021-01-27
   success, logical commutations and custom values via ``model.DecodeResult``.
 - src: Update ``models.rotatedtoric.RotatedToricSMWPMDecoder`` to return
   ``model.DecodeResult`` with custom values for fault-tolerant decoding.
+- src: Improve code/decoder separation: move all ``distance`` methods to
+  decoders.
 - docs: Add change log.
 
 1.0b5

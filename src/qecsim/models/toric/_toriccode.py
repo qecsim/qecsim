@@ -220,29 +220,6 @@ class ToricCode(StabilizerCode):
         col_steps = steps_east if steps_east <= steps_west else -steps_west
         return row_steps, col_steps
 
-    @functools.lru_cache(maxsize=2 ** 28)  # for MxN lattice, cache_size <~ 2(MN)(MN-1) so handle 100x100 codes.
-    def distance(self, a_index, b_index):
-        """
-        Evaluate the taxi-cab distance between the plaquettes indexed by A and B.
-
-        Notes:
-
-        * Indices are in the format (lattice, row, column).
-        * Both indices must index the same lattice.
-        * Indices are modulo the lattice shape, i.e. on a (5, 5) lattice, (2, 6, -1) indexes the same plaquette as
-          (0, 1, 4).
-
-        :param a_index: Index identifying a plaquette in the format (lattice, row, column).
-        :type a_index: 3-tuple of int
-        :param b_index: Index identifying a plaquette in the format (lattice, row, column).
-        :type b_index: 3-tuple of int
-        :return: Taxi-cab distance between plaquettes.
-        :rtype: int
-        :raises IndexError: If indices do not index the same valid lattice.
-        """
-        row_steps, col_steps = self.translation(a_index, b_index)
-        return abs(row_steps) + abs(col_steps)
-
     def syndrome_to_plaquette_indices(self, syndrome):
         """
         Returns the indices of the plaquettes associated with the non-commuting stabilizers identified by the

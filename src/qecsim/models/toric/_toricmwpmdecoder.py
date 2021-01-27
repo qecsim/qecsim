@@ -13,7 +13,7 @@ class ToricMWPMDecoder(Decoder):
     Decoding algorithm:
 
     * The syndrome is resolved to plaquettes using: :meth:`qecsim.models.toric.ToricCode.syndrome_to_plaquette_indices`.
-    * A graph between plaquettes is built with weights given by: :meth:`qecsim.models.toric.ToricCode.distance`.
+    * A graph between plaquettes is built with weights given by: :meth:`distance`.
     * A MWPM algorithm is used to match plaquettes into pairs.
     * A recovery operator is constructed by applying the shortest path between matching plaquette pairs using:
       :meth:`qecsim.models.toric.ToricPauli.path`.
