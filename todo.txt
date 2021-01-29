@@ -62,7 +62,7 @@
 # DONE: src: Make ErrorModel.probability_distribution optional to simplify non-IID noise.
 # DONE: src: Allow decoders to return DecodeResult as alternative to recovery operation.
 # DONE: docs: rename acknowledgment section to citing.
-# DONE: setup.cfg and docs/conf.py: update author with initial.
+# DONE: cfg: update setup.cfg and docs/conf.py author with initial.
 # DONE: README: add license / citing section, fix spacing.
 # DONE: docs: Update citing with DOI link.
 # DONE: add EQUS acknowledgment.
@@ -75,8 +75,12 @@
 # DONE: src: Add custom_values to run and merge output.
 # DONE: src: Update RotatedToricSMWPMDecoder to return DecodeResult with custom values.
 # DONE: Tag 1.0b6
-# TODO: choose licence (update LICENSE, setup.cfg license and classifiers, and README.rst).
-# TODO: setup.cfg: finalize meta-data.
-# TODO: test upload to PyPI.
-# TODO: host documentation on readthedocs (update setup.cfg project_urls, README.rst and doc).
-# TODO: set up continuous integration.
+# DONE: docs: Choose licence (update LICENSE and README.rst).
+# DONE: cfg: Update setup.cfg for license and finalize meta-data.
+# DONE: docs: Update for PyPI installation in readme and generated docs.
+# DONE: cfg: test upload to testpypi.
+# TODO: Tag 1.0b7
+# TODO: qecsimext: Update to install qecsim from PyPI.
+# TODO: cfg: Make repositories public.
+# TODO: docs: host on readthedocs (update setup.cfg project_urls, README.rst and doc).
+# TODO: cfg: set up continuous integration.

@@ -231,8 +231,8 @@ class Decoder(metaclass=abc.ABCMeta):
 
         Notes:
 
-        * The keyword parameters ``kwargs`` may be provided by the client with context values such as error_model,
-          error_probability and error, see :func:`qecsim.app.run_once`. Most implementations will ignore such
+        * The keyword parameters ``kwargs`` may be provided by the client with context values such as `error_model`,
+          `error_probability` and `error`, see :func:`qecsim.app.run_once`. Most implementations will ignore such
           parameters; however, if they are used, implementations should declare them explicitly and treat them as
           optional.
         * This method typically returns a recovery operation but it may, alternatively, return :class:`DecodeResult`
@@ -280,10 +280,10 @@ class DecoderFTP(metaclass=abc.ABCMeta):
 
         Notes:
 
-        * The keyword parameters ``kwargs`` may be provided by the client with context values such as error_model,
-          error_probability, error, step_errors, measurement_error_probability and step_measurement_errors, see
-          :func:`qecsim.app.run_once_ftp`. Most implementations will ignore such parameters; however, if they are used,
-          implementations should declare them explicitly and treat them as optional.
+        * The keyword parameters ``kwargs`` may be provided by the client with context values such as `error_model`,
+          `error_probability`, `error`, `step_errors`, `measurement_error_probability` and `step_measurement_errors`,
+          see :func:`qecsim.app.run_once_ftp`. Most implementations will ignore such parameters; however, if they are
+          used, implementations should declare them explicitly and treat them as optional.
         * This method typically returns a recovery operation but it may, alternatively, return :class:`DecodeResult`
           to indicate success/failure more explicitly.
 

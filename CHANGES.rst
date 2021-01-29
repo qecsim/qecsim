@@ -1,6 +1,15 @@
 1.0
 ---
 
+1.0b7
+~~~~~
+
+Tagged 2021-01-29
+
+- docs: Add BSD 3-Clause license in readme and generated docs.
+- docs: Update for PyPI installation in readme and generated docs.
+- cfg: Update setup.cfg for license and finalize meta-data.
+
 1.0b6
 ~~~~~
 

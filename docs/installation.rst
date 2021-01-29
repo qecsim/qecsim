@@ -1,8 +1,8 @@
 Installation
 ============
 
-qecsim is available (TODO: COMING SOON) from the Python Package Index (PyPI) for installation using the Python package
-installer `pip`_. Optionally, logging and a faster matching library can be configured.
+qecsim is available from the Python Package Index (PyPI) for installation using the Python package installer `pip`_.
+Optionally, logging and a faster matching library can be configured.
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
 
@@ -14,7 +14,7 @@ qecsim requires Python 3.5+ and can be installed and upgraded using pip:
 
 .. code-block:: bash
 
-    $ pip install -U qecsim         # TODO: COMING SOON
+    $ pip install -U qecsim
 
 A nice way to install qecsim is using a virtual environment:
 
@@ -26,10 +26,10 @@ A nice way to install qecsim is using a virtual environment:
     $ source venv/bin/activate      # activate venv (Windows: venv\Scripts\activate)
     (venv) $ pip install qecsim     # install qecsim
     ...
-    Successfully installed ... qecsim-1.0b6 ...
+    Successfully installed ... qecsim-1.0b7 ...
     (venv) $
     (venv) $ qecsim --version       # verify qecsim cli
-    qecsim, version 1.0b6
+    qecsim, version 1.0b7
     (venv) $ deactivate             # deactivate venv
     $
 
