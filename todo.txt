@@ -80,7 +80,7 @@
 # DONE: docs: Update for PyPI installation in readme and generated docs.
 # DONE: cfg: test upload to testpypi.
 # DONE: Tag 1.0b7
-# TODO: qecsimext: Update to install qecsim from PyPI.
-# TODO: cfg: Make repositories public.
-# TODO: docs: host on readthedocs (update setup.cfg project_urls, README.rst and doc).
+# DONE: qecsimext: Update to install qecsim from PyPI.
+# DONE: cfg: Make repositories public.
+# TODO: docs: permanent hosting (update setup.cfg project_urls, README.rst and doc).
 # TODO: cfg: set up continuous integration.
