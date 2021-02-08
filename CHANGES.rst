@@ -1,6 +1,13 @@
 1.0
 ---
 
+1.0b8
+~~~~~
+
+Untagged
+
+- Migrate to GitHub.
+
 1.0b7
 ~~~~~
 

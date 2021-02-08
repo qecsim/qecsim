@@ -26,10 +26,10 @@ A nice way to install qecsim is using a virtual environment:
     $ source venv/bin/activate      # activate venv (Windows: venv\Scripts\activate)
     (venv) $ pip install qecsim     # install qecsim
     ...
-    Successfully installed ... qecsim-1.0b7 ...
+    Successfully installed ... qecsim-1.0b8 ...
     (venv) $
     (venv) $ qecsim --version       # verify qecsim cli
-    qecsim, version 1.0b7
+    qecsim, version 1.0b8
     (venv) $ deactivate             # deactivate venv
     $
 
