@@ -8,7 +8,7 @@ Citing qecsim
 Please cite qecsim if you use it in your research. It was first introduced in the following thesis:
 
 * D. K. Tuckett, *Tailoring surface codes: Improvements in quantum error correction with biased noise*, `Ph.D. thesis`_,
-  University of Sydney (2020), (qecsim: https://bitbucket.org/qecsim/qecsim/).
+  University of Sydney (2020), (qecsim: https://github.com/qecsim/qecsim).
 
 .. _Ph.D. thesis: https://doi.org/10.25910/x8xw-9077
 
@@ -22,7 +22,7 @@ A suitable BibTeX entry is:
       school = {University of Sydney},
       doi = {10.25910/x8xw-9077},
       year = {2020},
-      note = {(qecsim: \url{https://bitbucket.org/qecsim/qecsim/})}
+      note = {(qecsim: \url{https://github.com/qecsim/qecsim})}
     }
 
 

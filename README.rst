@@ -8,7 +8,6 @@ It provides access to all features via a command-line interface. It can also be
 used as a library via the fully-documented API. It includes many common codes,
 error models and decoders, and can be extended with additional components.
 
-|
 
 Installation
 ------------
@@ -21,12 +20,10 @@ Install and upgrade using `pip`_:
 
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
 
-|
 
 Usage
 -----
 
-|
 
 CLI
 ~~~
@@ -34,13 +31,12 @@ CLI
 .. code-block:: text
 
     $ qecsim --version
-    qecsim, version 1.0b7
+    qecsim, version 1.0b8
     $ qecsim --help                 # console script
     ...
     $ python -O -m qecsim --help    # module script with Python options e.g. -O for optimize
     ...
 
-|
 
 API
 ~~~
@@ -49,21 +45,19 @@ API
 
     >>> import qecsim
     >>> qecsim.__version__
-    '1.0b7'
+    '1.0b8'
     >>> from qecsim import app
     >>> help(app)
     ...
 
-|
 
 Extension
 ~~~~~~~~~
 
 qecsim can be extended with additional codes, error models and decoders that
 integrate into the command-line interface.
-See https://bitbucket.org/qecsim/qecsimext/ for a basic example.
+See https://github.com/qecsim/qecsimext for a basic example.
 
-|
 
 License / Citing
 ----------------
@@ -73,17 +67,16 @@ research, please see the `qecsim documentation`_ for citing details.
 
 .. _qecsim documentation: https://davidtuckett.com/qit/qecsim/
 
-|
 
 Links
 -----
 
-* Source code: https://bitbucket.org/qecsim/qecsim/
+* Source code: https://github.com/qecsim/qecsim
 * Documentation: https://davidtuckett.com/qit/qecsim/
-* Issue tracker: https://bitbucket.org/qecsim/qecsim/issues
+* Issue tracker: https://github.com/qecsim/qecsim/issues
 * Releases: https://pypi.org/project/qecsim/
 * Contact: qecsim@gmail.com
 
 ----
 
-Copyright 2016, David K. Tuckett.
+Copyright 2016 - 2021, David K. Tuckett.
