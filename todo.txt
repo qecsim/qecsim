@@ -82,6 +82,7 @@
 # DONE: Tag 1.0b7
 # DONE: qecsimext: Update to install qecsim from PyPI.
 # DONE: cfg: Make repositories public.
-# TODO: Migrate to GitHub.
+# DONE: Migrate to GitHub.
+# DONE: Tag 1.0b8
 # TODO: docs: permanent hosting (update setup.cfg project_urls, README.rst and doc).
 # TODO: cfg: set up continuous integration.
