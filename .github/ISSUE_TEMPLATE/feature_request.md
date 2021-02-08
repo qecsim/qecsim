@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest new feature for qecsim
+about: Suggest a new feature for qecsim
 title: ''
 labels: ''
 assignees: ''
