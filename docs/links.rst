@@ -1,8 +1,8 @@
 Links
 =====
 
-* Source code: https://bitbucket.org/qecsim/qecsim/
+* Source code: https://github.com/qecsim/qecsim
 * Documentation: https://davidtuckett.com/qit/qecsim/
-* Issue tracker: https://bitbucket.org/qecsim/qecsim/issues
+* Issue tracker: https://github.com/qecsim/qecsim/issues
 * Releases: https://pypi.org/project/qecsim/
 * Contact: qecsim@gmail.com
