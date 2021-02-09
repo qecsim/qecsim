@@ -1,6 +1,13 @@
 1.0
 ---
 
+1.0b9
+~~~~~
+
+Untagged
+
+- Move docs to GitHub.
+
 1.0b8
 ~~~~~
 

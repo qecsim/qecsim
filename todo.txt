@@ -85,4 +85,6 @@
 # DONE: Migrate to GitHub.
 # DONE: Tag 1.0b8
 # TODO: docs: permanent hosting (update setup.cfg project_urls, README.rst and doc).
+# TODO: Tag 1.0b9
+# TODO: cfg: set up continuous documentation.
 # TODO: cfg: set up continuous integration.

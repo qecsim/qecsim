@@ -31,7 +31,7 @@ CLI
 .. code-block:: text
 
     $ qecsim --version
-    qecsim, version 1.0b8
+    qecsim, version 1.0b9
     $ qecsim --help                 # console script
     ...
     $ python -O -m qecsim --help    # module script with Python options e.g. -O for optimize
@@ -45,7 +45,7 @@ API
 
     >>> import qecsim
     >>> qecsim.__version__
-    '1.0b8'
+    '1.0b9'
     >>> from qecsim import app
     >>> help(app)
     ...
