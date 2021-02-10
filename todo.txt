@@ -84,7 +84,7 @@
 # DONE: cfg: Make repositories public.
 # DONE: Migrate to GitHub.
 # DONE: Tag 1.0b8
-# TODO: docs: Migrate to GitHub pages.
-# TODO: Tag 1.0b9
+# DONE: docs: Migrate to GitHub pages.
+# DONE: Tag 1.0b9
 # TODO: cfg: set up continuous documentation.
 # TODO: cfg: set up continuous integration.

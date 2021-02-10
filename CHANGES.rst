@@ -6,7 +6,7 @@
 
 Tagged 2021-02-10
 
-- Migrate docs to GitHub pages.
+- docs: Migrate to GitHub pages.
 
 1.0b8
 ~~~~~
