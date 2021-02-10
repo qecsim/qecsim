@@ -4,7 +4,7 @@
 1.0b9
 ~~~~~
 
-Untagged
+Tagged 2021-02-10
 
 - Migrate docs to GitHub pages.
 
