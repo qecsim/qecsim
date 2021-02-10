@@ -6,7 +6,7 @@
 
 Untagged
 
-- Move docs to GitHub.
+- Migrate docs to GitHub pages.
 
 1.0b8
 ~~~~~

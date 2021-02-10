@@ -65,14 +65,14 @@ License / Citing
 qecsim is released under the BSD 3-Clause license. If you use qecsim in your
 research, please see the `qecsim documentation`_ for citing details.
 
-.. _qecsim documentation: https://davidtuckett.com/qit/qecsim/
+.. _qecsim documentation: https://qecsim.github.io/
 
 
 Links
 -----
 
 * Source code: https://github.com/qecsim/qecsim
-* Documentation: https://davidtuckett.com/qit/qecsim/
+* Documentation: https://qecsim.github.io/
 * Issue tracker: https://github.com/qecsim/qecsim/issues
 * Releases: https://pypi.org/project/qecsim/
 * Contact: qecsim@gmail.com
