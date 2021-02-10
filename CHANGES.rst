@@ -1,6 +1,13 @@
 1.0
 ---
 
+1.0b9
+~~~~~
+
+Untagged
+
+- Migrate docs to GitHub pages.
+
 1.0b8
 ~~~~~
 

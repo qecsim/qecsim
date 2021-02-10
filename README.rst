@@ -31,7 +31,7 @@ CLI
 .. code-block:: text
 
     $ qecsim --version
-    qecsim, version 1.0b8
+    qecsim, version 1.0b9
     $ qecsim --help                 # console script
     ...
     $ python -O -m qecsim --help    # module script with Python options e.g. -O for optimize
@@ -45,7 +45,7 @@ API
 
     >>> import qecsim
     >>> qecsim.__version__
-    '1.0b8'
+    '1.0b9'
     >>> from qecsim import app
     >>> help(app)
     ...
@@ -65,14 +65,14 @@ License / Citing
 qecsim is released under the BSD 3-Clause license. If you use qecsim in your
 research, please see the `qecsim documentation`_ for citing details.
 
-.. _qecsim documentation: https://davidtuckett.com/qit/qecsim/
+.. _qecsim documentation: https://qecsim.github.io/
 
 
 Links
 -----
 
 * Source code: https://github.com/qecsim/qecsim
-* Documentation: https://davidtuckett.com/qit/qecsim/
+* Documentation: https://qecsim.github.io/
 * Issue tracker: https://github.com/qecsim/qecsim/issues
 * Releases: https://pypi.org/project/qecsim/
 * Contact: qecsim@gmail.com
