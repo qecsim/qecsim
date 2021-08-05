@@ -1,3 +1,5 @@
+import pytest
+
 from qecsim import graphtools as gt
 
 
@@ -30,6 +32,7 @@ def test_mwpm_networkx():
     assert sorted_mates == expected
 
 
+@pytest.mark.clib
 def test_mwpm_blossom5():
     graph = {('b', 'c'): 10, ('b', 'd'): 25, ('a', 'c'): 56, ('a', 'b'): 15, ('c', 'd'): 6}
     mates = gt.mwpm_blossom5(graph)

@@ -1,6 +1,22 @@
 qecsim
 ======
 
+.. image:: https://img.shields.io/badge/docs-stable-blue.svg
+    :target: https://qecsim.github.io/
+    :alt: Documentation
+
+.. image:: https://github.com/qecsim/qecsim/workflows/CI/badge.svg?branch=master
+    :target: https://github.com/qecsim/qecsim/actions?workflow=CI
+    :alt: CI Status
+
+.. image:: https://codecov.io/gh/qecsim/qecsim/branch/master/graph/badge.svg?token=BH80LCIYBZ
+    :target: https://codecov.io/gh/qecsim/qecsim
+    :alt: Coverage
+
+.. image:: https://img.shields.io/pypi/v/qecsim
+    :target: https://pypi.org/project/qecsim/
+    :alt: PyPI
+
 **qecsim** is a Python 3 package for simulating quantum error correction using
 stabilizer codes.
 
