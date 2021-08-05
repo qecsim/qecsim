@@ -9,7 +9,6 @@ qecsim
     :target: https://github.com/qecsim/qecsim/actions?workflow=CI
     :alt: CI Status
 
-
 .. image:: https://codecov.io/gh/qecsim/qecsim/branch/master/graph/badge.svg?token=BH80LCIYBZ
     :target: https://codecov.io/gh/qecsim/qecsim
     :alt: Coverage
