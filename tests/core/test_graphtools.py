@@ -1,3 +1,5 @@
+import pytest
+
 from qecsim import graphtools as gt
 
 
