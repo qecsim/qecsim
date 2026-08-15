@@ -9,3 +9,6 @@ include LICENSE
 
 # Include sample logging configuration
 include logging_qecsim.ini
+
+# Include demo notebooks
+recursive-include demos *.ipynb
